@@ -1,0 +1,66 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Zastávka DPMK Košice",
+        "description": "Zadajte začiatok názvu zastávky, napr. \"Hlavn\" alebo \"Aupark\".",
+        "data": {
+          "query": "Názov zastávky"
+        }
+      },
+      "pick": {
+        "title": "Vyberte zastávku",
+        "data": {
+          "stop_id": "Zastávka"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Nepodarilo sa spojiť s dpmk.sk",
+      "no_stops": "Zastávka sa nenašla, skúste prvé písmená názvu"
+    },
+    "abort": {
+      "already_configured": "Táto zastávka je už pridaná"
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Nastavenia DPMK",
+        "data": {
+          "routes": "Iba tieto linky/smery (prázdne = všetky)",
+          "max_departures": "Počet odchodov",
+          "school_mode": "Variant cestovného poriadku vo všedné dni",
+          "location": "Poloha zastávky na mape a okruh (zobrazia sa vozidlá v okruhu)",
+          "map_scope": "Vozidlá zobrazené na mape",
+          "update_interval": "Interval obnovenia (sekundy)"
+        },
+        "data_description": {
+          "update_interval": "Ako často sa číta živý prehľad vozidiel. Minimum 5 s. DPMK aktualizuje polohu vozidla zhruba každých 20 s, takže hodnoty pod 10 s zvyčajne nepomôžu."
+        }
+      }
+    }
+  },
+  "selector": {
+    "school_mode": {
+      "options": {
+        "auto": "Automaticky (leto a Vianoce = prázdniny)",
+        "school": "Školský rok",
+        "holidays": "Školské prázdniny"
+      }
+    },
+    "map_scope": {
+      "options": {
+        "serving": "Iba tie, ktoré obsluhujú túto zastávku",
+        "all": "Všetky vozidlá v okruhu (ostatné stlmené)"
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "next_departure": {
+        "name": "Najbližší odchod"
+      }
+    }
+  }
+}

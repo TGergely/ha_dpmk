@@ -1,0 +1,66 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "DPMK Košice stop",
+        "description": "Type (the start of) a stop name, e.g. \"Hlavn\" or \"Aupark\".",
+        "data": {
+          "query": "Stop name"
+        }
+      },
+      "pick": {
+        "title": "Choose the stop",
+        "data": {
+          "stop_id": "Stop"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Could not reach dpmk.sk",
+      "no_stops": "No stop found, try the first letters of the name"
+    },
+    "abort": {
+      "already_configured": "This stop is already added"
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "DPMK options",
+        "data": {
+          "routes": "Only these lines/directions (empty = all)",
+          "max_departures": "Number of departures",
+          "school_mode": "Timetable variant on weekdays",
+          "location": "Stop location on the map and radius (buses within it are shown)",
+          "map_scope": "Vehicles shown on the map",
+          "update_interval": "Update interval (seconds)"
+        },
+        "data_description": {
+          "update_interval": "How often the live vehicle feed is read. Minimum 5 s. DPMK itself updates a vehicle roughly every 20 s, so values below 10 s rarely help."
+        }
+      }
+    }
+  },
+  "selector": {
+    "school_mode": {
+      "options": {
+        "auto": "Auto (summer and Christmas = holidays)",
+        "school": "School year",
+        "holidays": "School holidays"
+      }
+    },
+    "map_scope": {
+      "options": {
+        "serving": "Only those serving this stop",
+        "all": "All vehicles in range (others dimmed)"
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "next_departure": {
+        "name": "Next departure"
+      }
+    }
+  }
+}

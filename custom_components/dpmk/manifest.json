@@ -1,0 +1,13 @@
+{
+  "domain": "dpmk",
+  "name": "DPMK Košice public transport",
+  "codeowners": ["@TGergely"],
+  "config_flow": true,
+  "dependencies": ["http", "frontend"],
+  "documentation": "https://github.com/TGergely/ha_dpmk",
+  "integration_type": "service",
+  "iot_class": "cloud_polling",
+  "issue_tracker": "https://github.com/TGergely/ha_dpmk/issues",
+  "requirements": [],
+  "version": "0.1.0"
+}
