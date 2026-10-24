@@ -11,7 +11,7 @@ Slovak and English. The cards are Slovak by default, also when Home Assistant it
 **Install in two clicks** (needs [HACS](https://hacs.xyz) and the [My Home Assistant](https://my.home-assistant.io) link set up once):
 
 1. [![Open your Home Assistant instance and add this repository to HACS.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=TGergely&repository=ha_dpmk&category=integration) then download it in HACS and restart Home Assistant.
-2. [![Open your Home Assistant instance and start setting up the integration.](https://my.home-assistant.io/badges/config_flow_start.svg)](https://my.home-assistant.io/redirect/config_flow_start/?domain=dpmk) to add your first stop. This button works only after step 1.
+2. [![Open your Home Assistant instance and start setting up the integration.](https://my.home-assistant.io/badges/config_flow_start.svg)](https://my.home-assistant.io/redirect/config_flow_start/?domain=dpmk) to add your first stop. It works only after step 1 **and a restart of Home Assistant**. Before that Home Assistant shows "This integration does not support configuration via the UI", because it does not know the integration yet. You can always use **Settings → Devices & services → Add integration → DPMK Košice** instead.
 
 > Unofficial. Not affiliated with DPMK, a.s. It reads DPMK's public website, which could change without notice.
 
