@@ -2,7 +2,7 @@
   "config": {
     "step": {
       "user": {
-        "title": "Pridať zastávku DPMK Košice",
+        "title": "Pridať zastávku alebo miesto",
         "description": "Pridajte jednu zastávku, alebo miesto: viac zastávok pri jednom mieste (napríklad doma), zobrazených spolu na jednej karte a jednej mape.",
         "menu_options": {
           "stop": "Jedna zastávka zo zoznamu",
@@ -30,7 +30,7 @@
       },
       "place_stops": {
         "title": "Zastávky miesta",
-        "description": "Nájdených zastávok: {count}. Označte tie, ktoré chcete (označených je {ticked} najbližších).",
+        "description": "Pri zvolenom mieste je {count} zastávok; {inside} v okruhu {radius} m je označených. Označte viac alebo menej: ostatné sú tesne za okruhom, s uvedenou vzdialenosťou.",
         "data": {
           "stop_ids": "Zastávky"
         }

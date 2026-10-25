@@ -4,6 +4,21 @@ All notable changes to this project are listed here. The version number lives on
 `custom_components/dpmk/manifest.json`. While the number starts with 0, new features may still
 change how things work.
 
+## 0.2.1 - 2026-10-25
+
+- **Renamed to "Košice Public Transport – DPMK"** (the name Home Assistant and HACS show). The technical
+  name `dpmk` is unchanged, so existing installs keep working.
+- **Sensor names**: devices are now called `DPMK <stop or place>`, so new sensors get ids like
+  `sensor.dpmk_heringes_vysne_opatske_next_departure` or `sensor.dpmk_home_next_departure`. Home Assistant
+  never renames an existing entity id by itself: your current sensors keep their ids (and your cards keep
+  working), only their device and display names gain the `DPMK` prefix. To get the new id for an existing
+  sensor, rename it in its settings (Entity ID), or remove and add the stop again.
+
+- **Every stop now has a position.** The 14 stops that the city's open data lacks (for example Panoráma)
+  are placed from OpenStreetMap by `tools/build_stops.py`. Before, a place could never find them.
+- Adding a place also offers the stops just **outside** the radius (unticked, with their distance), so a
+  stop that is a little too far is one tick away. Only the stops inside the radius are ticked.
+
 ## 0.2.0 - 2026-10-25
 
 - **Places**: add several stops near one spot as one place. One sensor, one merged departures list (each

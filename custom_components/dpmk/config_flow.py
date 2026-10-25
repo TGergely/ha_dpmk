@@ -62,6 +62,7 @@ from .const import (
 from .stops import Catalog, StopInfo, load_catalog
 
 PLACE_PRETICKED = 8  # a place preselects at most this many stops (the nearest ones)
+PLACE_REACH = 800  # metres: stops this close are offered even when the radius is smaller
 
 
 def format_distance(metres: float) -> str:
@@ -152,7 +153,8 @@ class DpmkConfigFlow(ConfigFlow, domain=DOMAIN):
         if user_input is not None:
             spot = user_input[CONF_LOCATION]
             radius = float(spot.get("radius") or DEFAULT_PLACE_RADIUS)
-            found = catalog.near(spot["latitude"], spot["longitude"], radius)
+            # look further than the radius: the stops just outside it are offered too (unticked)
+            found = catalog.near(spot["latitude"], spot["longitude"], max(radius * 2, PLACE_REACH))
             if found:
                 self._place = {
                     "name": user_input[CONF_PLACE_NAME].strip() or "Place",
@@ -182,6 +184,8 @@ class DpmkConfigFlow(ConfigFlow, domain=DOMAIN):
         place = self._place
         found: list[tuple[StopInfo, float]] = place["found"]
         errors: dict[str, str] = {}
+        inside = [s.stop_id for s, d in found if d <= place["radius"]][:PLACE_PRETICKED]
+        ticked = inside or [found[0][0].stop_id]  # nothing inside the radius: offer the nearest one
         if user_input is not None:
             ids = user_input.get(CONF_STOP_IDS) or []
             if not ids:
@@ -208,9 +212,7 @@ class DpmkConfigFlow(ConfigFlow, domain=DOMAIN):
         ]
         schema = vol.Schema(
             {
-                vol.Required(
-                    CONF_STOP_IDS, default=[s.stop_id for s, _ in found[:PLACE_PRETICKED]]
-                ): SelectSelector(
+                vol.Required(CONF_STOP_IDS, default=ticked): SelectSelector(
                     SelectSelectorConfig(options=options, multiple=True, mode=SelectSelectorMode.LIST)
                 )
             }
@@ -219,7 +221,11 @@ class DpmkConfigFlow(ConfigFlow, domain=DOMAIN):
             step_id="place_stops",
             data_schema=schema,
             errors=errors,
-            description_placeholders={"count": str(len(found)), "ticked": str(min(len(found), PLACE_PRETICKED))},
+            description_placeholders={
+                "count": str(len(found)),
+                "inside": str(len(inside)),
+                "radius": str(round(place["radius"])),
+            },
         )
 
     @staticmethod

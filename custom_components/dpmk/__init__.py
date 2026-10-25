@@ -1,4 +1,4 @@
-"""DPMK Košice public transport: departures at a chosen stop with live delays."""
+"""Košice Public Transport – DPMK: departures at a chosen stop or place, with live delays."""
 
 from __future__ import annotations
 

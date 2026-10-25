@@ -1,6 +1,6 @@
-/* DPMK Košice Lovelace cards (both live in this one file):
- *   type: custom:dpmk-departures-card   entity: sensor.<stop>_next_departure
- *   type: custom:dpmk-map-card          entity: sensor.<stop>_next_departure
+/* Košice Public Transport – DPMK: Lovelace cards (both live in this one file):
+ *   type: custom:dpmk-departures-card   entity: sensor.dpmk_<stop>_next_departure
+ *   type: custom:dpmk-map-card          entity: sensor.dpmk_<stop>_next_departure
  */
 (() => {
   // The file can end up loaded twice (integration auto-load + manual dashboard resource).
@@ -16,7 +16,7 @@
       ontime: "načas",
       none: "Žiadne ďalšie odchody",
       missing: "Entita nebola nájdená:",
-      choose: "Nenašiel sa žiadny senzor DPMK. Pridajte zastávku v integrácii DPMK Košice.",
+      choose: "Nenašiel sa žiadny senzor DPMK. Pridajte zastávku v integrácii Košice Public Transport – DPMK.",
       entity: "Zastávka (senzor)",
       title: "Nadpis",
       max_rows: "Počet riadkov",
@@ -42,7 +42,7 @@
       ontime: "on time",
       none: "No upcoming departures",
       missing: "Entity not found:",
-      choose: "No DPMK sensor found. Add a stop in the DPMK Košice integration.",
+      choose: "No DPMK sensor found. Add a stop in the Košice Public Transport – DPMK integration.",
       entity: "Stop (sensor)",
       title: "Title",
       max_rows: "Rows",

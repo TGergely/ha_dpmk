@@ -2,7 +2,8 @@
  "generated": "2026-10-25",
  "sources": {
   "stops": "https://www.dpmk.sk (stop list)",
-  "coordinates": "Mesto Kosice open data, 'Zastavky MHD', CC BY 4.0, https://opendata.kosice.sk"
+  "coordinates": "Mesto Kosice open data, 'Zastavky MHD', CC BY 4.0, https://opendata.kosice.sk",
+  "coordinates_fallback": "OpenStreetMap contributors (ODbL), only for stops with position_source=osm"
  },
  "stops": [
   {
@@ -3153,7 +3154,28 @@
    "id": "169",
    "label": "Senný trh - Juh",
    "name": "Senný trh",
-   "district": "Juh"
+   "district": "Juh",
+   "position_source": "osm",
+   "lat": 48.71851,
+   "lng": 21.264809,
+   "poles": [
+    [
+     48.719064,
+     21.265011
+    ],
+    [
+     48.718902,
+     21.264466
+    ],
+    [
+     48.718672,
+     21.264035
+    ],
+    [
+     48.717402,
+     21.265725
+    ]
+   ]
   },
   {
    "id": "170",
@@ -4335,7 +4357,20 @@
    "id": "236",
    "label": "Správa mestskej zelene - Kokšov Bakša",
    "name": "Správa mestskej zelene",
-   "district": "Kokšov Bakša"
+   "district": "Kokšov Bakša",
+   "position_source": "osm",
+   "lat": 48.657435,
+   "lng": 21.315663,
+   "poles": [
+    [
+     48.657441,
+     21.31563
+    ],
+    [
+     48.657428,
+     21.315697
+    ]
+   ]
   },
   {
    "id": "237",
@@ -4789,7 +4824,16 @@
    "id": "274",
    "label": "Pollova - Krásna",
    "name": "Pollova",
-   "district": "Krásna"
+   "district": "Krásna",
+   "position_source": "osm",
+   "lat": 48.666141,
+   "lng": 21.326563,
+   "poles": [
+    [
+     48.666141,
+     21.326563
+    ]
+   ]
   },
   {
    "id": "275",
@@ -4853,13 +4897,39 @@
    "id": "278",
    "label": "Lúčnicová - Lorinčík",
    "name": "Lúčnicová",
-   "district": "Lorinčík"
+   "district": "Lorinčík",
+   "position_source": "osm",
+   "lat": 48.691918,
+   "lng": 21.198979,
+   "poles": [
+    [
+     48.691967,
+     21.199198
+    ],
+    [
+     48.69187,
+     21.19876
+    ]
+   ]
   },
   {
    "id": "279",
    "label": "Hríbová - Lorinčík",
    "name": "Hríbová",
-   "district": "Lorinčík"
+   "district": "Lorinčík",
+   "position_source": "osm",
+   "lat": 48.689536,
+   "lng": 21.198766,
+   "poles": [
+    [
+     48.689765,
+     21.198692
+    ],
+    [
+     48.689307,
+     21.198839
+    ]
+   ]
   },
   {
    "id": "280",
@@ -4883,37 +4953,107 @@
    "id": "281",
    "label": "Múzeum obetí komunizmu - Staré mesto",
    "name": "Múzeum obetí komunizmu",
-   "district": "Staré mesto"
+   "district": "Staré mesto",
+   "position_source": "osm",
+   "lat": 48.722984,
+   "lng": 21.251768,
+   "poles": [
+    [
+     48.723113,
+     21.251863
+    ],
+    [
+     48.722856,
+     21.251673
+    ]
+   ]
   },
   {
    "id": "282",
    "label": "Pytliacka - Pereš",
    "name": "Pytliacka",
-   "district": "Pereš"
+   "district": "Pereš",
+   "position_source": "osm",
+   "lat": 48.69408,
+   "lng": 21.201865,
+   "poles": [
+    [
+     48.69431,
+     21.20209
+    ],
+    [
+     48.693851,
+     21.201641
+    ]
+   ]
   },
   {
    "id": "283",
    "label": "Panoráma - Vyšné Opátske",
    "name": "Panoráma",
-   "district": "Vyšné Opátske"
+   "district": "Vyšné Opátske",
+   "position_source": "osm",
+   "lat": 48.717518,
+   "lng": 21.293376,
+   "poles": [
+    [
+     48.717518,
+     21.293376
+    ]
+   ]
   },
   {
    "id": "285",
    "label": "Červený rak - Barca",
    "name": "Červený rak",
-   "district": "Barca"
+   "district": "Barca",
+   "position_source": "osm",
+   "lat": 48.686641,
+   "lng": 21.226428,
+   "poles": [
+    [
+     48.686832,
+     21.226145
+    ],
+    [
+     48.68645,
+     21.226711
+    ]
+   ]
   },
   {
    "id": "286",
    "label": "A.Kvasa - Barca",
    "name": "A.Kvasa",
-   "district": "Barca"
+   "district": "Barca",
+   "position_source": "osm",
+   "lat": 48.676053,
+   "lng": 21.226404,
+   "poles": [
+    [
+     48.676053,
+     21.226404
+    ]
+   ]
   },
   {
    "id": "287",
    "label": "Uralská - Nad jazerom",
    "name": "Uralská",
-   "district": "Nad jazerom"
+   "district": "Nad jazerom",
+   "position_source": "osm",
+   "lat": 48.684838,
+   "lng": 21.287194,
+   "poles": [
+    [
+     48.684929,
+     21.287091
+    ],
+    [
+     48.684746,
+     21.287298
+    ]
+   ]
   },
   {
    "id": "288",
@@ -5105,19 +5245,46 @@
    "id": "501",
    "label": "Volvo, lisovňa - Valaliky",
    "name": "Volvo, lisovňa",
-   "district": "Valaliky"
+   "district": "Valaliky",
+   "position_source": "osm",
+   "lat": 48.633988,
+   "lng": 21.275527,
+   "poles": [
+    [
+     48.633988,
+     21.275527
+    ]
+   ]
   },
   {
    "id": "502",
    "label": "Volvo, vstupný areál - Valaliky",
    "name": "Volvo, vstupný areál",
-   "district": "Valaliky"
+   "district": "Valaliky",
+   "position_source": "osm",
+   "lat": 48.633877,
+   "lng": 21.281237,
+   "poles": [
+    [
+     48.633877,
+     21.281237
+    ]
+   ]
   },
   {
    "id": "503",
    "label": "Volvo, hala pohonu - Valaliky",
    "name": "Volvo, hala pohonu",
-   "district": "Valaliky"
+   "district": "Valaliky",
+   "position_source": "osm",
+   "lat": 48.6304,
+   "lng": 21.280808,
+   "poles": [
+    [
+     48.6304,
+     21.280808
+    ]
+   ]
   },
   {
    "id": "901",

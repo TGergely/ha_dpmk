@@ -35,7 +35,8 @@ class NextDepartureSensor(CoordinatorEntity[DpmkCoordinator], SensorEntity):
         self._attr_unique_id = f"{key}_next_departure"
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, key)},
-            name=coordinator.display_name,
+            # "DPMK " in front gives every sensor the id sensor.dpmk_<name>_next_departure
+            name=f"DPMK {coordinator.display_name}",
             manufacturer="DPMK Košice",
             entry_type=DeviceEntryType.SERVICE,
         )

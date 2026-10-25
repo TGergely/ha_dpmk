@@ -2,7 +2,7 @@
   "config": {
     "step": {
       "user": {
-        "title": "Add a DPMK Košice stop",
+        "title": "Add a stop or a place",
         "description": "Add one stop, or a place: several stops near one spot (for example your home) shown together on one card and one map.",
         "menu_options": {
           "stop": "One stop, chosen from the list",
@@ -30,7 +30,7 @@
       },
       "place_stops": {
         "title": "Stops of the place",
-        "description": "{count} stops found. Tick the ones you want ({ticked} nearest are ticked).",
+        "description": "{count} stops found around the spot; the {inside} within your {radius} m radius are ticked. Tick more or fewer as you like: the others are just outside the radius, with their distance.",
         "data": {
           "stop_ids": "Stops"
         }

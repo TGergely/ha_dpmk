@@ -4,6 +4,7 @@
 Joins two public sources (needs the internet, run it by hand before a release):
   * dpmk.sk            every stop (id and "Name - District" label), via the site's search
   * opendata.kosice.sk "Zastavky MHD" (CC BY 4.0): one point per physical stop pole, with coordinates
+  * OpenStreetMap (ODbL, via Overpass): only for the few stops the city's data lacks
 
 A DPMK stop usually covers several poles (one per direction), so each stop gets its poles and the
 centroid. Names are matched by normalised name + district, then by similarity; the few that still
@@ -28,6 +29,18 @@ POLES = (
     "FeatureServer/0/query?where=1%3D1&outFields=*&returnGeometry=true&outSR=4326&f=json"
 )
 OUT = Path(__file__).resolve().parent.parent / "custom_components" / "dpmk" / "data" / "stops.json"
+
+OVERPASS = ("https://overpass-api.de/api/interpreter", "https://overpass.kumi.systems/api/interpreter")
+BBOX = "(48.55,21.10,48.85,21.45)"  # around Kosice
+OSM_QUERY = (
+    "[out:json][timeout:90];("
+    f'node["highway"="bus_stop"]{BBOX};'
+    f'node["public_transport"="platform"]{BBOX};'
+    f'node["railway"="tram_stop"]{BBOX};'
+    ");out body;"
+)
+# DPMK name -> OpenStreetMap name, for the rare stop the two spell differently (both written through norm())
+OSM_ALIASES: dict[str, str] = {"a kvasa": "andreja kvasa"}
 
 # Stops whose names differ between the two sources beyond what the automatic matching can bridge.
 # Keys and values are written through norm(): lower case, no accents, punctuation as spaces.
@@ -101,6 +114,27 @@ def match(label: str, groups) -> tuple[tuple[str, str] | None, str]:
     return None, "no match"
 
 
+def osm_stops() -> dict[str, list[tuple[float, float]]]:
+    """Named bus and tram stop nodes of OpenStreetMap around Kosice: normalised name -> points."""
+    body = urllib.parse.urlencode({"data": OSM_QUERY}).encode()
+    for url in OVERPASS:
+        try:
+            req = urllib.request.Request(url, data=body, headers={"User-Agent": "ha-dpmk stop list builder"})
+            with urllib.request.urlopen(req, timeout=120) as resp:
+                elements = json.load(resp)["elements"]
+            break
+        except Exception as err:  # the public servers are sometimes busy: try the next one
+            print(f"  {url.split('/')[2]} failed: {type(err).__name__}", file=sys.stderr)
+    else:
+        return {}
+    points: dict[str, list[tuple[float, float]]] = collections.defaultdict(list)
+    for e in elements:
+        name = e.get("tags", {}).get("name")
+        if name and "lat" in e:
+            points[norm(name)].append((round(e["lat"], 6), round(e["lon"], 6)))
+    return points
+
+
 def main_cluster(poles: list[tuple[float, float]], link: float = 350) -> tuple[list[tuple[float, float]], int]:
     """Poles of the biggest group of poles that lie within `link` metres of each other.
 
@@ -121,6 +155,7 @@ def main_cluster(poles: list[tuple[float, float]], link: float = 350) -> tuple[l
 def build(report: bool = False) -> dict:
     stops, groups = dpmk_stops(), pole_groups()
     out, notes = [], []
+    osm: dict[str, list[tuple[float, float]]] | None = None  # fetched only if some stop needs it
     for stop_id, label in sorted(stops.items(), key=lambda kv: int(kv[0])):
         name, _, district = label.rpartition(" - ")
         key, how = match(label, groups)
@@ -132,6 +167,14 @@ def build(report: bool = False) -> dict:
         elif how != "exact":
             notes.append((label, key, how, round(spread)))
         entry = {"id": stop_id, "label": label, "name": name, "district": district}
+        if not poles:  # the city's data has no (usable) position: try OpenStreetMap
+            if osm is None:
+                osm = osm_stops()
+            found = osm.get(OSM_ALIASES.get(norm(name), norm(name)), [])
+            poles, groups_found = main_cluster(sorted(set(found))) if found else ([], 0)
+            if poles:
+                entry["position_source"] = "osm"
+                notes.append((label, "OpenStreetMap", f"{len(poles)} node(s)", groups_found))
         if poles:
             entry["lat"] = round(sum(p[0] for p in poles) / len(poles), 6)
             entry["lng"] = round(sum(p[1] for p in poles) / len(poles), 6)
@@ -145,6 +188,7 @@ def build(report: bool = False) -> dict:
         "sources": {
             "stops": f"{DPMK} (stop list)",
             "coordinates": "Mesto Kosice open data, 'Zastavky MHD', CC BY 4.0, https://opendata.kosice.sk",
+            "coordinates_fallback": "OpenStreetMap contributors (ODbL), only for stops with position_source=osm",
         },
         "stops": out,
     }

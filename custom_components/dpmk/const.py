@@ -1,4 +1,4 @@
-"""Constants for the DPMK Košice integration."""
+"""Constants for the Košice Public Transport – DPMK integration."""
 
 DOMAIN = "dpmk"
 BASE_URL = "https://www.dpmk.sk"
