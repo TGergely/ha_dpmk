@@ -122,16 +122,22 @@ class DpmkApi:
         resp.raise_for_status()
         return resp
 
-    async def search_stops(self, term: str) -> dict[str, str]:
-        """Return {stop_id: name}. The site only prefix-matches, so try each word."""
+    async def list_stops(self) -> dict[str, str]:
+        """Every stop as {stop_id: label}, e.g. {"42": "Hlavná pošta - Staré mesto"}.
+
+        The site only offers a search box, but every label carries its district after " - ",
+        so asking for "-" returns all stops at once. If that ever stops working, the vowels
+        together cover practically every name.
+        """
         found: dict[str, str] = {}
-        words = [term.strip()] + [w for w in term.split() if len(w) > 2]
-        for word in dict.fromkeys(words):
-            resp = await self._get("/search/autocomplete", term=word)
+        for term in ("-", "a", "e", "o", "i"):
+            resp = await self._get("/search/autocomplete", term=term)
             for item in await resp.json(content_type=None):
                 value = item.get("value", "")
                 if value.startswith("stop_"):
                     found[value[5:]] = item["label"]
+            if len(found) >= 100:  # "-" normally returns the lot, no need to ask more
+                break
         return found
 
     async def get_stop(self, stop_id: str) -> Stop:

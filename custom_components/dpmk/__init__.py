@@ -16,6 +16,7 @@ from homeassistant.helpers.typing import ConfigType
 from .api import DpmkApi
 from .const import CARD_URL, DOMAIN
 from .coordinator import DpmkCoordinator, LiveFeed
+from .stops import load_catalog
 
 PLATFORMS = ["sensor"]
 
@@ -42,7 +43,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     store = hass.data.setdefault(DOMAIN, {})
     if "live" not in store:
         store["live"] = LiveFeed(DpmkApi(async_get_clientsession(hass)))
-    coordinator = DpmkCoordinator(hass, entry, store["live"])
+    if "catalog" not in store:  # the bundled stop list: a local file, read once
+        store["catalog"] = await hass.async_add_executor_job(load_catalog)
+    coordinator = DpmkCoordinator(hass, entry, store["live"], store["catalog"])
     await coordinator.async_config_entry_first_refresh()
     store[entry.entry_id] = coordinator
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)

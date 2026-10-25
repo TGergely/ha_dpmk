@@ -16,7 +16,7 @@
       ontime: "načas",
       none: "Žiadne ďalšie odchody",
       missing: "Entita nebola nájdená:",
-      choose: "Vyberte senzor zastávky DPMK (entity)",
+      choose: "Nenašiel sa žiadny senzor DPMK. Pridajte zastávku v integrácii DPMK Košice.",
       entity: "Zastávka (senzor)",
       title: "Nadpis",
       max_rows: "Počet riadkov",
@@ -42,7 +42,7 @@
       ontime: "on time",
       none: "No upcoming departures",
       missing: "Entity not found:",
-      choose: "Please choose a DPMK stop sensor (entity)",
+      choose: "No DPMK sensor found. Add a stop in the DPMK Košice integration.",
       entity: "Stop (sensor)",
       title: "Title",
       max_rows: "Rows",
@@ -64,19 +64,34 @@
     },
   };
 
+  // Which sensor a card shows: its own `entity`; else the stop or place marked "Use as the default
+  // for cards" in the integration options; else the first DPMK sensor there is.
+  function resolveEntity(config, hass) {
+    if (config?.entity) return config.entity;
+    const all = Object.keys(hass?.states || {}).filter((e) =>
+      Array.isArray(hass.states[e].attributes.departures)
+    );
+    return all.find((e) => hass.states[e].attributes.is_default === true) || all[0] || "";
+  }
+
+  // The language comes from, in this order: the card's own `language` option, the "Language of
+  // the cards" setting of the integration (a sensor attribute), and finally automatic.
   function pickLanguage(config, hass) {
-    const l = config?.language || "sk";
+    let l = config?.language;
+    if (!l || l === "default") l = hass?.states?.[resolveEntity(config, hass)]?.attributes?.language || "auto";
     if (l === "auto") return (hass?.language || "sk").startsWith("sk") ? "sk" : "en";
     return I18N[l] ? l : "sk";
   }
 
-  const clock = (iso) =>
-    new Date(iso).toLocaleTimeString("sk-SK", { hour: "2-digit", minute: "2-digit", hour12: false });
+  const clock = (iso, lang) =>
+    new Date(iso).toLocaleTimeString(lang === "en" ? "en-GB" : "sk-SK", {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+    });
 
   const sizeClass = (line) => (line.length <= 2 ? "" : line.length === 3 ? "s3" : "s4");
 
-  const findStopSensor = (hass) =>
-    Object.keys(hass.states).find((e) => Array.isArray(hass.states[e].attributes.departures)) || "";
 
   /* Badge look shared by both cards: bus = rounded square, tram = circle. */
   const BADGE_CSS = `
@@ -98,11 +113,10 @@
       return document.createElement("dpmk-departures-card-editor");
     }
     static getStubConfig(hass) {
-      return { entity: findStopSensor(hass) };
+      return {}; // no entity: the default stop or place is used
     }
 
     setConfig(config) {
-      if (!config.entity) throw new Error(I18N[pickLanguage(config, null)].choose);
       this._config = config;
       if (!this._root) {
         this._root = this.attachShadow({ mode: "open" });
@@ -138,11 +152,13 @@
 
     _render() {
       if (!this._root || !this._config || !this._hass) return;
-      const st = this._hass.states[this._config.entity];
+      const entity = resolveEntity(this._config, this._hass);
+      const st = this._hass.states[entity];
       const title = this._config.title ?? st?.attributes.stop_name ?? "DPMK";
+      const lang = pickLanguage(this._config, this._hass);
       let rows = "";
       if (!st) {
-        rows = `<div class="empty">${this._t("missing")} ${this._config.entity}</div>`;
+        rows = `<div class="empty">${entity ? `${this._t("missing")} ${entity}` : this._t("choose")}</div>`;
       } else {
         const now = new Date();
         const deps = (st.attributes.departures || [])
@@ -159,14 +175,16 @@
                     : `<span class="ok">${this._t("ontime")}</span>`
                   : "";
                 const live = `<span class="dot${d.live ? " on" : ""}" title="live"></span>`;
-                const real = `<span class="real">${d.live ? `[${clock(d.expected)}]` : ""}</span>`;
-                const sub = [this._countdown(d, now), this._config.show_delay === false ? "" : delay]
+                const real = `<span class="real">${d.live ? `[${clock(d.expected, lang)}]` : ""}</span>`;
+                // a place with several stops: say which stop each departure is from
+                const stopName = st.attributes.multi_stop && d.stop ? d.stop : "";
+                const sub = [stopName, this._countdown(d, now), this._config.show_delay === false ? "" : delay]
                   .filter(Boolean)
                   .join(" · ");
                 return `<div class="row">
                   <span class="line t${d.type} ${sizeClass(d.line)}" style="${d.bg ? `background:${d.bg};` : ""}${d.fg ? `color:${d.fg};` : ""}">${d.line}</span>
                   <span class="dest">${d.destination}<span class="sub">${sub}</span></span>
-                  <span class="when">${live}<span class="off">${clock(d.scheduled)}</span>${real}</span>
+                  <span class="when">${live}<span class="off">${clock(d.scheduled, lang)}</span>${real}</span>
                 </div>`;
               })
               .join("")
@@ -180,7 +198,7 @@
             .line { width:40px; height:40px; padding:0; font-size:17px; }
             .line.s3 { font-size:13px; } .line.s4 { font-size:11px; }
             .dest { flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-            .sub { display:block; font-size:0.8em; color:var(--secondary-text-color); }
+            .sub { display:block; font-size:0.8em; color:var(--secondary-text-color); white-space:normal; }
             /* fixed columns so the times line up whether or not a live time is shown */
             .when { flex:none; display:flex; align-items:center; gap:6px; font-weight:600;
                     white-space:nowrap; font-variant-numeric:tabular-nums; }
@@ -212,11 +230,10 @@
       return document.createElement("dpmk-map-card-editor");
     }
     static getStubConfig(hass) {
-      return { entity: findStopSensor(hass) };
+      return {}; // no entity: the default stop or place is used
     }
 
     setConfig(config) {
-      if (!config.entity) throw new Error(I18N[pickLanguage(config, null)].choose);
       this._config = config;
       if (!this._root) {
         this._root = this.attachShadow({ mode: "open" });
@@ -228,7 +245,7 @@
 
     set hass(hass) {
       this._hass = hass;
-      const st = hass.states[this._config?.entity];
+      const st = hass.states[resolveEntity(this._config, hass)];
       if (st !== this._lastState) {
         this._lastState = st;
         this._update();
@@ -252,6 +269,8 @@
       this._els = new Map();
       this._radius = null;
       this._mapKey = null;
+      this._stopsKey = null;
+      this._multi = false;
       this._root.innerHTML = `
         <ha-card>
           <style>
@@ -275,7 +294,13 @@
                       background:var(--ha-card-background, var(--card-background-color)); }
             .north { position:absolute; left:50%; top:1%; transform:translateX(-50%);
                      font-size:11px; font-weight:700; color:var(--secondary-text-color); }
-            .stop { position:absolute; left:50%; top:50%; width:18px; height:18px; z-index:20000;
+            .stops { position:absolute; inset:0; }
+            .stop.small { width:14px; height:14px; border-width:3px; }
+            .sname { position:absolute; left:50%; top:calc(100% + 4px); transform:translateX(-50%);
+                     white-space:nowrap; font-size:10px; font-weight:600; padding:0 4px; border-radius:6px;
+                     background:var(--ha-card-background, var(--card-background-color)); opacity:.88;
+                     color:var(--primary-text-color); }
+            .stop { position:absolute; width:18px; height:18px; z-index:20000;
                     transform:translate(-50%,-50%); border-radius:50%; box-sizing:border-box;
                     background:var(--primary-color); border:4px solid var(--ha-card-background, var(--card-background-color));
                     box-shadow:0 0 0 2px var(--primary-color); }
@@ -306,7 +331,7 @@
             <div class="ring" style="width:${(4 * SPAN) / 3}%;height:${(4 * SPAN) / 3}%"><span class="rlabel"></span></div>
             <div class="ring" style="width:${2 * SPAN}%;height:${2 * SPAN}%"><span class="rlabel"></span></div>
             <div class="north"></div>
-            <div class="stop"></div>
+            <div class="stops"></div>
             <div class="layer"></div>
             <div class="nov"></div>
           </div>
@@ -376,10 +401,34 @@
       return `${v.distance} m`;
     }
 
+    /* The stops: one dot each, named when a place has several. Without coordinates a single
+     * dot in the middle stands for the stop. */
+    _renderStops(stops, radius) {
+      const key = JSON.stringify([stops, radius, this._multi]);
+      if (key === this._stopsKey) return;
+      this._stopsKey = key;
+      const layer = this._root.querySelector(".stops");
+      layer.textContent = "";
+      for (const s of stops.length ? stops : [{ name: "", dx: 0, dy: 0 }]) {
+        const dot = document.createElement("div");
+        dot.className = this._multi ? "stop small" : "stop";
+        dot.style.left = `${50 + (s.dx / radius) * SPAN}%`;
+        dot.style.top = `${50 - (s.dy / radius) * SPAN}%`;
+        if (this._multi && s.name) {
+          const n = document.createElement("span");
+          n.className = "sname";
+          n.textContent = s.name;
+          dot.appendChild(n);
+        }
+        layer.appendChild(dot);
+      }
+    }
+
     _update() {
       if (!this._root || !this._config || !this._hass) return;
       const q = (s) => this._root.querySelector(s);
-      const st = this._hass.states[this._config.entity];
+      const entity = resolveEntity(this._config, this._hass);
+      const st = this._hass.states[entity];
       this._card.header = this._config.title ?? this._t("map_title");
       q(".north").textContent = this._t("north");
       const legend = q(".legend");
@@ -387,13 +436,15 @@
       legend.innerHTML = `<span><i style="background:${RING.approaching}"></i>${this._t("arriving")}</span>
                           <span><i style="background:${RING.leaving}"></i>${this._t("leaving")}</span>`;
       if (!st) {
-        q(".nov").textContent = `${this._t("missing")} ${this._config.entity}`;
+        q(".nov").textContent = entity ? `${this._t("missing")} ${entity}` : this._t("choose");
         return;
       }
       const a = st.attributes;
       q(".cname").textContent = a.stop_name || "";
       const radius = a.radius || 1500;
+      this._multi = a.multi_stop === true;
       this._renderMap(a, radius);
+      this._renderStops(a.stops || [], radius);
       if (radius !== this._radius) {
         this._radius = radius;
         this._root.querySelectorAll(".rlabel").forEach((el, i) => {
@@ -458,9 +509,10 @@
       select: {
         mode: "dropdown",
         options: [
+          { value: "default", label: "Z integrácie / From the integration" },
           { value: "sk", label: "Slovenčina" },
           { value: "en", label: "English" },
-          { value: "auto", label: "Auto" },
+          { value: "auto", label: "Automaticky / Automatic" },
         ],
       },
     },
@@ -538,7 +590,7 @@
           select: {
             mode: "dropdown",
             options: [
-              { value: "auto", label: "Auto" },
+              { value: "auto", label: "Automaticky / Automatic" },
               { value: "light", label: "Svetlá / Light" },
               { value: "dark", label: "Tmavá / Dark" },
             ],
@@ -551,18 +603,21 @@
   );
 
   window.customCards = window.customCards || [];
-  const lang = "sk"; // picker entries are Slovak, in line with the Slovak default of the cards
-  for (const [type, nameKey, descKey] of [
-    ["dpmk-departures-card", "departures_name", "departures_desc"],
-    ["dpmk-map-card", "map_name", "map_desc"],
+  // The picker cannot know the card language yet, so its entries are bilingual.
+  for (const [type, name, description] of [
+    [
+      "dpmk-departures-card",
+      "DPMK odchody / departures",
+      "Najbližšie odchody DPMK Košice s aktuálnym meškaním / Upcoming DPMK Košice departures with live delays",
+    ],
+    [
+      "dpmk-map-card",
+      "DPMK mapa / map",
+      "Vozidlá DPMK v okolí zastávky / DPMK vehicles around the stop, simple overview",
+    ],
   ]) {
     if (!window.customCards.some((c) => c.type === type)) {
-      window.customCards.push({
-        type,
-        name: I18N[lang][nameKey],
-        description: I18N[lang][descKey],
-        preview: false,
-      });
+      window.customCards.push({ type, name, description, preview: false });
     }
   }
 })();

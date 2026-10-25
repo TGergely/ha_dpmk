@@ -11,7 +11,7 @@ from homeassistant.helpers.device_registry import DeviceEntryType, DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
-from .const import CONF_STOP_ID, CONF_STOP_NAME, DOMAIN
+from .const import CONF_STOP_ID, DOMAIN
 from .coordinator import DpmkCoordinator
 
 
@@ -30,10 +30,12 @@ class NextDepartureSensor(CoordinatorEntity[DpmkCoordinator], SensorEntity):
     def __init__(self, coordinator: DpmkCoordinator) -> None:
         super().__init__(coordinator)
         entry = coordinator.entry
-        self._attr_unique_id = f"{entry.data[CONF_STOP_ID]}_next_departure"
+        # A single stop keeps the ids it always had; a place is identified by its config entry.
+        key = entry.entry_id if coordinator.is_place else entry.data[CONF_STOP_ID]
+        self._attr_unique_id = f"{key}_next_departure"
         self._attr_device_info = DeviceInfo(
-            identifiers={(DOMAIN, entry.data[CONF_STOP_ID])},
-            name=entry.data[CONF_STOP_NAME],
+            identifiers={(DOMAIN, key)},
+            name=coordinator.display_name,
             manufacturer="DPMK Košice",
             entry_type=DeviceEntryType.SERVICE,
         )
@@ -50,19 +52,23 @@ class NextDepartureSensor(CoordinatorEntity[DpmkCoordinator], SensorEntity):
         return {
             "latitude": lat,
             "longitude": lng,
-            "stop_name": self.coordinator.entry.data[CONF_STOP_NAME],
+            "stop_name": data["name"],
+            "stops": data["stops"],
+            "multi_stop": data["multi_stop"],
+            "is_default": data["is_default"],
             "departures": data["departures"],
             "vehicles": [
                 {
                     k: v[k]
                     for k in (
-                        "line", "type", "bg", "fg", "movement", "distance", "dx", "dy", "eta", "serves"
+                        "line", "type", "bg", "fg", "movement", "distance", "dx", "dy", "eta", "serves", "stop"
                     )
                 }
                 | {"id": v["id"], "delay_min": round(v["delay"] / 60)}
                 for v in data["vehicles"]
             ],
             "radius": data["radius"],
+            "language": data["language"],
             "lines": data["lines"],
             "live_vehicles": data["live_vehicles"],
         }

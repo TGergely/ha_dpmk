@@ -2,22 +2,45 @@
   "config": {
     "step": {
       "user": {
-        "title": "DPMK Košice stop",
-        "description": "Type (the start of) a stop name, e.g. \"Hlavn\" or \"Aupark\".",
-        "data": {
-          "query": "Stop name"
+        "title": "Add a DPMK Košice stop",
+        "description": "Add one stop, or a place: several stops near one spot (for example your home) shown together on one card and one map.",
+        "menu_options": {
+          "stop": "One stop, chosen from the list",
+          "place": "A place with several nearby stops"
         }
       },
-      "pick": {
-        "title": "Choose the stop",
+      "stop": {
+        "title": "Choose a stop",
+        "description": "Pick the stop from the list. The list is built into the integration; when your Home Assistant is in Košice, the nearest stops come first.",
         "data": {
-          "stop_id": "Stop"
+          "stop_id": "Stop",
+          "stop_number": "Stop number (only if your stop is missing from the list)"
+        },
+        "data_description": {
+          "stop_number": "The number in the address dpmk.sk/cp/zastavka/<number>. It overrides the list."
+        }
+      },
+      "place": {
+        "title": "Add a place",
+        "description": "Name the place and put it on the map. All DPMK stops within the radius can then be added.",
+        "data": {
+          "place_name": "Name of the place",
+          "location": "Location and radius for finding stops"
+        }
+      },
+      "place_stops": {
+        "title": "Stops of the place",
+        "description": "{count} stops found. Tick the ones you want ({ticked} nearest are ticked).",
+        "data": {
+          "stop_ids": "Stops"
         }
       }
     },
     "error": {
       "cannot_connect": "Could not reach dpmk.sk",
-      "no_stops": "No stop found, try the first letters of the name"
+      "choose_stop": "Choose a stop",
+      "unknown_stop": "dpmk.sk does not know a stop with this number",
+      "no_stops_nearby": "No DPMK stop within this radius: move the pin or make the radius larger"
     },
     "abort": {
       "already_configured": "This stop is already added"
@@ -31,12 +54,23 @@
           "routes": "Only these lines/directions (empty = all)",
           "max_departures": "Number of departures",
           "school_mode": "Timetable variant on weekdays",
-          "location": "Stop location on the map and radius (buses within it are shown)",
+          "location": "Map centre",
           "map_scope": "Vehicles shown on the map",
-          "update_interval": "Update interval (seconds)"
+          "update_interval": "Update interval (seconds)",
+          "language": "Language of the cards",
+          "stop_ids": "Stops of this place",
+          "auto_location": "Put the map where the stop is",
+          "map_radius": "Map radius (metres)",
+          "is_default": "Use as the default for cards"
         },
         "data_description": {
-          "update_interval": "How often the live vehicle feed is read. Minimum 5 s. DPMK itself updates a vehicle roughly every 20 s, so values below 10 s rarely help."
+          "update_interval": "How often the live vehicle feed is read. Minimum 5 s. DPMK itself updates a vehicle roughly every 20 s, so values below 10 s rarely help.",
+          "language": "Used by both cards unless a card sets its own language. Automatic follows the Home Assistant language (Slovak or English).",
+          "stop_ids": "The stops within 1 km of the place, plus the ones you chose.",
+          "auto_location": "A single stop only. Turn off to place the map on a point of your own (the next field).",
+          "location": "Used for a place, and for a stop when the option above is off.",
+          "map_radius": "How far around the centre vehicles are shown.",
+          "is_default": "Cards without an entity use this stop or place."
         }
       }
     }
@@ -53,6 +87,13 @@
       "options": {
         "serving": "Only those serving this stop",
         "all": "All vehicles in range (others dimmed)"
+      }
+    },
+    "language": {
+      "options": {
+        "auto": "Automatic (follow Home Assistant)",
+        "sk": "Slovak",
+        "en": "English"
       }
     }
   },

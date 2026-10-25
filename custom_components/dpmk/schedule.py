@@ -45,6 +45,8 @@ class Departure:
     scheduled: datetime
     delay: int | None  # seconds, None = no live data
     vehicle_id: str | None = None  # live vehicle serving this departure, if matched
+    stop: str | None = None  # name of the stop, shown on cards when a place has several
+    stop_id: str | None = None
 
     @property
     def expected(self) -> datetime:
@@ -59,6 +61,7 @@ class Departure:
             "expected": self.expected.isoformat(),
             "delay_min": None if self.delay is None else round(self.delay / 60),
             "live": self.delay is not None,
+            "stop": self.stop,
             "minutes": max(0, int((self.expected - now).total_seconds() // 60)),
         }
 
@@ -68,6 +71,14 @@ def distance_m(lat1: float, lng1: float, lat2: float, lng2: float) -> float:
     p1, p2 = radians(lat1), radians(lat2)
     a = sin((p2 - p1) / 2) ** 2 + cos(p1) * cos(p2) * sin(radians(lng2 - lng1) / 2) ** 2
     return 2 * 6371000 * asin(sqrt(a))
+
+
+def offset_m(lat0: float, lng0: float, lat: float, lng: float) -> tuple[int, int]:
+    """(east, north) offset in metres of a point from a centre, the same maths as nearby_vehicles."""
+    return (
+        round((lng - lng0) * 111320 * cos(radians(lat0))),
+        round((lat - lat0) * 110540),
+    )
 
 
 def classify_movement(previous: float | None, current: float, threshold: float = 15) -> str:
@@ -130,6 +141,8 @@ def build_departures(
     now: datetime,
     school_mode: str = SCHOOL_AUTO,
     limit: int = 8,
+    stop_name: str | None = None,
+    stop_id: str | None = None,
 ) -> list[Departure]:
     """routes: (route, timetable at the stop, timetable at the line origin)."""
     live = index_vehicles(vehicles)
@@ -156,7 +169,14 @@ def build_departures(
                         vehicle_id = f"{vehicle['Line']}_{vehicle['Trip']}_{vehicle['Dir']}"
                 result.append(
                     Departure(
-                        route.line, route.line_type, route.destination, scheduled, delay, vehicle_id
+                        route.line,
+                        route.line_type,
+                        route.destination,
+                        scheduled,
+                        delay,
+                        vehicle_id,
+                        stop_name,
+                        stop_id,
                     )
                 )
     result.sort(key=lambda d: d.expected)

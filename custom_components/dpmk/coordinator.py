@@ -1,4 +1,4 @@
-"""Data coordinator: cached timetables + live vehicle feed -> departures."""
+"""Data coordinator: cached timetables + live vehicle feed -> departures for a stop or a place."""
 
 from __future__ import annotations
 
@@ -13,19 +13,28 @@ from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 from homeassistant.util import dt as dt_util
 
-from .api import DpmkApi, Route, Stop, Timetable
+from .api import DpmkApi, Route, Timetable
 from .const import (
+    CONF_AUTO_LOCATION,
+    CONF_IS_DEFAULT,
+    CONF_LANGUAGE,
     CONF_LOCATION,
+    CONF_MAP_RADIUS,
     CONF_MAP_SCOPE,
     CONF_MAX_DEPARTURES,
+    CONF_PLACE_LOCATION,
+    CONF_PLACE_NAME,
     CONF_ROUTES,
     CONF_SCHOOL_MODE,
     CONF_STOP_ID,
+    CONF_STOP_IDS,
+    CONF_STOP_NAME,
+    CONF_UPDATE_INTERVAL,
+    DEFAULT_LANGUAGE,
     DEFAULT_MAX_DEPARTURES,
     DEFAULT_RADIUS,
-    DOMAIN,
-    CONF_UPDATE_INTERVAL,
     DEFAULT_UPDATE_INTERVAL,
+    DOMAIN,
     MAX_UPDATE_INTERVAL,
     MIN_UPDATE_INTERVAL,
     SCHEDULE_TTL_SECONDS,
@@ -33,7 +42,8 @@ from .const import (
     SCOPE_ALL,
     SCOPE_SERVING,
 )
-from .schedule import build_departures, classify_movement, nearby_vehicles
+from .schedule import build_departures, classify_movement, distance_m, nearby_vehicles, offset_m
+from .stops import Catalog
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -73,7 +83,11 @@ class LiveFeed:
 
 
 class DpmkCoordinator(DataUpdateCoordinator[dict]):
-    def __init__(self, hass: HomeAssistant, entry: ConfigEntry, live: LiveFeed) -> None:
+    """One config entry: a single stop, or a place made of several stops."""
+
+    def __init__(
+        self, hass: HomeAssistant, entry: ConfigEntry, live: LiveFeed, catalog: Catalog
+    ) -> None:
         super().__init__(
             hass,
             _LOGGER,
@@ -85,28 +99,80 @@ class DpmkCoordinator(DataUpdateCoordinator[dict]):
         self.entry = entry
         self.api = DpmkApi(async_get_clientsession(hass))
         self.live = live
-        self.stop: Stop | None = None
-        self._schedule: list[tuple[Route, Timetable, Timetable | None]] = []
+        self.catalog = catalog
+        # per stop id: every route (unfiltered, for the options form) and the loaded timetables
+        self.routes_by_stop: dict[str, list[Route]] = {}
+        self._schedule: dict[str, list[tuple[Route, Timetable, Timetable | None]]] = {}
+        self._names: dict[str, str] = {}
+        self._pages: dict[tuple, Timetable] = {}
         self._schedule_at = 0.0
         self._colors: dict[str, dict[str, str]] = {}
         self._types: dict[str, str] = {}
         self._distances: dict[str, float] = {}
 
+    # ---- what this entry is made of -------------------------------------------------------
+
+    @property
+    def is_place(self) -> bool:
+        return CONF_STOP_IDS in self.entry.data
+
+    @property
+    def stop_ids(self) -> list[str]:
+        ids = self.entry.options.get(CONF_STOP_IDS) or self.entry.data.get(CONF_STOP_IDS)
+        if ids:
+            return [str(i) for i in ids]
+        return [str(self.entry.data[CONF_STOP_ID])]
+
+    @property
+    def display_name(self) -> str:
+        data = self.entry.data
+        return data.get(CONF_PLACE_NAME) or data.get(CONF_STOP_NAME) or self.entry.title
+
+    @property
+    def center(self) -> tuple[float, float]:
+        """Where the map is centred: a stop's own position, a place's spot, or a chosen point."""
+        opts = self.entry.options
+        loc = opts.get(CONF_LOCATION) or {}
+        chosen = (loc["latitude"], loc["longitude"]) if "latitude" in loc and "longitude" in loc else None
+        if self.is_place:
+            base = self.entry.data.get(CONF_PLACE_LOCATION) or {}
+            if chosen:
+                return chosen
+            if "latitude" in base:
+                return base["latitude"], base["longitude"]
+        else:
+            info = self.catalog.get(self.stop_ids[0])
+            if opts.get(CONF_AUTO_LOCATION, chosen is None) and info and info.has_position:
+                return info.lat, info.lng
+            if chosen:
+                return chosen
+        return self.hass.config.latitude, self.hass.config.longitude
+
+    @property
+    def map_radius(self) -> float:
+        loc = self.entry.options.get(CONF_LOCATION) or {}
+        return float(self.entry.options.get(CONF_MAP_RADIUS) or loc.get("radius") or DEFAULT_RADIUS)
+
     @property
     def location(self) -> tuple[float, float, float]:
-        """Stop position and map radius; defaults to the Home Assistant home."""
-        loc = self.entry.options.get(CONF_LOCATION) or {}
-        return (
-            loc.get("latitude", self.hass.config.latitude),
-            loc.get("longitude", self.hass.config.longitude),
-            loc.get("radius", DEFAULT_RADIUS),
-        )
+        """(latitude, longitude, map radius in metres)."""
+        lat, lng = self.center
+        return lat, lng, self.map_radius
 
     @property
-    def stop_id(self) -> str:
-        return self.entry.data[CONF_STOP_ID]
+    def all_routes(self) -> list[tuple[str, Route]]:
+        return [(sid, r) for sid, routes in self.routes_by_stop.items() for r in routes]
 
-    async def _trip_starts(self, route: Route, table: Timetable) -> Timetable:
+    # ---- loading the timetables ------------------------------------------------------------
+
+    async def _page(self, route: Route, stop_id: str, seq: str | None = None) -> Timetable:
+        """A timetable page, fetched once per load (stops of a place share many of them)."""
+        key = (route.line_id, route.direction, stop_id, seq or route.seq)
+        if key not in self._pages:
+            self._pages[key] = await self.api.get_timetable(route, stop_id, seq)
+        return self._pages[key]
+
+    async def _trip_starts(self, stop_id: str, route: Route, table: Timetable) -> Timetable:
         """Start time of every trip serving this stop, as a pseudo timetable (conn id -> minutes).
 
         The live feed identifies a trip by the time it left its first stop. Not every trip starts
@@ -115,13 +181,13 @@ class DpmkCoordinator(DataUpdateCoordinator[dict]):
         """
         starts: dict[str, dict[str, int]] = {dtype: {} for dtype in table.tables}
         ids = [s for s, _ in table.stops]
-        end = ids.index(self.stop_id) + 1 if self.stop_id in ids else len(ids)
-        for fetched, (stop_id, seq) in enumerate(table.stops[:end]):
+        end = ids.index(stop_id) + 1 if stop_id in ids else len(ids)
+        for fetched, (page_stop, seq) in enumerate(table.stops[:end]):
             if all(c in starts[d] for d, rows in table.tables.items() for c, _ in rows):
                 break
             if fetched >= MAX_START_LOOKUPS:
                 break
-            page = table if stop_id == self.stop_id else await self.api.get_timetable(route, stop_id, seq)
+            page = table if page_stop == stop_id else await self._page(route, page_stop, seq)
             for dtype, rows in page.tables.items():
                 if dtype in starts:
                     for conn, minutes in rows:
@@ -129,25 +195,42 @@ class DpmkCoordinator(DataUpdateCoordinator[dict]):
         return Timetable(stops=[], tables={d: list(s.items()) for d, s in starts.items()})
 
     async def _load_schedule(self) -> None:
-        stop = await self.api.get_stop(self.stop_id)
+        self._pages = {}
         wanted = self.entry.options.get(CONF_ROUTES)
-        routes = [r for r in stop.routes if not wanted or r.key in wanted]
         sem = asyncio.Semaphore(3)
+        schedule: dict[str, list] = {}
+        routes_by_stop: dict[str, list[Route]] = {}
+        names: dict[str, str] = {}
+        errors: list[Exception] = []
 
-        async def load(route: Route):
+        async def load_route(stop_id: str, route: Route):
             async with sem:
-                table = await self.api.get_timetable(route, self.stop_id)
-                return route, table, await self._trip_starts(route, table)
+                table = await self._page(route, stop_id)
+                return route, table, await self._trip_starts(stop_id, route, table)
 
-        self._schedule = list(await asyncio.gather(*(load(r) for r in routes)))
+        for stop_id in self.stop_ids:
+            try:
+                stop = await self.api.get_stop(stop_id)
+                routes_by_stop[stop_id] = stop.routes
+                info = self.catalog.get(stop_id)
+                names[stop_id] = info.name if info else stop.name
+                chosen = [r for r in stop.routes if not wanted or r.key in wanted]
+                schedule[stop_id] = list(await asyncio.gather(*(load_route(stop_id, r) for r in chosen)))
+            except Exception as err:  # one stop of a place failing must not hide the others
+                _LOGGER.warning("Could not load stop %s: %s", stop_id, err)
+                errors.append(err)
+        if not schedule:
+            raise errors[0] if errors else UpdateFailed("no stops configured")
         try:
             self._colors = await self.api.get_line_colors()
             if self.entry.options.get(CONF_MAP_SCOPE) == SCOPE_ALL:
                 self._types = await self.api.get_line_types()  # bus/tram shape of unrelated lines
         except Exception as err:  # cosmetic only: the card falls back to default colours
             _LOGGER.debug("Could not load line colours: %s", err)
-        self.stop = stop
+        self._schedule, self.routes_by_stop, self._names = schedule, routes_by_stop, names
         self._schedule_at = time.monotonic()
+
+    # ---- the refresh -----------------------------------------------------------------------
 
     async def _async_update_data(self) -> dict:
         try:
@@ -164,41 +247,77 @@ class DpmkCoordinator(DataUpdateCoordinator[dict]):
 
         now = dt_util.now()
         opts = self.entry.options
-        # Build a long list: the map needs the live ETA of buses beyond the displayed rows.
-        everything = build_departures(
-            self._schedule, vehicles, now, opts.get(CONF_SCHOOL_MODE, SCHOOL_AUTO), limit=80
-        )
+        school = opts.get(CONF_SCHOOL_MODE, SCHOOL_AUTO)
+        multi = len(self._schedule) > 1
+
+        # Long lists per stop: the map needs the live ETA of buses beyond the displayed rows.
+        everything = []
+        for stop_id, routes in self._schedule.items():
+            everything += build_departures(
+                routes, vehicles, now, school, limit=80,
+                stop_name=self._names.get(stop_id), stop_id=stop_id,
+            )
+        everything.sort(key=lambda d: d.expected)
         departures = everything[: int(opts.get(CONF_MAX_DEPARTURES, DEFAULT_MAX_DEPARTURES))]
+
+        # for every running vehicle: when it reaches the first of our stops it is heading to
         eta: dict[str, str] = {}
+        eta_stop: dict[str, str] = {}
         for d in everything:
             if d.vehicle_id and d.vehicle_id not in eta:
                 eta[d.vehicle_id] = d.expected.isoformat()
-        lat, lng, radius = self.location
-        lines = {r.line for r, _, _ in self._schedule}
-        served = {(r.line, r.direction) for r, _, _ in self._schedule}
+                eta_stop[d.vehicle_id] = d.stop_id
+
+        clat, clng, radius = self.location
+        all_routes = [r for routes in self._schedule.values() for r, _, _ in routes]
+        lines = {r.line for r in all_routes}
+        served = {(r.line, r.direction) for r in all_routes}
         only_served = opts.get(CONF_MAP_SCOPE, SCOPE_SERVING) != SCOPE_ALL
-        near = nearby_vehicles(vehicles, served, lat, lng, radius, only_served)
-        types = self._types | {r.line: r.line_type for r, _, _ in self._schedule}
-        distances = {}
+        near = nearby_vehicles(vehicles, served, clat, clng, radius, only_served)
+        types = self._types | {r.line: r.line_type for _, r in self.all_routes}
+
+        points: dict[str, tuple[float, float]] = {}
+        for stop_id in self._schedule:
+            info = self.catalog.get(stop_id)
+            if info and info.has_position:
+                points[stop_id] = (info.lat, info.lng)
+
+        distances: dict[str, float] = {}
         for v in near:
+            target_id = eta_stop.get(v["id"])
+            tlat, tlng = points.get(target_id) or (clat, clng)
+            # distance and movement are measured to the stop the vehicle is heading for
+            v["distance"] = round(distance_m(tlat, tlng, v["latitude"], v["longitude"]))
             v["movement"] = classify_movement(self._distances.get(v["id"]), v["distance"])
             distances[v["id"]] = v["distance"]
-        self._distances = distances
-        for v in near:
+            v["stop"] = self._names.get(target_id) if multi and target_id else None
             v["type"] = types.get(v["line"])
             v["bg"] = self._colors.get(v["line"], {}).get("bg")
             v["fg"] = self._colors.get(v["line"], {}).get("fg")
             v["eta"] = eta.get(v["id"])
+        self._distances = distances
+
         rows = []
         for d in departures:
             row = d.as_dict(now)
             row["bg"] = self._colors.get(d.line, {}).get("bg")
             row["fg"] = self._colors.get(d.line, {}).get("fg")
             rows.append(row)
+
+        stops = []
+        for stop_id, (slat, slng) in points.items():
+            dx, dy = offset_m(clat, clng, slat, slng)
+            stops.append({"id": stop_id, "name": self._names.get(stop_id), "dx": dx, "dy": dy})
+
         return {
             "departures": rows,
             "lines": sorted(lines),
             "vehicles": near,
+            "stops": stops,
+            "multi_stop": multi,
+            "name": self.display_name,
+            "is_default": bool(opts.get(CONF_IS_DEFAULT)),
             "radius": radius,
+            "language": opts.get(CONF_LANGUAGE, DEFAULT_LANGUAGE),
             "live_vehicles": len(vehicles),
         }

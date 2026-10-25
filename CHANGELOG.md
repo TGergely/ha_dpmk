@@ -4,6 +4,24 @@ All notable changes to this project are listed here. The version number lives on
 `custom_components/dpmk/manifest.json`. While the number starts with 0, new features may still
 change how things work.
 
+## 0.2.0 - 2026-10-25
+
+- **Places**: add several stops near one spot as one place. One sensor, one merged departures list (each
+  row says which stop it is from) and one map with all the stops. Stops within a radius are found
+  automatically and can be ticked or unticked.
+- **The stop list is built in** (`data/stops.json`, 262 stops with positions from the city's open data,
+  CC BY 4.0), so adding a stop makes no request to dpmk.sk. When your Home Assistant is in Košice the list
+  is sorted by distance. A stop number field covers stops added by DPMK after the list was made.
+  `tools/build_stops.py` rebuilds the file.
+- **The map centres itself on the stop**; new options: put the map where the stop is, map centre, map
+  radius. Existing stops keep the position and radius they had.
+- **Default stop or place**: cards without an `entity` use it.
+- New option **Language of the cards** (Automatic, Slovak or English); one setting for both cards.
+  **Automatic** (follow Home Assistant) is the default. A card's own `language` option still overrides it.
+  The time format follows the language.
+- The card picker entries are bilingual; the departure line can wrap when a stop name is long.
+- Example pictures in the README.
+
 ## 0.1.0 - first release
 
 - Choose a DPMK Košice stop by name and add one entry per stop.

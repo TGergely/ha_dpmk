@@ -1,0 +1,5141 @@
+{
+ "generated": "2026-10-25",
+ "sources": {
+  "stops": "https://www.dpmk.sk (stop list)",
+  "coordinates": "Mesto Kosice open data, 'Zastavky MHD', CC BY 4.0, https://opendata.kosice.sk"
+ },
+ "stops": [
+  {
+   "id": "1",
+   "label": "Alpinka - Sever",
+   "name": "Alpinka",
+   "district": "Sever",
+   "lat": 48.758766,
+   "lng": 21.186706,
+   "poles": [
+    [
+     48.758301,
+     21.188299
+    ],
+    [
+     48.75845,
+     21.188299
+    ],
+    [
+     48.758541,
+     21.18804
+    ],
+    [
+     48.759029,
+     21.18527
+    ],
+    [
+     48.75951,
+     21.18362
+    ]
+   ]
+  },
+  {
+   "id": "2",
+   "label": "Alvinczyho - Staré mesto",
+   "name": "Alvinczyho",
+   "district": "Staré mesto",
+   "lat": 48.730666,
+   "lng": 21.26095,
+   "poles": [
+    [
+     48.730549,
+     21.26095
+    ],
+    [
+     48.730782,
+     21.26095
+    ]
+   ]
+  },
+  {
+   "id": "3",
+   "label": "Amfiteáter - Staré mesto",
+   "name": "Amfiteáter",
+   "district": "Staré mesto",
+   "lat": 48.72761,
+   "lng": 21.241613,
+   "poles": [
+    [
+     48.727322,
+     21.240351
+    ],
+    [
+     48.727409,
+     21.24246
+    ],
+    [
+     48.727421,
+     21.241671
+    ],
+    [
+     48.727657,
+     21.241708
+    ],
+    [
+     48.727829,
+     21.24122
+    ],
+    [
+     48.72802,
+     21.24227
+    ]
+   ]
+  },
+  {
+   "id": "4",
+   "label": "Anička - Sever",
+   "name": "Anička",
+   "district": "Sever",
+   "lat": 48.751276,
+   "lng": 21.248979,
+   "poles": [
+    [
+     48.750622,
+     21.2491
+    ],
+    [
+     48.75193,
+     21.248859
+    ]
+   ]
+  },
+  {
+   "id": "5",
+   "label": "Astória - Juh",
+   "name": "Astória",
+   "district": "Juh",
+   "lat": 48.711903,
+   "lng": 21.260197,
+   "poles": [
+    [
+     48.711281,
+     21.25959
+    ],
+    [
+     48.711311,
+     21.25938
+    ],
+    [
+     48.712391,
+     21.260889
+    ],
+    [
+     48.712631,
+     21.260929
+    ]
+   ]
+  },
+  {
+   "id": "6",
+   "label": "Atletická - Sever",
+   "name": "Atletická",
+   "district": "Sever",
+   "lat": 48.74431,
+   "lng": 21.24382,
+   "poles": [
+    [
+     48.744221,
+     21.24386
+    ],
+    [
+     48.7444,
+     21.24378
+    ]
+   ]
+  },
+  {
+   "id": "7",
+   "label": "Autocamping - Juh",
+   "name": "Autocamping",
+   "district": "Juh",
+   "lat": 48.688773,
+   "lng": 21.260677,
+   "poles": [
+    [
+     48.687851,
+     21.260059
+    ],
+    [
+     48.68845,
+     21.26203
+    ],
+    [
+     48.688511,
+     21.26136
+    ],
+    [
+     48.688886,
+     21.260307
+    ],
+    [
+     48.688961,
+     21.26037
+    ],
+    [
+     48.689174,
+     21.260331
+    ],
+    [
+     48.689579,
+     21.260281
+    ]
+   ]
+  },
+  {
+   "id": "8",
+   "label": "Baňa Bankov - Sever",
+   "name": "Baňa Bankov",
+   "district": "Sever",
+   "lat": 48.732695,
+   "lng": 21.22782,
+   "poles": [
+    [
+     48.732571,
+     21.22793
+    ],
+    [
+     48.732819,
+     21.227711
+    ]
+   ]
+  },
+  {
+   "id": "9",
+   "label": "Belehradská - Sídl. Ťahanovce",
+   "name": "Belehradská",
+   "district": "Sídl. Ťahanovce",
+   "lat": 48.756834,
+   "lng": 21.273789,
+   "poles": [
+    [
+     48.756699,
+     21.273809
+    ],
+    [
+     48.756969,
+     21.273769
+    ]
+   ]
+  },
+  {
+   "id": "10",
+   "label": "Berlínska - Sídl. Ťahanovce",
+   "name": "Berlínska",
+   "district": "Sídl. Ťahanovce",
+   "lat": 48.758671,
+   "lng": 21.268555,
+   "poles": [
+    [
+     48.758411,
+     21.26848
+    ],
+    [
+     48.75893,
+     21.268629
+    ]
+   ]
+  },
+  {
+   "id": "11",
+   "label": "Botanická záhrada - Sever",
+   "name": "Botanická záhrada",
+   "district": "Sever",
+   "lat": 48.734438,
+   "lng": 21.240548,
+   "poles": [
+    [
+     48.734169,
+     21.24052
+    ],
+    [
+     48.734211,
+     21.23913
+    ],
+    [
+     48.73428,
+     21.240721
+    ],
+    [
+     48.734501,
+     21.240761
+    ],
+    [
+     48.735031,
+     21.24161
+    ]
+   ]
+  },
+  {
+   "id": "12",
+   "label": "Bytový podnik mesta Košice - Vyšné Opátske",
+   "name": "Bytový podnik mesta Košice",
+   "district": "Vyšné Opátske",
+   "lat": 48.706049,
+   "lng": 21.27955,
+   "poles": [
+    [
+     48.705379,
+     21.27951
+    ],
+    [
+     48.706718,
+     21.279591
+    ]
+   ]
+  },
+  {
+   "id": "13",
+   "label": "Kavečany, cintorín - Kavečany",
+   "name": "Kavečany, cintorín",
+   "district": "Kavečany",
+   "lat": 48.773914,
+   "lng": 21.207145,
+   "poles": [
+    [
+     48.77383,
+     21.20714
+    ],
+    [
+     48.773998,
+     21.20715
+    ]
+   ]
+  },
+  {
+   "id": "14",
+   "label": "Košická Nová Ves, cintorín - Koš. Nová Ves",
+   "name": "Košická Nová Ves, cintorín",
+   "district": "Koš. Nová Ves",
+   "lat": 48.727001,
+   "lng": 21.30365,
+   "poles": [
+    [
+     48.727001,
+     21.30365
+    ]
+   ]
+  },
+  {
+   "id": "15",
+   "label": "Verejný cintorín - Juh",
+   "name": "Verejný cintorín",
+   "district": "Juh",
+   "lat": 48.69499,
+   "lng": 21.263054,
+   "poles": [
+    [
+     48.694248,
+     21.262051
+    ],
+    [
+     48.694778,
+     21.262039
+    ],
+    [
+     48.695122,
+     21.264601
+    ],
+    [
+     48.69524,
+     21.262079
+    ],
+    [
+     48.69556,
+     21.2645
+    ]
+   ]
+  },
+  {
+   "id": "16",
+   "label": "Kovaľská - Poľov",
+   "name": "Kovaľská",
+   "district": "Poľov",
+   "lat": 48.662731,
+   "lng": 21.19711,
+   "poles": [
+    [
+     48.662571,
+     21.197321
+    ],
+    [
+     48.662891,
+     21.196899
+    ]
+   ]
+  },
+  {
+   "id": "17",
+   "label": "Bosákova - Juh",
+   "name": "Bosákova",
+   "district": "Juh",
+   "lat": 48.720928,
+   "lng": 21.274375,
+   "poles": [
+    [
+     48.720558,
+     21.27453
+    ],
+    [
+     48.721298,
+     21.27422
+    ]
+   ]
+  },
+  {
+   "id": "19",
+   "label": "CVČ Domino - Západ",
+   "name": "CVČ Domino",
+   "district": "Západ",
+   "lat": 48.70488,
+   "lng": 21.230379,
+   "poles": [
+    [
+     48.70488,
+     21.230379
+    ]
+   ]
+  },
+  {
+   "id": "20",
+   "label": "Cyklistická - Sever",
+   "name": "Cyklistická",
+   "district": "Sever",
+   "lat": 48.746922,
+   "lng": 21.241949,
+   "poles": [
+    [
+     48.746922,
+     21.241949
+    ]
+   ]
+  },
+  {
+   "id": "21",
+   "label": "Čermeľ - Sever",
+   "name": "Čermeľ",
+   "district": "Sever",
+   "lat": 48.74942,
+   "lng": 21.230366,
+   "poles": [
+    [
+     48.74921,
+     21.23118
+    ],
+    [
+     48.74931,
+     21.22953
+    ],
+    [
+     48.749489,
+     21.230749
+    ],
+    [
+     48.749512,
+     21.22893
+    ],
+    [
+     48.74958,
+     21.23144
+    ]
+   ]
+  },
+  {
+   "id": "22",
+   "label": "Džungľa - Džungľa",
+   "name": "Džungľa",
+   "district": "Džungľa",
+   "lat": 48.735889,
+   "lng": 21.26968,
+   "poles": [
+    [
+     48.735889,
+     21.26968
+    ]
+   ]
+  },
+  {
+   "id": "23",
+   "label": "Mliečna - Koš. Nová Ves",
+   "name": "Mliečna",
+   "district": "Koš. Nová Ves",
+   "lat": 48.73082,
+   "lng": 21.301451,
+   "poles": [
+    [
+     48.73082,
+     21.301451
+    ]
+   ]
+  },
+  {
+   "id": "24",
+   "label": "Diamantová - Západ",
+   "name": "Diamantová",
+   "district": "Západ",
+   "lat": 48.71295,
+   "lng": 21.222004,
+   "poles": [
+    [
+     48.712879,
+     21.22224
+    ],
+    [
+     48.71302,
+     21.221769
+    ]
+   ]
+  },
+  {
+   "id": "25",
+   "label": "Dneperská - Nad jazerom",
+   "name": "Dneperská",
+   "district": "Nad jazerom",
+   "lat": 48.686655,
+   "lng": 21.284422,
+   "poles": [
+    [
+     48.686409,
+     21.284439
+    ],
+    [
+     48.686691,
+     21.2845
+    ],
+    [
+     48.686729,
+     21.28455
+    ],
+    [
+     48.68679,
+     21.284201
+    ]
+   ]
+  },
+  {
+   "id": "26",
+   "label": "Dolný Bankov - Sever",
+   "name": "Dolný Bankov",
+   "district": "Sever",
+   "lat": 48.747397,
+   "lng": 21.207659,
+   "poles": [
+    [
+     48.747372,
+     21.207729
+    ],
+    [
+     48.747421,
+     21.20759
+    ]
+   ]
+  },
+  {
+   "id": "27",
+   "label": "Dom umenia - Staré mesto",
+   "name": "Dom umenia",
+   "district": "Staré mesto",
+   "lat": 48.716682,
+   "lng": 21.254253,
+   "poles": [
+    [
+     48.716358,
+     21.25485
+    ],
+    [
+     48.716438,
+     21.254589
+    ],
+    [
+     48.717251,
+     21.253321
+    ]
+   ]
+  },
+  {
+   "id": "28",
+   "label": "Školy pre telesne postihnutých - Vyšné Opátske",
+   "name": "Školy pre telesne postihnutých",
+   "district": "Vyšné Opátske",
+   "lat": 48.705911,
+   "lng": 21.281736,
+   "poles": [
+    [
+     48.705761,
+     21.282021
+    ],
+    [
+     48.705971,
+     21.281679
+    ],
+    [
+     48.706001,
+     21.281509
+    ]
+   ]
+  },
+  {
+   "id": "29",
+   "label": "DP mesta Košice - Západ",
+   "name": "DP mesta Košice",
+   "district": "Západ",
+   "lat": 48.704586,
+   "lng": 21.236831,
+   "poles": [
+    [
+     48.705231,
+     21.237431
+    ],
+    [
+     48.704418,
+     21.236561
+    ],
+    [
+     48.704109,
+     21.2365
+    ]
+   ]
+  },
+  {
+   "id": "30",
+   "label": "Drabova - Sídlisko KVP",
+   "name": "Drabova",
+   "district": "Sídlisko KVP",
+   "lat": 48.709845,
+   "lng": 21.218094,
+   "poles": [
+    [
+     48.709839,
+     21.21796
+    ],
+    [
+     48.70985,
+     21.218229
+    ]
+   ]
+  },
+  {
+   "id": "31",
+   "label": "Ďumbierska - Sever",
+   "name": "Ďumbierska",
+   "district": "Sever",
+   "lat": 48.751461,
+   "lng": 21.245291,
+   "poles": [
+    [
+     48.751461,
+     21.245291
+    ]
+   ]
+  },
+  {
+   "id": "32",
+   "label": "Exnárova - Darg. hrdinov",
+   "name": "Exnárova",
+   "district": "Darg. hrdinov",
+   "lat": 48.740659,
+   "lng": 21.284021,
+   "poles": [
+    [
+     48.740051,
+     21.283911
+    ],
+    [
+     48.741268,
+     21.28413
+    ]
+   ]
+  },
+  {
+   "id": "33",
+   "label": "EZ Elektrosystémy - Šaca",
+   "name": "EZ Elektrosystémy",
+   "district": "Šaca",
+   "lat": 48.634369,
+   "lng": 21.21249,
+   "poles": [
+    [
+     48.634369,
+     21.21249
+    ]
+   ]
+  },
+  {
+   "id": "34",
+   "label": "Fábryho - Darg. hrdinov",
+   "name": "Fábryho",
+   "district": "Darg. hrdinov",
+   "lat": 48.74223,
+   "lng": 21.28043,
+   "poles": [
+    [
+     48.742088,
+     21.28034
+    ],
+    [
+     48.742371,
+     21.280519
+    ]
+   ]
+  },
+  {
+   "id": "35",
+   "label": "Golianova - Krásna",
+   "name": "Golianova",
+   "district": "Krásna",
+   "lat": 48.672119,
+   "lng": 21.30349,
+   "poles": [
+    [
+     48.672119,
+     21.30349
+    ]
+   ]
+  },
+  {
+   "id": "36",
+   "label": "Grunt - Myslava",
+   "name": "Grunt",
+   "district": "Myslava",
+   "lat": 48.70989,
+   "lng": 21.2045,
+   "poles": [
+    [
+     48.709419,
+     21.20454
+    ],
+    [
+     48.70961,
+     21.205521
+    ],
+    [
+     48.71011,
+     21.20405
+    ],
+    [
+     48.710419,
+     21.20389
+    ]
+   ]
+  },
+  {
+   "id": "37",
+   "label": "Gymnázium Opatovská - Vyšné Opátske",
+   "name": "Gymnázium Opatovská",
+   "district": "Vyšné Opátske",
+   "lat": 48.716715,
+   "lng": 21.27785,
+   "poles": [
+    [
+     48.716518,
+     21.277731
+    ],
+    [
+     48.716911,
+     21.277969
+    ]
+   ]
+  },
+  {
+   "id": "38",
+   "label": "Haburská - Pereš",
+   "name": "Haburská",
+   "district": "Pereš",
+   "lat": 48.69171,
+   "lng": 21.207481,
+   "poles": [
+    [
+     48.691689,
+     21.20755
+    ],
+    [
+     48.69173,
+     21.207411
+    ]
+   ]
+  },
+  {
+   "id": "40",
+   "label": "Hanojská - Sídl. Ťahanovce",
+   "name": "Hanojská",
+   "district": "Sídl. Ťahanovce",
+   "lat": 48.76088,
+   "lng": 21.27028,
+   "poles": [
+    [
+     48.76062,
+     21.27033
+    ],
+    [
+     48.761139,
+     21.270229
+    ]
+   ]
+  },
+  {
+   "id": "41",
+   "label": "Hečkova - Barca",
+   "name": "Hečkova",
+   "district": "Barca",
+   "lat": 48.674617,
+   "lng": 21.268471,
+   "poles": [
+    [
+     48.674389,
+     21.266041
+    ],
+    [
+     48.6744,
+     21.269831
+    ],
+    [
+     48.674541,
+     21.268101
+    ],
+    [
+     48.67514,
+     21.269911
+    ]
+   ]
+  },
+  {
+   "id": "42",
+   "label": "Hlavná pošta - Staré mesto",
+   "name": "Hlavná pošta",
+   "district": "Staré mesto",
+   "lat": 48.721718,
+   "lng": 21.249181,
+   "poles": [
+    [
+     48.721401,
+     21.249371
+    ],
+    [
+     48.721661,
+     21.24929
+    ],
+    [
+     48.721828,
+     21.248341
+    ],
+    [
+     48.721981,
+     21.24972
+    ]
+   ]
+  },
+  {
+   "id": "43",
+   "label": "Tesco, Džungľa - Sídl. Ťahanovce",
+   "name": "Tesco, Džungľa",
+   "district": "Sídl. Ťahanovce",
+   "lat": 48.742531,
+   "lng": 21.264071,
+   "poles": [
+    [
+     48.742531,
+     21.264071
+    ]
+   ]
+  },
+  {
+   "id": "45",
+   "label": "Hodonínska - Západ",
+   "name": "Hodonínska",
+   "district": "Západ",
+   "lat": 48.713428,
+   "lng": 21.226743,
+   "poles": [
+    [
+     48.712891,
+     21.22683
+    ],
+    [
+     48.713211,
+     21.227751
+    ],
+    [
+     48.7136,
+     21.225651
+    ],
+    [
+     48.714008,
+     21.22674
+    ]
+   ]
+  },
+  {
+   "id": "46",
+   "label": "Horný Bankov - Sever",
+   "name": "Horný Bankov",
+   "district": "Sever",
+   "lat": 48.744696,
+   "lng": 21.210674,
+   "poles": [
+    [
+     48.744511,
+     21.210569
+    ],
+    [
+     48.744881,
+     21.210779
+    ]
+   ]
+  },
+  {
+   "id": "47",
+   "label": "Ryba - Juh",
+   "name": "Ryba",
+   "district": "Juh",
+   "lat": 48.704321,
+   "lng": 21.26267,
+   "poles": [
+    [
+     48.703869,
+     21.262369
+    ],
+    [
+     48.703972,
+     21.262051
+    ],
+    [
+     48.70401,
+     21.262039
+    ],
+    [
+     48.704189,
+     21.26379
+    ],
+    [
+     48.704819,
+     21.26379
+    ],
+    [
+     48.70507,
+     21.26198
+    ]
+   ]
+  },
+  {
+   "id": "48",
+   "label": "Hronská - Západ",
+   "name": "Hronská",
+   "district": "Západ",
+   "lat": 48.71835,
+   "lng": 21.226245,
+   "poles": [
+    [
+     48.717918,
+     21.226151
+    ],
+    [
+     48.718781,
+     21.226339
+    ]
+   ]
+  },
+  {
+   "id": "49",
+   "label": "Húskova - Sídlisko KVP",
+   "name": "Húskova",
+   "district": "Sídlisko KVP",
+   "lat": 48.719429,
+   "lng": 21.21018,
+   "poles": [
+    [
+     48.719318,
+     21.21076
+    ],
+    [
+     48.71954,
+     21.2096
+    ]
+   ]
+  },
+  {
+   "id": "50",
+   "label": "Napájadlá - Nad jazerom",
+   "name": "Napájadlá",
+   "district": "Nad jazerom",
+   "lat": 48.682579,
+   "lng": 21.285086,
+   "poles": [
+    [
+     48.68256,
+     21.285191
+    ],
+    [
+     48.682598,
+     21.284981
+    ]
+   ]
+  },
+  {
+   "id": "51",
+   "label": "Chrastie - Sever",
+   "name": "Chrastie",
+   "district": "Sever",
+   "lat": 48.754429,
+   "lng": 21.24757,
+   "poles": [
+    [
+     48.754379,
+     21.247669
+    ],
+    [
+     48.754478,
+     21.247471
+    ]
+   ]
+  },
+  {
+   "id": "52",
+   "label": "Moskovská - Sídlisko KVP",
+   "name": "Moskovská",
+   "district": "Sídlisko KVP",
+   "lat": 48.711578,
+   "lng": 21.212178,
+   "poles": [
+    [
+     48.711494,
+     21.212975
+    ],
+    [
+     48.71162,
+     21.21171
+    ],
+    [
+     48.71162,
+     21.211849
+    ]
+   ]
+  },
+  {
+   "id": "53",
+   "label": "Jahodná, chata - Sever",
+   "name": "Jahodná, chata",
+   "district": "Sever",
+   "lat": 48.76844,
+   "lng": 21.133986,
+   "poles": [
+    [
+     48.768379,
+     21.13409
+    ],
+    [
+     48.768501,
+     21.133881
+    ]
+   ]
+  },
+  {
+   "id": "54",
+   "label": "Jahodná, kopec - Sever",
+   "name": "Jahodná, kopec",
+   "district": "Sever",
+   "lat": 48.78077,
+   "lng": 21.141309,
+   "poles": [
+    [
+     48.78072,
+     21.14122
+    ],
+    [
+     48.780819,
+     21.141399
+    ]
+   ]
+  },
+  {
+   "id": "55",
+   "label": "Jakabov palác - Staré mesto",
+   "name": "Jakabov palác",
+   "district": "Staré mesto",
+   "lat": 48.721315,
+   "lng": 21.263505,
+   "poles": [
+    [
+     48.720779,
+     21.26342
+    ],
+    [
+     48.721851,
+     21.26359
+    ]
+   ]
+  },
+  {
+   "id": "56",
+   "label": "Janigova - Sídlisko KVP",
+   "name": "Janigova",
+   "district": "Sídlisko KVP",
+   "lat": 48.716299,
+   "lng": 21.206136,
+   "poles": [
+    [
+     48.716068,
+     21.206091
+    ],
+    [
+     48.71653,
+     21.206181
+    ]
+   ]
+  },
+  {
+   "id": "57",
+   "label": "Kalinovská - Darg. hrdinov",
+   "name": "Kalinovská",
+   "district": "Darg. hrdinov",
+   "lat": 48.743601,
+   "lng": 21.277034,
+   "poles": [
+    [
+     48.743542,
+     21.27655
+    ],
+    [
+     48.74366,
+     21.277519
+    ]
+   ]
+  },
+  {
+   "id": "58",
+   "label": "Kino Družba - Západ",
+   "name": "Kino Družba",
+   "district": "Západ",
+   "lat": 48.717946,
+   "lng": 21.233844,
+   "poles": [
+    [
+     48.718399,
+     21.233761
+    ],
+    [
+     48.718121,
+     21.233879
+    ],
+    [
+     48.717319,
+     21.233891
+    ]
+   ]
+  },
+  {
+   "id": "59",
+   "label": "KVP, kláštor - Sídlisko KVP",
+   "name": "KVP, kláštor",
+   "district": "Sídlisko KVP",
+   "lat": 48.719364,
+   "lng": 21.207296,
+   "poles": [
+    [
+     48.718761,
+     21.20698
+    ],
+    [
+     48.719601,
+     21.20788
+    ],
+    [
+     48.71973,
+     21.207029
+    ]
+   ]
+  },
+  {
+   "id": "60",
+   "label": "Klimkovičova - Sídlisko KVP",
+   "name": "Klimkovičova",
+   "district": "Sídlisko KVP",
+   "lat": 48.712545,
+   "lng": 21.20801,
+   "poles": [
+    [
+     48.71244,
+     21.208099
+    ],
+    [
+     48.71265,
+     21.20792
+    ]
+   ]
+  },
+  {
+   "id": "61",
+   "label": "Kolibár - Myslava",
+   "name": "Kolibár",
+   "district": "Myslava",
+   "lat": 48.70233,
+   "lng": 21.217974,
+   "poles": [
+    [
+     48.7019,
+     21.21879
+    ],
+    [
+     48.702759,
+     21.217159
+    ]
+   ]
+  },
+  {
+   "id": "63",
+   "label": "Kavečany - Kavečany",
+   "name": "Kavečany",
+   "district": "Kavečany",
+   "lat": 48.776138,
+   "lng": 21.205669,
+   "poles": [
+    [
+     48.776138,
+     21.205669
+    ]
+   ]
+  },
+  {
+   "id": "64",
+   "label": "Ťahanovská - Ťahanovce",
+   "name": "Ťahanovská",
+   "district": "Ťahanovce",
+   "lat": 48.757595,
+   "lng": 21.25569,
+   "poles": [
+    [
+     48.75758,
+     21.25572
+    ],
+    [
+     48.75761,
+     21.255659
+    ]
+   ]
+  },
+  {
+   "id": "65",
+   "label": "Budapeštianska - Sídl. Ťahanovce",
+   "name": "Budapeštianska",
+   "district": "Sídl. Ťahanovce",
+   "lat": 48.752445,
+   "lng": 21.2688,
+   "poles": [
+    [
+     48.752361,
+     21.2686
+    ],
+    [
+     48.752529,
+     21.268999
+    ]
+   ]
+  },
+  {
+   "id": "66",
+   "label": "Myslava, kostol - Myslava",
+   "name": "Myslava, kostol",
+   "district": "Myslava",
+   "lat": 48.707023,
+   "lng": 21.207925,
+   "poles": [
+    [
+     48.706829,
+     21.2082
+    ],
+    [
+     48.707218,
+     21.207649
+    ]
+   ]
+  },
+  {
+   "id": "67",
+   "label": "Vyšné Opátske - Vyšné Opátske",
+   "name": "Vyšné Opátske",
+   "district": "Vyšné Opátske",
+   "lat": 48.700035,
+   "lng": 21.283945,
+   "poles": [
+    [
+     48.699928,
+     21.284019
+    ],
+    [
+     48.700142,
+     21.283871
+    ]
+   ]
+  },
+  {
+   "id": "68",
+   "label": "Ladožská - Nad jazerom",
+   "name": "Ladožská",
+   "district": "Nad jazerom",
+   "lat": 48.682672,
+   "lng": 21.290132,
+   "poles": [
+    [
+     48.6819,
+     21.29081
+    ],
+    [
+     48.682838,
+     21.28989
+    ],
+    [
+     48.682911,
+     21.28994
+    ],
+    [
+     48.683041,
+     21.28989
+    ]
+   ]
+  },
+  {
+   "id": "69",
+   "label": "Barca, kostoly - Barca",
+   "name": "Barca, kostoly",
+   "district": "Barca",
+   "lat": 48.676399,
+   "lng": 21.265705,
+   "poles": [
+    [
+     48.676319,
+     21.26576
+    ],
+    [
+     48.676479,
+     21.26565
+    ]
+   ]
+  },
+  {
+   "id": "71",
+   "label": "Krajský súd - Staré mesto",
+   "name": "Krajský súd",
+   "district": "Staré mesto",
+   "lat": 48.716763,
+   "lng": 21.249973,
+   "poles": [
+    [
+     48.716198,
+     21.248566
+    ],
+    [
+     48.716267,
+     21.249393
+    ],
+    [
+     48.716511,
+     21.249599
+    ],
+    [
+     48.716541,
+     21.25057
+    ],
+    [
+     48.717491,
+     21.25082
+    ],
+    [
+     48.717571,
+     21.250891
+    ]
+   ]
+  },
+  {
+   "id": "72",
+   "label": "Okresný úrad - Sever",
+   "name": "Okresný úrad",
+   "district": "Sever",
+   "lat": 48.735222,
+   "lng": 21.247781,
+   "poles": [
+    [
+     48.733723,
+     21.248918
+    ],
+    [
+     48.734458,
+     21.250926
+    ],
+    [
+     48.734558,
+     21.24748
+    ],
+    [
+     48.735291,
+     21.246981
+    ],
+    [
+     48.736511,
+     21.24548
+    ],
+    [
+     48.73679,
+     21.246901
+    ]
+   ]
+  },
+  {
+   "id": "73",
+   "label": "Krematórium - Sídl. Ťahanovce",
+   "name": "Krematórium",
+   "district": "Sídl. Ťahanovce",
+   "lat": 48.772464,
+   "lng": 21.28972,
+   "poles": [
+    [
+     48.772331,
+     21.28953
+    ],
+    [
+     48.772598,
+     21.289909
+    ]
+   ]
+  },
+  {
+   "id": "74",
+   "label": "Kremnická - Sídlisko KVP",
+   "name": "Kremnická",
+   "district": "Sídlisko KVP",
+   "lat": 48.705235,
+   "lng": 21.21935,
+   "poles": [
+    [
+     48.705139,
+     21.21925
+    ],
+    [
+     48.70533,
+     21.21945
+    ]
+   ]
+  },
+  {
+   "id": "75",
+   "label": "Krupinská - Sever",
+   "name": "Krupinská",
+   "district": "Sever",
+   "lat": 48.731004,
+   "lng": 21.230514,
+   "poles": [
+    [
+     48.730968,
+     21.230499
+    ],
+    [
+     48.731041,
+     21.23053
+    ]
+   ]
+  },
+  {
+   "id": "76",
+   "label": "Ulica Sv.Ladislava - Koš. Nová Ves",
+   "name": "Ulica Sv.Ladislava",
+   "district": "Koš. Nová Ves",
+   "lat": 48.73464,
+   "lng": 21.296655,
+   "poles": [
+    [
+     48.734509,
+     21.2967
+    ],
+    [
+     48.734772,
+     21.29661
+    ]
+   ]
+  },
+  {
+   "id": "77",
+   "label": "Barca, kultúrny dom - Barca",
+   "name": "Barca, kultúrny dom",
+   "district": "Barca",
+   "lat": 48.685255,
+   "lng": 21.264285,
+   "poles": [
+    [
+     48.685101,
+     21.262899
+    ],
+    [
+     48.685162,
+     21.26305
+    ],
+    [
+     48.685501,
+     21.266905
+    ]
+   ]
+  },
+  {
+   "id": "78",
+   "label": "Krásna - Krásna",
+   "name": "Krásna",
+   "district": "Krásna",
+   "lat": 48.672682,
+   "lng": 21.31231,
+   "poles": [
+    [
+     48.672642,
+     21.312281
+    ],
+    [
+     48.672722,
+     21.31234
+    ]
+   ]
+  },
+  {
+   "id": "79",
+   "label": "Kvetná - Šaca",
+   "name": "Kvetná",
+   "district": "Šaca",
+   "lat": 48.63722,
+   "lng": 21.171495,
+   "poles": [
+    [
+     48.636841,
+     21.17157
+    ],
+    [
+     48.6376,
+     21.171419
+    ]
+   ]
+  },
+  {
+   "id": "80",
+   "label": "Lackova - Krásna",
+   "name": "Lackova",
+   "district": "Krásna",
+   "lat": 48.667999,
+   "lng": 21.32188,
+   "poles": [
+    [
+     48.667999,
+     21.32188
+    ]
+   ]
+  },
+  {
+   "id": "81",
+   "label": "Letecká - Sever",
+   "name": "Letecká",
+   "district": "Sever",
+   "lat": 48.742599,
+   "lng": 21.23897,
+   "poles": [
+    [
+     48.742489,
+     21.23934
+    ],
+    [
+     48.74271,
+     21.2386
+    ]
+   ]
+  },
+  {
+   "id": "82",
+   "label": "Letisko - Barca",
+   "name": "Letisko",
+   "district": "Barca",
+   "lat": 48.67316,
+   "lng": 21.23691,
+   "poles": [
+    [
+     48.67292,
+     21.236441
+    ],
+    [
+     48.673401,
+     21.237379
+    ]
+   ]
+  },
+  {
+   "id": "83",
+   "label": "Lingov - Darg. hrdinov",
+   "name": "Lingov",
+   "district": "Darg. hrdinov",
+   "lat": 48.732351,
+   "lng": 21.291175,
+   "poles": [
+    [
+     48.732311,
+     21.291149
+    ],
+    [
+     48.732391,
+     21.291201
+    ]
+   ]
+  },
+  {
+   "id": "84",
+   "label": "Ludvíkov Dvor - Šaca",
+   "name": "Ludvíkov Dvor",
+   "district": "Šaca",
+   "lat": 48.642208,
+   "lng": 21.20107,
+   "poles": [
+    [
+     48.640732,
+     21.202299
+    ],
+    [
+     48.641541,
+     21.200649
+    ],
+    [
+     48.642262,
+     21.19813
+    ],
+    [
+     48.642269,
+     21.201281
+    ],
+    [
+     48.642971,
+     21.201981
+    ],
+    [
+     48.643471,
+     21.20208
+    ]
+   ]
+  },
+  {
+   "id": "85",
+   "label": "Madridská - Sídl. Ťahanovce",
+   "name": "Madridská",
+   "district": "Sídl. Ťahanovce",
+   "lat": 48.759607,
+   "lng": 21.260157,
+   "poles": [
+    [
+     48.759472,
+     21.2605
+    ],
+    [
+     48.759579,
+     21.259821
+    ],
+    [
+     48.759769,
+     21.260151
+    ]
+   ]
+  },
+  {
+   "id": "86",
+   "label": "Magnezitárska - Ťahanovce",
+   "name": "Magnezitárska",
+   "district": "Ťahanovce",
+   "lat": 48.749506,
+   "lng": 21.26437,
+   "poles": [
+    [
+     48.749352,
+     21.26478
+    ],
+    [
+     48.74966,
+     21.26396
+    ]
+   ]
+  },
+  {
+   "id": "87",
+   "label": "Májová - Sever",
+   "name": "Májová",
+   "district": "Sever",
+   "lat": 48.744825,
+   "lng": 21.24835,
+   "poles": [
+    [
+     48.74482,
+     21.24839
+    ],
+    [
+     48.744831,
+     21.24831
+    ]
+   ]
+  },
+  {
+   "id": "88",
+   "label": "Malá stanica - Juh",
+   "name": "Malá stanica",
+   "district": "Juh",
+   "lat": 48.70874,
+   "lng": 21.265525,
+   "poles": [
+    [
+     48.708519,
+     21.265459
+    ],
+    [
+     48.708961,
+     21.265591
+    ]
+   ]
+  },
+  {
+   "id": "89",
+   "label": "Maša - Myslava",
+   "name": "Maša",
+   "district": "Myslava",
+   "lat": 48.71706,
+   "lng": 21.189295,
+   "poles": [
+    [
+     48.717041,
+     21.189159
+    ],
+    [
+     48.717079,
+     21.18943
+    ]
+   ]
+  },
+  {
+   "id": "90",
+   "label": "Detský domov Satelit - Koš. Nová Ves",
+   "name": "Detský domov Satelit",
+   "district": "Koš. Nová Ves",
+   "lat": 48.731201,
+   "lng": 21.299009,
+   "poles": [
+    [
+     48.731201,
+     21.299009
+    ]
+   ]
+  },
+  {
+   "id": "91",
+   "label": "Mengusovská - Sever",
+   "name": "Mengusovská",
+   "district": "Sever",
+   "lat": 48.74857,
+   "lng": 21.238889,
+   "poles": [
+    [
+     48.74839,
+     21.238899
+    ],
+    [
+     48.748749,
+     21.23888
+    ]
+   ]
+  },
+  {
+   "id": "92",
+   "label": "Magistrát mesta Košice - Západ",
+   "name": "Magistrát mesta Košice",
+   "district": "Západ",
+   "lat": 48.713325,
+   "lng": 21.235533,
+   "poles": [
+    [
+     48.712891,
+     21.235519
+    ],
+    [
+     48.71299,
+     21.235479
+    ],
+    [
+     48.713039,
+     21.23564
+    ],
+    [
+     48.713459,
+     21.23439
+    ],
+    [
+     48.713581,
+     21.236811
+    ],
+    [
+     48.713989,
+     21.235359
+    ]
+   ]
+  },
+  {
+   "id": "93",
+   "label": "Kavečany, MiÚ - Kavečany",
+   "name": "Kavečany, MiÚ",
+   "district": "Kavečany",
+   "lat": 48.776251,
+   "lng": 21.208065,
+   "poles": [
+    [
+     48.77602,
+     21.20783
+    ],
+    [
+     48.776482,
+     21.2083
+    ]
+   ]
+  },
+  {
+   "id": "94",
+   "label": "Bruselská - Sídl. Ťahanovce",
+   "name": "Bruselská",
+   "district": "Sídl. Ťahanovce",
+   "lat": 48.756104,
+   "lng": 21.266017,
+   "poles": [
+    [
+     48.755329,
+     21.265619
+    ],
+    [
+     48.75618,
+     21.264999
+    ],
+    [
+     48.75629,
+     21.26651
+    ],
+    [
+     48.756618,
+     21.266939
+    ]
+   ]
+  },
+  {
+   "id": "95",
+   "label": "Dargovských hrdinov, MiÚ - Darg. hrdinov",
+   "name": "Dargovských hrdinov, MiÚ",
+   "district": "Darg. hrdinov",
+   "lat": 48.730142,
+   "lng": 21.290008,
+   "poles": [
+    [
+     48.72961,
+     21.289471
+    ],
+    [
+     48.730171,
+     21.28997
+    ],
+    [
+     48.730228,
+     21.290461
+    ],
+    [
+     48.73056,
+     21.290131
+    ]
+   ]
+  },
+  {
+   "id": "96",
+   "label": "Miestny úrad, KVP - Sídlisko KVP",
+   "name": "Miestny úrad, KVP",
+   "district": "Sídlisko KVP",
+   "lat": 48.716949,
+   "lng": 21.21436,
+   "poles": [
+    [
+     48.716881,
+     21.21427
+    ],
+    [
+     48.717018,
+     21.214451
+    ]
+   ]
+  },
+  {
+   "id": "97",
+   "label": "Revúcka - Pereš",
+   "name": "Revúcka",
+   "district": "Pereš",
+   "lat": 48.68889,
+   "lng": 21.211795,
+   "poles": [
+    [
+     48.688862,
+     21.2118
+    ],
+    [
+     48.688919,
+     21.21179
+    ]
+   ]
+  },
+  {
+   "id": "98",
+   "label": "Lorinčík, MiÚ - Lorinčík",
+   "name": "Lorinčík, MiÚ",
+   "district": "Lorinčík",
+   "lat": 48.687479,
+   "lng": 21.19526,
+   "poles": [
+    [
+     48.687279,
+     21.195339
+    ],
+    [
+     48.687679,
+     21.195181
+    ]
+   ]
+  },
+  {
+   "id": "99",
+   "label": "Poľovská - Poľov",
+   "name": "Poľovská",
+   "district": "Poľov",
+   "lat": 48.665554,
+   "lng": 21.192554,
+   "poles": [
+    [
+     48.665459,
+     21.19265
+    ],
+    [
+     48.665649,
+     21.192459
+    ]
+   ]
+  },
+  {
+   "id": "100",
+   "label": "Michalovská - Západ",
+   "name": "Michalovská",
+   "district": "Západ",
+   "lat": 48.705349,
+   "lng": 21.234131,
+   "poles": [
+    [
+     48.705059,
+     21.234091
+    ],
+    [
+     48.705639,
+     21.234171
+    ]
+   ]
+  },
+  {
+   "id": "101",
+   "label": "Luník VIII - Západ",
+   "name": "Luník VIII",
+   "district": "Západ",
+   "lat": 48.697275,
+   "lng": 21.231524,
+   "poles": [
+    [
+     48.69725,
+     21.231609
+    ],
+    [
+     48.6973,
+     21.23144
+    ]
+   ]
+  },
+  {
+   "id": "103",
+   "label": "Mlynská bašta - Staré mesto",
+   "name": "Mlynská bašta",
+   "district": "Staré mesto",
+   "lat": 48.727896,
+   "lng": 21.257017,
+   "poles": [
+    [
+     48.727081,
+     21.257389
+    ],
+    [
+     48.728088,
+     21.25687
+    ],
+    [
+     48.728088,
+     21.25709
+    ],
+    [
+     48.728329,
+     21.25672
+    ]
+   ]
+  },
+  {
+   "id": "104",
+   "label": "Moňok - Darg. hrdinov",
+   "name": "Moňok",
+   "district": "Darg. hrdinov",
+   "lat": 48.745571,
+   "lng": 21.273029,
+   "poles": [
+    [
+     48.745571,
+     21.273029
+    ]
+   ]
+  },
+  {
+   "id": "105",
+   "label": "Cottbuská - Sídlisko KVP",
+   "name": "Cottbuská",
+   "district": "Sídlisko KVP",
+   "lat": 48.712375,
+   "lng": 21.218024,
+   "poles": [
+    [
+     48.71236,
+     21.218679
+    ],
+    [
+     48.712391,
+     21.217369
+    ]
+   ]
+  },
+  {
+   "id": "106",
+   "label": "Pri Hornáde - Krásna",
+   "name": "Pri Hornáde",
+   "district": "Krásna",
+   "lat": 48.669618,
+   "lng": 21.314135,
+   "poles": [
+    [
+     48.669498,
+     21.314529
+    ],
+    [
+     48.669739,
+     21.31374
+    ]
+   ]
+  },
+  {
+   "id": "107",
+   "label": "Motorest, Krásna - Krásna",
+   "name": "Motorest, Krásna",
+   "district": "Krásna",
+   "lat": 48.666124,
+   "lng": 21.32736,
+   "poles": [
+    [
+     48.66586,
+     21.32689
+    ],
+    [
+     48.666161,
+     21.32774
+    ],
+    [
+     48.666351,
+     21.32745
+    ]
+   ]
+  },
+  {
+   "id": "108",
+   "label": "Myslavská 87 - Myslava",
+   "name": "Myslavská 87",
+   "district": "Myslava",
+   "lat": 48.704899,
+   "lng": 21.21334,
+   "poles": [
+    [
+     48.704689,
+     21.21372
+    ],
+    [
+     48.705109,
+     21.212959
+    ]
+   ]
+  },
+  {
+   "id": "109",
+   "label": "Nám. Maratónu mieru - Staré mesto",
+   "name": "Nám. Maratónu mieru",
+   "district": "Staré mesto",
+   "lat": 48.727147,
+   "lng": 21.254471,
+   "poles": [
+    [
+     48.726608,
+     21.255819
+    ],
+    [
+     48.726791,
+     21.25613
+    ],
+    [
+     48.726822,
+     21.25345
+    ],
+    [
+     48.726849,
+     21.253639
+    ],
+    [
+     48.727402,
+     21.25569
+    ],
+    [
+     48.727619,
+     21.253223
+    ],
+    [
+     48.727936,
+     21.253345
+    ]
+   ]
+  },
+  {
+   "id": "110",
+   "label": "Košická Nová Ves - Koš. Nová Ves",
+   "name": "Košická Nová Ves",
+   "district": "Koš. Nová Ves",
+   "lat": 48.728271,
+   "lng": 21.301451,
+   "poles": [
+    [
+     48.728271,
+     21.301451
+    ]
+   ]
+  },
+  {
+   "id": "111",
+   "label": "Rozvojová - Juh",
+   "name": "Rozvojová",
+   "district": "Juh",
+   "lat": 48.69453,
+   "lng": 21.253545,
+   "poles": [
+    [
+     48.69426,
+     21.253571
+    ],
+    [
+     48.694801,
+     21.253519
+    ]
+   ]
+  },
+  {
+   "id": "112",
+   "label": "Aténska - Sídl. Ťahanovce",
+   "name": "Aténska",
+   "district": "Sídl. Ťahanovce",
+   "lat": 48.758049,
+   "lng": 21.262175,
+   "poles": [
+    [
+     48.75779,
+     21.26222
+    ],
+    [
+     48.758308,
+     21.262131
+    ]
+   ]
+  },
+  {
+   "id": "113",
+   "label": "Nám. osloboditeľov - Staré mesto",
+   "name": "Nám. osloboditeľov",
+   "district": "Staré mesto",
+   "lat": 48.717933,
+   "lng": 21.260673,
+   "poles": [
+    [
+     48.716629,
+     21.258801
+    ],
+    [
+     48.716801,
+     21.25934
+    ],
+    [
+     48.71727,
+     21.260611
+    ],
+    [
+     48.71735,
+     21.2612
+    ],
+    [
+     48.71743,
+     21.2612
+    ],
+    [
+     48.718288,
+     21.262329
+    ],
+    [
+     48.718342,
+     21.26239
+    ],
+    [
+     48.718449,
+     21.262199
+    ],
+    [
+     48.72084,
+     21.25799
+    ]
+   ]
+  },
+  {
+   "id": "114",
+   "label": "Šaca, námestie - Šaca",
+   "name": "Šaca, námestie",
+   "district": "Šaca",
+   "lat": 48.633662,
+   "lng": 21.172154,
+   "poles": [
+    [
+     48.633438,
+     21.172131
+    ],
+    [
+     48.633598,
+     21.172091
+    ],
+    [
+     48.633949,
+     21.172239
+    ]
+   ]
+  },
+  {
+   "id": "115",
+   "label": "Národné námestie - Staré mesto",
+   "name": "Národné námestie",
+   "district": "Staré mesto",
+   "lat": 48.731494,
+   "lng": 21.254224,
+   "poles": [
+    [
+     48.731441,
+     21.25415
+    ],
+    [
+     48.731548,
+     21.254299
+    ]
+   ]
+  },
+  {
+   "id": "116",
+   "label": "Považská, Nová nemocnica - Západ",
+   "name": "Považská, Nová nemocnica",
+   "district": "Západ",
+   "lat": 48.720967,
+   "lng": 21.238974,
+   "poles": [
+    [
+     48.720692,
+     21.239759
+    ],
+    [
+     48.721241,
+     21.23819
+    ]
+   ]
+  },
+  {
+   "id": "117",
+   "label": "Nemocnica Šaca - Šaca",
+   "name": "Nemocnica Šaca",
+   "district": "Šaca",
+   "lat": 48.642424,
+   "lng": 21.170674,
+   "poles": [
+    [
+     48.642319,
+     21.17063
+    ],
+    [
+     48.642529,
+     21.170719
+    ]
+   ]
+  },
+  {
+   "id": "119",
+   "label": "Obchodná akadémia - Sever",
+   "name": "Obchodná akadémia",
+   "district": "Sever",
+   "lat": 48.73073,
+   "lng": 21.23942,
+   "poles": [
+    [
+     48.730179,
+     21.2397
+    ],
+    [
+     48.731281,
+     21.23914
+    ]
+   ]
+  },
+  {
+   "id": "120",
+   "label": "Železníky, križovatka - Juh",
+   "name": "Železníky, križovatka",
+   "district": "Juh",
+   "lat": 48.700288,
+   "lng": 21.25142,
+   "poles": [
+    [
+     48.699909,
+     21.25202
+    ],
+    [
+     48.700668,
+     21.25082
+    ]
+   ]
+  },
+  {
+   "id": "121",
+   "label": "Levočská - Nad jazerom",
+   "name": "Levočská",
+   "district": "Nad jazerom",
+   "lat": 48.690294,
+   "lng": 21.279573,
+   "poles": [
+    [
+     48.68996,
+     21.279909
+    ],
+    [
+     48.690159,
+     21.28001
+    ],
+    [
+     48.69025,
+     21.2775
+    ],
+    [
+     48.690262,
+     21.28019
+    ],
+    [
+     48.690392,
+     21.280109
+    ],
+    [
+     48.690739,
+     21.27972
+    ]
+   ]
+  },
+  {
+   "id": "122",
+   "label": "Bukovecká - Nad jazerom",
+   "name": "Bukovecká",
+   "district": "Nad jazerom",
+   "lat": 48.692835,
+   "lng": 21.280255,
+   "poles": [
+    [
+     48.69183,
+     21.28006
+    ],
+    [
+     48.69384,
+     21.280451
+    ]
+   ]
+  },
+  {
+   "id": "123",
+   "label": "Postupimská - Darg. hrdinov",
+   "name": "Postupimská",
+   "district": "Darg. hrdinov",
+   "lat": 48.73225,
+   "lng": 21.289092,
+   "poles": [
+    [
+     48.732182,
+     21.288935
+    ],
+    [
+     48.732319,
+     21.289249
+    ]
+   ]
+  },
+  {
+   "id": "124",
+   "label": "Moldavská, obchodné centrá - Západ",
+   "name": "Moldavská, obchodné centrá",
+   "district": "Západ",
+   "lat": 48.69996,
+   "lng": 21.237993,
+   "poles": [
+    [
+     48.699409,
+     21.23789
+    ],
+    [
+     48.699772,
+     21.23847
+    ],
+    [
+     48.700699,
+     21.237619
+    ]
+   ]
+  },
+  {
+   "id": "125",
+   "label": "Obchodné centrum Optima - Západ",
+   "name": "Obchodné centrum Optima",
+   "district": "Západ",
+   "lat": 48.696768,
+   "lng": 21.235683,
+   "poles": [
+    [
+     48.696529,
+     21.23554
+    ],
+    [
+     48.696793,
+     21.235672
+    ],
+    [
+     48.696838,
+     21.23559
+    ],
+    [
+     48.696911,
+     21.235929
+    ]
+   ]
+  },
+  {
+   "id": "126",
+   "label": "Zupkova - Darg. hrdinov",
+   "name": "Zupkova",
+   "district": "Darg. hrdinov",
+   "lat": 48.733654,
+   "lng": 21.285125,
+   "poles": [
+    [
+     48.73362,
+     21.284969
+    ],
+    [
+     48.733688,
+     21.28528
+    ]
+   ]
+  },
+  {
+   "id": "127",
+   "label": "Važecká - Nad jazerom",
+   "name": "Važecká",
+   "district": "Nad jazerom",
+   "lat": 48.676178,
+   "lng": 21.29901,
+   "poles": [
+    [
+     48.675732,
+     21.299191
+    ],
+    [
+     48.675968,
+     21.2994
+    ],
+    [
+     48.676281,
+     21.298759
+    ],
+    [
+     48.676369,
+     21.299101
+    ],
+    [
+     48.67654,
+     21.298599
+    ]
+   ]
+  },
+  {
+   "id": "128",
+   "label": "Tomášikova - Sever",
+   "name": "Tomášikova",
+   "district": "Sever",
+   "lat": 48.735654,
+   "lng": 21.253861,
+   "poles": [
+    [
+     48.735439,
+     21.25382
+    ],
+    [
+     48.73587,
+     21.253901
+    ]
+   ]
+  },
+  {
+   "id": "129",
+   "label": "Mier - Sever",
+   "name": "Mier",
+   "district": "Sever",
+   "lat": 48.739372,
+   "lng": 21.25239,
+   "poles": [
+    [
+     48.73917,
+     21.250999
+    ],
+    [
+     48.739368,
+     21.253389
+    ],
+    [
+     48.739429,
+     21.25107
+    ],
+    [
+     48.739521,
+     21.254101
+    ]
+   ]
+  },
+  {
+   "id": "130",
+   "label": "Bernolákova - Západ",
+   "name": "Bernolákova",
+   "district": "Západ",
+   "lat": 48.709947,
+   "lng": 21.236888,
+   "poles": [
+    [
+     48.7094,
+     21.236971
+    ],
+    [
+     48.709419,
+     21.237141
+    ],
+    [
+     48.71035,
+     21.23667
+    ],
+    [
+     48.710621,
+     21.236771
+    ]
+   ]
+  },
+  {
+   "id": "135",
+   "label": "Lorinčík - Lorinčík",
+   "name": "Lorinčík",
+   "district": "Lorinčík",
+   "lat": 48.689875,
+   "lng": 21.19278,
+   "poles": [
+    [
+     48.689819,
+     21.19294
+    ],
+    [
+     48.68993,
+     21.192619
+    ]
+   ]
+  },
+  {
+   "id": "136",
+   "label": "Poľov - Poľov",
+   "name": "Poľov",
+   "district": "Poľov",
+   "lat": 48.667515,
+   "lng": 21.188863,
+   "poles": [
+    [
+     48.667351,
+     21.18894
+    ],
+    [
+     48.667679,
+     21.188786
+    ]
+   ]
+  },
+  {
+   "id": "137",
+   "label": "Ovsená - Vyšné Opátske",
+   "name": "Ovsená",
+   "district": "Vyšné Opátske",
+   "lat": 48.719719,
+   "lng": 21.277411,
+   "poles": [
+    [
+     48.719719,
+     21.277411
+    ]
+   ]
+  },
+  {
+   "id": "138",
+   "label": "Palackého - Staré mesto",
+   "name": "Palackého",
+   "district": "Staré mesto",
+   "lat": 48.71862,
+   "lng": 21.268379,
+   "poles": [
+    [
+     48.71862,
+     21.268379
+    ]
+   ]
+  },
+  {
+   "id": "139",
+   "label": "Pasteurova - Juh",
+   "name": "Pasteurova",
+   "district": "Juh",
+   "lat": 48.709549,
+   "lng": 21.2568,
+   "poles": [
+    [
+     48.709549,
+     21.2568
+    ]
+   ]
+  },
+  {
+   "id": "140",
+   "label": "Prekladisko hotových výrobkov - Šaca",
+   "name": "Prekladisko hotových výrobkov",
+   "district": "Šaca",
+   "lat": 48.604154,
+   "lng": 21.201616,
+   "poles": [
+    [
+     48.604149,
+     21.20166
+    ],
+    [
+     48.60416,
+     21.201571
+    ]
+   ]
+  },
+  {
+   "id": "141",
+   "label": "Slovenská č. 20 - Sever",
+   "name": "Slovenská č. 20",
+   "district": "Sever",
+   "lat": 48.737094,
+   "lng": 21.260105,
+   "poles": [
+    [
+     48.736938,
+     21.26013
+    ],
+    [
+     48.737251,
+     21.26008
+    ]
+   ]
+  },
+  {
+   "id": "142",
+   "label": "Plťová - Džungľa",
+   "name": "Plťová",
+   "district": "Džungľa",
+   "lat": 48.738655,
+   "lng": 21.266265,
+   "poles": [
+    [
+     48.738319,
+     21.265961
+    ],
+    [
+     48.738991,
+     21.266569
+    ]
+   ]
+  },
+  {
+   "id": "143",
+   "label": "Plynáreň Haniska - Šaca",
+   "name": "Plynáreň Haniska",
+   "district": "Šaca",
+   "lat": 48.618889,
+   "lng": 21.22965,
+   "poles": [
+    [
+     48.618519,
+     21.22888
+    ],
+    [
+     48.619259,
+     21.230419
+    ]
+   ]
+  },
+  {
+   "id": "144",
+   "label": "Idanská - Západ",
+   "name": "Idanská",
+   "district": "Západ",
+   "lat": 48.709165,
+   "lng": 21.24633,
+   "poles": [
+    [
+     48.709091,
+     21.24625
+    ],
+    [
+     48.70924,
+     21.24641
+    ]
+   ]
+  },
+  {
+   "id": "145",
+   "label": "Pod Furčou - Staré mesto",
+   "name": "Pod Furčou",
+   "district": "Staré mesto",
+   "lat": 48.735909,
+   "lng": 21.27375,
+   "poles": [
+    [
+     48.735909,
+     21.27375
+    ]
+   ]
+  },
+  {
+   "id": "146",
+   "label": "Podjazdy Haniska - Šaca",
+   "name": "Podjazdy Haniska",
+   "district": "Šaca",
+   "lat": 48.623075,
+   "lng": 21.226065,
+   "poles": [
+    [
+     48.623051,
+     21.226
+    ],
+    [
+     48.6231,
+     21.22613
+    ]
+   ]
+  },
+  {
+   "id": "147",
+   "label": "Podnikateľská - Barca",
+   "name": "Podnikateľská",
+   "district": "Barca",
+   "lat": 48.671566,
+   "lng": 21.27075,
+   "poles": [
+    [
+     48.671162,
+     21.270741
+    ],
+    [
+     48.67197,
+     21.27076
+    ]
+   ]
+  },
+  {
+   "id": "148",
+   "label": "Perešská - Pereš",
+   "name": "Perešská",
+   "district": "Pereš",
+   "lat": 48.68429,
+   "lng": 21.218066,
+   "poles": [
+    [
+     48.683762,
+     21.21793
+    ],
+    [
+     48.684059,
+     21.21829
+    ],
+    [
+     48.684231,
+     21.217819
+    ],
+    [
+     48.684444,
+     21.218491
+    ],
+    [
+     48.684952,
+     21.2178
+    ]
+   ]
+  },
+  {
+   "id": "149",
+   "label": "Polianska - Sever",
+   "name": "Polianska",
+   "district": "Sever",
+   "lat": 48.748249,
+   "lng": 21.245821,
+   "poles": [
+    [
+     48.74807,
+     21.24544
+    ],
+    [
+     48.748428,
+     21.246201
+    ]
+   ]
+  },
+  {
+   "id": "150",
+   "label": "Poliklinika Východ - Darg. hrdinov",
+   "name": "Poliklinika Východ",
+   "district": "Darg. hrdinov",
+   "lat": 48.738635,
+   "lng": 21.2825,
+   "poles": [
+    [
+     48.738209,
+     21.282391
+    ],
+    [
+     48.738449,
+     21.28182
+    ],
+    [
+     48.738911,
+     21.282669
+    ],
+    [
+     48.738972,
+     21.283119
+    ]
+   ]
+  },
+  {
+   "id": "151",
+   "label": "Nová nemocnica - Západ",
+   "name": "Nová nemocnica",
+   "district": "Západ",
+   "lat": 48.722012,
+   "lng": 21.234997,
+   "poles": [
+    [
+     48.72147,
+     21.23465
+    ],
+    [
+     48.72155,
+     21.234501
+    ],
+    [
+     48.72168,
+     21.236059
+    ],
+    [
+     48.722301,
+     21.233891
+    ],
+    [
+     48.722481,
+     21.23531
+    ],
+    [
+     48.722591,
+     21.235571
+    ]
+   ]
+  },
+  {
+   "id": "152",
+   "label": "Poliklinika KVP - Sídlisko KVP",
+   "name": "Poliklinika KVP",
+   "district": "Sídlisko KVP",
+   "lat": 48.713492,
+   "lng": 21.21554,
+   "poles": [
+    [
+     48.713291,
+     21.215731
+    ],
+    [
+     48.713692,
+     21.215349
+    ]
+   ]
+  },
+  {
+   "id": "153",
+   "label": "Poliklinika Sever - Staré mesto",
+   "name": "Poliklinika Sever",
+   "district": "Staré mesto",
+   "lat": 48.730549,
+   "lng": 21.250971,
+   "poles": [
+    [
+     48.730549,
+     21.250971
+    ]
+   ]
+  },
+  {
+   "id": "154",
+   "label": "Poľská - Juh",
+   "name": "Poľská",
+   "district": "Juh",
+   "lat": 48.699304,
+   "lng": 21.261567,
+   "poles": [
+    [
+     48.698978,
+     21.261595
+    ],
+    [
+     48.699631,
+     21.261539
+    ]
+   ]
+  },
+  {
+   "id": "155",
+   "label": "Pošta 2 - Staré mesto",
+   "name": "Pošta 2",
+   "district": "Staré mesto",
+   "lat": 48.726286,
+   "lng": 21.264265,
+   "poles": [
+    [
+     48.726101,
+     21.264839
+    ],
+    [
+     48.726471,
+     21.263691
+    ]
+   ]
+  },
+  {
+   "id": "157",
+   "label": "Pri hati - Sever",
+   "name": "Pri hati",
+   "district": "Sever",
+   "lat": 48.740669,
+   "lng": 21.257851,
+   "poles": [
+    [
+     48.74057,
+     21.257931
+    ],
+    [
+     48.740768,
+     21.257771
+    ]
+   ]
+  },
+  {
+   "id": "158",
+   "label": "Pri prachárni, obchodné centrá - Juh",
+   "name": "Pri prachárni, obchodné centrá",
+   "district": "Juh",
+   "lat": 48.698822,
+   "lng": 21.249837,
+   "poles": [
+    [
+     48.698318,
+     21.24935
+    ],
+    [
+     48.698978,
+     21.24976
+    ],
+    [
+     48.699169,
+     21.250401
+    ]
+   ]
+  },
+  {
+   "id": "159",
+   "label": "Rašelinové závody - Barca",
+   "name": "Rašelinové závody",
+   "district": "Barca",
+   "lat": 48.656145,
+   "lng": 21.310115,
+   "poles": [
+    [
+     48.65609,
+     21.310089
+    ],
+    [
+     48.6562,
+     21.310141
+    ]
+   ]
+  },
+  {
+   "id": "160",
+   "label": "Luník IX, rázcestie - Luník IX",
+   "name": "Luník IX, rázcestie",
+   "district": "Luník IX",
+   "lat": 48.70018,
+   "lng": 21.22282,
+   "poles": [
+    [
+     48.699669,
+     21.22352
+    ],
+    [
+     48.700691,
+     21.22212
+    ]
+   ]
+  },
+  {
+   "id": "162",
+   "label": "Poľov, rázcestie - Poľov",
+   "name": "Poľov, rázcestie",
+   "district": "Poľov",
+   "lat": 48.662425,
+   "lng": 21.207775,
+   "poles": [
+    [
+     48.66172,
+     21.20747
+    ],
+    [
+     48.66238,
+     21.20694
+    ],
+    [
+     48.66243,
+     21.20742
+    ],
+    [
+     48.662491,
+     21.20805
+    ],
+    [
+     48.662521,
+     21.20829
+    ],
+    [
+     48.66301,
+     21.208481
+    ]
+   ]
+  },
+  {
+   "id": "164",
+   "label": "Rovníková - Nad jazerom",
+   "name": "Rovníková",
+   "district": "Nad jazerom",
+   "lat": 48.680005,
+   "lng": 21.29402,
+   "poles": [
+    [
+     48.679131,
+     21.294849
+    ],
+    [
+     48.680161,
+     21.293779
+    ],
+    [
+     48.68034,
+     21.293699
+    ],
+    [
+     48.680389,
+     21.293751
+    ]
+   ]
+  },
+  {
+   "id": "165",
+   "label": "Rušňové depo - Juh",
+   "name": "Rušňové depo",
+   "district": "Juh",
+   "lat": 48.714184,
+   "lng": 21.26663,
+   "poles": [
+    [
+     48.713188,
+     21.265779
+    ],
+    [
+     48.715179,
+     21.267481
+    ]
+   ]
+  },
+  {
+   "id": "166",
+   "label": "Ružová - OC Galéria - Západ",
+   "name": "Ružová - OC Galéria",
+   "district": "Západ",
+   "lat": 48.714165,
+   "lng": 21.24156,
+   "poles": [
+    [
+     48.714001,
+     21.242781
+    ],
+    [
+     48.714329,
+     21.240339
+    ]
+   ]
+  },
+  {
+   "id": "167",
+   "label": "Južná trieda č. 125 - Juh",
+   "name": "Južná trieda č. 125",
+   "district": "Juh",
+   "lat": 48.6924,
+   "lng": 21.26522,
+   "poles": [
+    [
+     48.692268,
+     21.26527
+    ],
+    [
+     48.692532,
+     21.265169
+    ]
+   ]
+  },
+  {
+   "id": "168",
+   "label": "Sečovská - Vyšné Opátske",
+   "name": "Sečovská",
+   "district": "Vyšné Opátske",
+   "lat": 48.726391,
+   "lng": 21.2799,
+   "poles": [
+    [
+     48.726391,
+     21.2799
+    ]
+   ]
+  },
+  {
+   "id": "169",
+   "label": "Senný trh - Juh",
+   "name": "Senný trh",
+   "district": "Juh"
+  },
+  {
+   "id": "170",
+   "label": "Socha Jána Pavla II. - Barca",
+   "name": "Socha Jána Pavla II.",
+   "district": "Barca",
+   "lat": 48.679269,
+   "lng": 21.268492,
+   "poles": [
+    [
+     48.679501,
+     21.268299
+    ],
+    [
+     48.679268,
+     21.268559
+    ],
+    [
+     48.679039,
+     21.268618
+    ]
+   ]
+  },
+  {
+   "id": "171",
+   "label": "Luník IX, sídlisko - Luník IX",
+   "name": "Luník IX, sídlisko",
+   "district": "Luník IX",
+   "lat": 48.69986,
+   "lng": 21.22069,
+   "poles": [
+    [
+     48.69986,
+     21.22069
+    ]
+   ]
+  },
+  {
+   "id": "172",
+   "label": "Kasárne, Kulturpark - Juh",
+   "name": "Kasárne, Kulturpark",
+   "district": "Juh",
+   "lat": 48.712679,
+   "lng": 21.25529,
+   "poles": [
+    [
+     48.712219,
+     21.255569
+    ],
+    [
+     48.713139,
+     21.255011
+    ]
+   ]
+  },
+  {
+   "id": "173",
+   "label": "Sládkovičova - Sever",
+   "name": "Sládkovičova",
+   "district": "Sever",
+   "lat": 48.729134,
+   "lng": 21.236624,
+   "poles": [
+    [
+     48.728939,
+     21.23797
+    ],
+    [
+     48.729328,
+     21.235279
+    ]
+   ]
+  },
+  {
+   "id": "174",
+   "label": "Slovenský rozhlas - Staré mesto",
+   "name": "Slovenský rozhlas",
+   "district": "Staré mesto",
+   "lat": 48.72257,
+   "lng": 21.251847,
+   "poles": [
+    [
+     48.72179,
+     21.25202
+    ],
+    [
+     48.722889,
+     21.25176
+    ],
+    [
+     48.72303,
+     21.25176
+    ]
+   ]
+  },
+  {
+   "id": "175",
+   "label": "Slovenská č. 42 - Sever",
+   "name": "Slovenská č. 42",
+   "district": "Sever",
+   "lat": 48.739016,
+   "lng": 21.259495,
+   "poles": [
+    [
+     48.73896,
+     21.25955
+    ],
+    [
+     48.739071,
+     21.259439
+    ]
+   ]
+  },
+  {
+   "id": "176",
+   "label": "Dopravná - Sídl. Ťahanovce",
+   "name": "Dopravná",
+   "district": "Sídl. Ťahanovce",
+   "lat": 48.746575,
+   "lng": 21.269804,
+   "poles": [
+    [
+     48.746288,
+     21.270309
+    ],
+    [
+     48.746861,
+     21.2693
+    ]
+   ]
+  },
+  {
+   "id": "177",
+   "label": "Sofijská - Sídl. Ťahanovce",
+   "name": "Sofijská",
+   "district": "Sídl. Ťahanovce",
+   "lat": 48.751721,
+   "lng": 21.27236,
+   "poles": [
+    [
+     48.751671,
+     21.272129
+    ],
+    [
+     48.75177,
+     21.272591
+    ]
+   ]
+  },
+  {
+   "id": "178",
+   "label": "Sokolovská - Západ",
+   "name": "Sokolovská",
+   "district": "Západ",
+   "lat": 48.723169,
+   "lng": 21.230655,
+   "poles": [
+    [
+     48.723099,
+     21.231001
+    ],
+    [
+     48.72324,
+     21.23031
+    ]
+   ]
+  },
+  {
+   "id": "180",
+   "label": "SOŠ automobilová - Juh",
+   "name": "SOŠ automobilová",
+   "district": "Juh",
+   "lat": 48.706161,
+   "lng": 21.244471,
+   "poles": [
+    [
+     48.706161,
+     21.244471
+    ]
+   ]
+  },
+  {
+   "id": "181",
+   "label": "Učňovská - Šaca",
+   "name": "Učňovská",
+   "district": "Šaca",
+   "lat": 48.630125,
+   "lng": 21.17261,
+   "poles": [
+    [
+     48.630249,
+     21.1726
+    ],
+    [
+     48.630001,
+     21.172621
+    ]
+   ]
+  },
+  {
+   "id": "182",
+   "label": "Spaľovňa - Barca",
+   "name": "Spaľovňa",
+   "district": "Barca",
+   "lat": 48.658273,
+   "lng": 21.31285,
+   "poles": [
+    [
+     48.658138,
+     21.31286
+    ],
+    [
+     48.658409,
+     21.31284
+    ]
+   ]
+  },
+  {
+   "id": "183",
+   "label": "Spoločenský pavilón - Západ",
+   "name": "Spoločenský pavilón",
+   "district": "Západ",
+   "lat": 48.706559,
+   "lng": 21.239266,
+   "poles": [
+    [
+     48.706131,
+     21.238159
+    ],
+    [
+     48.706348,
+     21.238621
+    ],
+    [
+     48.706459,
+     21.24028
+    ],
+    [
+     48.70649,
+     21.238569
+    ],
+    [
+     48.706589,
+     21.239849
+    ],
+    [
+     48.706699,
+     21.23904
+    ],
+    [
+     48.706718,
+     21.239929
+    ],
+    [
+     48.707039,
+     21.239679
+    ]
+   ]
+  },
+  {
+   "id": "184",
+   "label": "Stará nemocnica - Juh",
+   "name": "Stará nemocnica",
+   "district": "Juh",
+   "lat": 48.707034,
+   "lng": 21.259482,
+   "poles": [
+    [
+     48.706108,
+     21.25864
+    ],
+    [
+     48.706261,
+     21.257721
+    ],
+    [
+     48.70697,
+     21.25832
+    ],
+    [
+     48.707661,
+     21.261459
+    ],
+    [
+     48.708172,
+     21.261271
+    ]
+   ]
+  },
+  {
+   "id": "185",
+   "label": "Radnica Starého mesta - Staré mesto",
+   "name": "Radnica Starého mesta",
+   "district": "Staré mesto",
+   "lat": 48.725877,
+   "lng": 21.250236,
+   "poles": [
+    [
+     48.72525,
+     21.249729
+    ],
+    [
+     48.72551,
+     21.251101
+    ],
+    [
+     48.72562,
+     21.25198
+    ],
+    [
+     48.72567,
+     21.24987
+    ],
+    [
+     48.725777,
+     21.249636
+    ],
+    [
+     48.725979,
+     21.25116
+    ],
+    [
+     48.726601,
+     21.2493
+    ],
+    [
+     48.726608,
+     21.249109
+    ]
+   ]
+  },
+  {
+   "id": "186",
+   "label": "Starozagorská - Sídlisko KVP",
+   "name": "Starozagorská",
+   "district": "Sídlisko KVP",
+   "lat": 48.720055,
+   "lng": 21.215235,
+   "poles": [
+    [
+     48.720009,
+     21.21497
+    ],
+    [
+     48.7201,
+     21.2155
+    ]
+   ]
+  },
+  {
+   "id": "188",
+   "label": "Stodolova - Západ",
+   "name": "Stodolova",
+   "district": "Západ",
+   "lat": 48.700896,
+   "lng": 21.23393,
+   "poles": [
+    [
+     48.700821,
+     21.233891
+    ],
+    [
+     48.700878,
+     21.23407
+    ],
+    [
+     48.700989,
+     21.233829
+    ]
+   ]
+  },
+  {
+   "id": "189",
+   "label": "Suchá dolina - Sever",
+   "name": "Suchá dolina",
+   "district": "Sever",
+   "lat": 48.757864,
+   "lng": 21.230314,
+   "poles": [
+    [
+     48.757858,
+     21.230249
+    ],
+    [
+     48.75787,
+     21.230379
+    ]
+   ]
+  },
+  {
+   "id": "190",
+   "label": "Suchodolinská - Sever",
+   "name": "Suchodolinská",
+   "district": "Sever",
+   "lat": 48.74592,
+   "lng": 21.23621,
+   "poles": [
+    [
+     48.745739,
+     21.236441
+    ],
+    [
+     48.746101,
+     21.235979
+    ]
+   ]
+  },
+  {
+   "id": "191",
+   "label": "Svornosti - Sever",
+   "name": "Svornosti",
+   "district": "Sever",
+   "lat": 48.733265,
+   "lng": 21.261335,
+   "poles": [
+    [
+     48.733131,
+     21.261339
+    ],
+    [
+     48.733398,
+     21.26133
+    ]
+   ]
+  },
+  {
+   "id": "192",
+   "label": "Havlíčkova - Sever",
+   "name": "Havlíčkova",
+   "district": "Sever",
+   "lat": 48.738947,
+   "lng": 21.245313,
+   "poles": [
+    [
+     48.738621,
+     21.245029
+    ],
+    [
+     48.738628,
+     21.244749
+    ],
+    [
+     48.738708,
+     21.24522
+    ],
+    [
+     48.73872,
+     21.245119
+    ],
+    [
+     48.738819,
+     21.24527
+    ],
+    [
+     48.73922,
+     21.24593
+    ],
+    [
+     48.739914,
+     21.245871
+    ]
+   ]
+  },
+  {
+   "id": "194",
+   "label": "Králičia - Vyšné Opátske",
+   "name": "Králičia",
+   "district": "Vyšné Opátske",
+   "lat": 48.702105,
+   "lng": 21.28018,
+   "poles": [
+    [
+     48.70171,
+     21.2801
+    ],
+    [
+     48.702499,
+     21.28026
+    ]
+   ]
+  },
+  {
+   "id": "196",
+   "label": "Štrbská - Sever",
+   "name": "Štrbská",
+   "district": "Sever",
+   "lat": 48.752161,
+   "lng": 21.239255,
+   "poles": [
+    [
+     48.752151,
+     21.239189
+    ],
+    [
+     48.752171,
+     21.239321
+    ]
+   ]
+  },
+  {
+   "id": "197",
+   "label": "Technická univerzita - Sever",
+   "name": "Technická univerzita",
+   "district": "Sever",
+   "lat": 48.730284,
+   "lng": 21.244422,
+   "poles": [
+    [
+     48.72966,
+     21.244459
+    ],
+    [
+     48.730019,
+     21.24497
+    ],
+    [
+     48.730202,
+     21.244591
+    ],
+    [
+     48.730659,
+     21.244169
+    ],
+    [
+     48.730881,
+     21.243919
+    ]
+   ]
+  },
+  {
+   "id": "198",
+   "label": "Tepláreň - Juh",
+   "name": "Tepláreň",
+   "district": "Juh",
+   "lat": 48.697941,
+   "lng": 21.28009,
+   "poles": [
+    [
+     48.697941,
+     21.28009
+    ]
+   ]
+  },
+  {
+   "id": "199",
+   "label": "Teplého - Barca",
+   "name": "Teplého",
+   "district": "Barca",
+   "lat": 48.682631,
+   "lng": 21.261539,
+   "poles": [
+    [
+     48.682571,
+     21.261589
+    ],
+    [
+     48.68269,
+     21.26149
+    ]
+   ]
+  },
+  {
+   "id": "200",
+   "label": "Priemyselná - Darg. hrdinov",
+   "name": "Priemyselná",
+   "district": "Darg. hrdinov",
+   "lat": 48.728748,
+   "lng": 21.277491,
+   "poles": [
+    [
+     48.728748,
+     21.277491
+    ]
+   ]
+  },
+  {
+   "id": "201",
+   "label": "Trebišovská - Západ",
+   "name": "Trebišovská",
+   "district": "Západ",
+   "lat": 48.702934,
+   "lng": 21.231581,
+   "poles": [
+    [
+     48.702709,
+     21.231741
+    ],
+    [
+     48.703159,
+     21.231421
+    ]
+   ]
+  },
+  {
+   "id": "202",
+   "label": "Triton - Juh",
+   "name": "Triton",
+   "district": "Juh",
+   "lat": 48.70143,
+   "lng": 21.261159,
+   "poles": [
+    [
+     48.701309,
+     21.26115
+    ],
+    [
+     48.70155,
+     21.261169
+    ]
+   ]
+  },
+  {
+   "id": "203",
+   "label": "Alžbetina, Rek.UPJŠ - Staré mesto",
+   "name": "Alžbetina, Rek.UPJŠ",
+   "district": "Staré mesto",
+   "lat": 48.719318,
+   "lng": 21.25264,
+   "poles": [
+    [
+     48.718868,
+     21.25272
+    ],
+    [
+     48.719769,
+     21.25256
+    ]
+   ]
+  },
+  {
+   "id": "204",
+   "label": "V úvoze - Vyšné Opátske",
+   "name": "V úvoze",
+   "district": "Vyšné Opátske",
+   "lat": 48.703178,
+   "lng": 21.283555,
+   "poles": [
+    [
+     48.702888,
+     21.283831
+    ],
+    [
+     48.703468,
+     21.283279
+    ]
+   ]
+  },
+  {
+   "id": "206",
+   "label": "Viničná - Vyšné Opátske",
+   "name": "Viničná",
+   "district": "Vyšné Opátske",
+   "lat": 48.711365,
+   "lng": 21.278714,
+   "poles": [
+    [
+     48.711189,
+     21.278589
+    ],
+    [
+     48.71154,
+     21.278839
+    ]
+   ]
+  },
+  {
+   "id": "207",
+   "label": "Vitalina - Kavečany",
+   "name": "Vitalina",
+   "district": "Kavečany",
+   "lat": 48.767229,
+   "lng": 21.221981,
+   "poles": [
+    [
+     48.76693,
+     21.22197
+    ],
+    [
+     48.767529,
+     21.221991
+    ]
+   ]
+  },
+  {
+   "id": "208",
+   "label": "Vo výmoli - Staré mesto",
+   "name": "Vo výmoli",
+   "district": "Staré mesto",
+   "lat": 48.73254,
+   "lng": 21.27611,
+   "poles": [
+    [
+     48.73254,
+     21.27611
+    ]
+   ]
+  },
+  {
+   "id": "209",
+   "label": "Vodárenská - Sever",
+   "name": "Vodárenská",
+   "district": "Sever",
+   "lat": 48.741251,
+   "lng": 21.24902,
+   "poles": [
+    [
+     48.74118,
+     21.24906
+    ],
+    [
+     48.741322,
+     21.24898
+    ]
+   ]
+  },
+  {
+   "id": "210",
+   "label": "Vodná - Staré mesto",
+   "name": "Vodná",
+   "district": "Staré mesto",
+   "lat": 48.72484,
+   "lng": 21.260365,
+   "poles": [
+    [
+     48.724739,
+     21.260389
+    ],
+    [
+     48.724941,
+     21.26034
+    ]
+   ]
+  },
+  {
+   "id": "211",
+   "label": "Pereš, vodojem - Pereš",
+   "name": "Pereš, vodojem",
+   "district": "Pereš",
+   "lat": 48.689362,
+   "lng": 21.225519,
+   "poles": [
+    [
+     48.689362,
+     21.225519
+    ]
+   ]
+  },
+  {
+   "id": "213",
+   "label": "Katastrálny úrad - Juh",
+   "name": "Katastrálny úrad",
+   "district": "Juh",
+   "lat": 48.68276,
+   "lng": 21.267767,
+   "poles": [
+    [
+     48.681881,
+     21.2682
+    ],
+    [
+     48.68251,
+     21.26782
+    ],
+    [
+     48.6828,
+     21.267799
+    ],
+    [
+     48.683849,
+     21.26725
+    ]
+   ]
+  },
+  {
+   "id": "214",
+   "label": "VSS, križovatka - Juh",
+   "name": "VSS, križovatka",
+   "district": "Juh",
+   "lat": 48.688602,
+   "lng": 21.265808,
+   "poles": [
+    [
+     48.68763,
+     21.26664
+    ],
+    [
+     48.687889,
+     21.26634
+    ],
+    [
+     48.688099,
+     21.266109
+    ],
+    [
+     48.688221,
+     21.2663
+    ],
+    [
+     48.688614,
+     21.26359
+    ],
+    [
+     48.688618,
+     21.263685
+    ],
+    [
+     48.688671,
+     21.26741
+    ],
+    [
+     48.688717,
+     21.264507
+    ],
+    [
+     48.688904,
+     21.267328
+    ],
+    [
+     48.689381,
+     21.265966
+    ],
+    [
+     48.68988,
+     21.266014
+    ]
+   ]
+  },
+  {
+   "id": "216",
+   "label": "Alejová, gymnázium - Juh",
+   "name": "Alejová, gymnázium",
+   "district": "Juh",
+   "lat": 48.702958,
+   "lng": 21.246592,
+   "poles": [
+    [
+     48.702831,
+     21.246599
+    ],
+    [
+     48.702862,
+     21.24682
+    ],
+    [
+     48.703041,
+     21.24638
+    ],
+    [
+     48.703098,
+     21.246571
+    ]
+   ]
+  },
+  {
+   "id": "217",
+   "label": "Vyhliadková veža - Sever",
+   "name": "Vyhliadková veža",
+   "district": "Sever",
+   "lat": 48.763426,
+   "lng": 21.225955,
+   "poles": [
+    [
+     48.76342,
+     21.22587
+    ],
+    [
+     48.763432,
+     21.22604
+    ]
+   ]
+  },
+  {
+   "id": "218",
+   "label": "Želiarska - Ťahanovce",
+   "name": "Želiarska",
+   "district": "Ťahanovce",
+   "lat": 48.75375,
+   "lng": 21.25739,
+   "poles": [
+    [
+     48.753689,
+     21.257549
+    ],
+    [
+     48.753811,
+     21.257231
+    ]
+   ]
+  },
+  {
+   "id": "219",
+   "label": "Myslava, Pri škole - Myslava",
+   "name": "Myslava, Pri škole",
+   "district": "Myslava",
+   "lat": 48.714334,
+   "lng": 21.196405,
+   "poles": [
+    [
+     48.714218,
+     21.19664
+    ],
+    [
+     48.714451,
+     21.196171
+    ]
+   ]
+  },
+  {
+   "id": "220",
+   "label": "Barca, základná škola - Barca",
+   "name": "Barca, základná škola",
+   "district": "Barca",
+   "lat": 48.67906,
+   "lng": 21.263425,
+   "poles": [
+    [
+     48.678951,
+     21.263451
+    ],
+    [
+     48.679169,
+     21.263399
+    ]
+   ]
+  },
+  {
+   "id": "221",
+   "label": "Zelený dvor - Darg. hrdinov",
+   "name": "Zelený dvor",
+   "district": "Darg. hrdinov",
+   "lat": 48.770432,
+   "lng": 21.29438,
+   "poles": [
+    [
+     48.770432,
+     21.29438
+    ]
+   ]
+  },
+  {
+   "id": "222",
+   "label": "Zimná - Staré mesto",
+   "name": "Zimná",
+   "district": "Staré mesto",
+   "lat": 48.728366,
+   "lng": 21.246324,
+   "poles": [
+    [
+     48.727631,
+     21.24692
+    ],
+    [
+     48.727879,
+     21.246531
+    ],
+    [
+     48.727909,
+     21.24667
+    ],
+    [
+     48.72823,
+     21.246559
+    ],
+    [
+     48.73018,
+     21.24494
+    ]
+   ]
+  },
+  {
+   "id": "224",
+   "label": "Podhradová - Sever",
+   "name": "Podhradová",
+   "district": "Sever",
+   "lat": 48.750561,
+   "lng": 21.243791,
+   "poles": [
+    [
+     48.749882,
+     21.243771
+    ],
+    [
+     48.75124,
+     21.243811
+    ]
+   ]
+  },
+  {
+   "id": "225",
+   "label": "Zoologická záhrada - Kavečany",
+   "name": "Zoologická záhrada",
+   "district": "Kavečany",
+   "lat": 48.78076,
+   "lng": 21.20269,
+   "poles": [
+    [
+     48.780659,
+     21.20281
+    ],
+    [
+     48.780861,
+     21.20257
+    ]
+   ]
+  },
+  {
+   "id": "226",
+   "label": "Železn. zastávka Ťahanovce - Sever",
+   "name": "Železn. zastávka Ťahanovce",
+   "district": "Sever",
+   "lat": 48.7561,
+   "lng": 21.250934,
+   "poles": [
+    [
+     48.756001,
+     21.250759
+    ],
+    [
+     48.756199,
+     21.25111
+    ]
+   ]
+  },
+  {
+   "id": "227",
+   "label": "Železničná zastávka Valaliky - Barca",
+   "name": "Železničná zastávka Valaliky",
+   "district": "Barca",
+   "lat": 48.647016,
+   "lng": 21.288305,
+   "poles": [
+    [
+     48.646992,
+     21.288349
+    ],
+    [
+     48.647041,
+     21.28826
+    ]
+   ]
+  },
+  {
+   "id": "228",
+   "label": "Železničná nemocnica - Staré mesto",
+   "name": "Železničná nemocnica",
+   "district": "Staré mesto",
+   "lat": 48.728249,
+   "lng": 21.260233,
+   "poles": [
+    [
+     48.728249,
+     21.259569
+    ],
+    [
+     48.728249,
+     21.2605
+    ],
+    [
+     48.728249,
+     21.26063
+    ]
+   ]
+  },
+  {
+   "id": "229",
+   "label": "Staničné námestie - Staré mesto",
+   "name": "Staničné námestie",
+   "district": "Staré mesto",
+   "lat": 48.72206,
+   "lng": 21.266573,
+   "poles": [
+    [
+     48.721401,
+     21.266159
+    ],
+    [
+     48.721642,
+     21.26647
+    ],
+    [
+     48.722069,
+     21.266821
+    ],
+    [
+     48.722099,
+     21.266939
+    ],
+    [
+     48.722229,
+     21.26675
+    ],
+    [
+     48.72224,
+     21.26687
+    ],
+    [
+     48.722351,
+     21.26634
+    ],
+    [
+     48.72245,
+     21.266239
+    ]
+   ]
+  },
+  {
+   "id": "231",
+   "label": "Železníky - Juh",
+   "name": "Železníky",
+   "district": "Juh",
+   "lat": 48.702111,
+   "lng": 21.25313,
+   "poles": [
+    [
+     48.701832,
+     21.25288
+    ],
+    [
+     48.702389,
+     21.25338
+    ]
+   ]
+  },
+  {
+   "id": "232",
+   "label": "Žilinská - Západ",
+   "name": "Žilinská",
+   "district": "Západ",
+   "lat": 48.708495,
+   "lng": 21.22878,
+   "poles": [
+    [
+     48.70826,
+     21.22884
+    ],
+    [
+     48.708729,
+     21.22872
+    ]
+   ]
+  },
+  {
+   "id": "234",
+   "label": "Šebastovce - Šebastovce",
+   "name": "Šebastovce",
+   "district": "Šebastovce",
+   "lat": 48.655766,
+   "lng": 21.26991,
+   "poles": [
+    [
+     48.65556,
+     21.27018
+    ],
+    [
+     48.655972,
+     21.26964
+    ]
+   ]
+  },
+  {
+   "id": "235",
+   "label": "ZŠ Polianska - Sever",
+   "name": "ZŠ Polianska",
+   "district": "Sever",
+   "lat": 48.748245,
+   "lng": 21.245865,
+   "poles": [
+    [
+     48.748032,
+     21.245541
+    ],
+    [
+     48.748459,
+     21.246189
+    ]
+   ]
+  },
+  {
+   "id": "236",
+   "label": "Správa mestskej zelene - Kokšov Bakša",
+   "name": "Správa mestskej zelene",
+   "district": "Kokšov Bakša"
+  },
+  {
+   "id": "237",
+   "label": "Kokšov Bakša č. 2 - Kokšov Bakša",
+   "name": "Kokšov Bakša č. 2",
+   "district": "Kokšov Bakša",
+   "lat": 48.650249,
+   "lng": 21.319941,
+   "poles": [
+    [
+     48.650249,
+     21.319941
+    ]
+   ]
+  },
+  {
+   "id": "238",
+   "label": "Kokšov Bakša č. 215 - Kokšov Bakša",
+   "name": "Kokšov Bakša č. 215",
+   "district": "Kokšov Bakša",
+   "lat": 48.648209,
+   "lng": 21.321,
+   "poles": [
+    [
+     48.648102,
+     21.32122
+    ],
+    [
+     48.648316,
+     21.32078
+    ]
+   ]
+  },
+  {
+   "id": "239",
+   "label": "Kokšov Bakša, kostol - Kokšov Bakša",
+   "name": "Kokšov Bakša, kostol",
+   "district": "Kokšov Bakša",
+   "lat": 48.646002,
+   "lng": 21.323698,
+   "poles": [
+    [
+     48.644932,
+     21.322906
+    ],
+    [
+     48.647072,
+     21.32449
+    ]
+   ]
+  },
+  {
+   "id": "240",
+   "label": "Budanova - Kavečany",
+   "name": "Budanova",
+   "district": "Kavečany",
+   "lat": 48.7718,
+   "lng": 21.214436,
+   "poles": [
+    [
+     48.771729,
+     21.21405
+    ],
+    [
+     48.77187,
+     21.214821
+    ]
+   ]
+  },
+  {
+   "id": "245",
+   "label": "Obchodné centrum Cassovia - Juh",
+   "name": "Obchodné centrum Cassovia",
+   "district": "Juh",
+   "lat": 48.696526,
+   "lng": 21.25062,
+   "poles": [
+    [
+     48.696381,
+     21.250401
+    ],
+    [
+     48.696671,
+     21.250839
+    ]
+   ]
+  },
+  {
+   "id": "246",
+   "label": "Dénešova - Sídlisko KVP",
+   "name": "Dénešova",
+   "district": "Sídlisko KVP",
+   "lat": 48.711761,
+   "lng": 21.216459,
+   "poles": [
+    [
+     48.711761,
+     21.216459
+    ]
+   ]
+  },
+  {
+   "id": "247",
+   "label": "Holubyho - Juh",
+   "name": "Holubyho",
+   "district": "Juh",
+   "lat": 48.699072,
+   "lng": 21.262594,
+   "poles": [
+    [
+     48.698719,
+     21.26363
+    ],
+    [
+     48.698929,
+     21.261589
+    ],
+    [
+     48.698971,
+     21.263639
+    ],
+    [
+     48.699669,
+     21.26152
+    ]
+   ]
+  },
+  {
+   "id": "248",
+   "label": "Jahodná, horáreň - Sever",
+   "name": "Jahodná, horáreň",
+   "district": "Sever",
+   "lat": 48.76918,
+   "lng": 21.16745,
+   "poles": [
+    [
+     48.76918,
+     21.16745
+    ]
+   ]
+  },
+  {
+   "id": "251",
+   "label": "Útulok pre zvieratá - Haniska",
+   "name": "Útulok pre zvieratá",
+   "district": "Haniska",
+   "lat": 48.62529,
+   "lng": 21.22333,
+   "poles": [
+    [
+     48.62529,
+     21.22333
+    ]
+   ]
+  },
+  {
+   "id": "252",
+   "label": "Cassovar - Staré mesto",
+   "name": "Cassovar",
+   "district": "Staré mesto",
+   "lat": 48.719631,
+   "lng": 21.24567,
+   "poles": [
+    [
+     48.719631,
+     21.24567
+    ]
+   ]
+  },
+  {
+   "id": "253",
+   "label": "Faurecia - Barca",
+   "name": "Faurecia",
+   "district": "Barca",
+   "lat": 48.675435,
+   "lng": 21.23079,
+   "poles": [
+    [
+     48.675179,
+     21.23089
+    ],
+    [
+     48.67569,
+     21.23069
+    ]
+   ]
+  },
+  {
+   "id": "254",
+   "label": "Vyšný dvor - Krásna",
+   "name": "Vyšný dvor",
+   "district": "Krásna",
+   "lat": 48.673241,
+   "lng": 21.320575,
+   "poles": [
+    [
+     48.672951,
+     21.32024
+    ],
+    [
+     48.673531,
+     21.32091
+    ]
+   ]
+  },
+  {
+   "id": "255",
+   "label": "Staroslovanská - Krásna",
+   "name": "Staroslovanská",
+   "district": "Krásna",
+   "lat": 48.67708,
+   "lng": 21.31679,
+   "poles": [
+    [
+     48.677059,
+     21.31683
+    ],
+    [
+     48.677101,
+     21.31675
+    ]
+   ]
+  },
+  {
+   "id": "256",
+   "label": "Pri Teleku - Krásna",
+   "name": "Pri Teleku",
+   "district": "Krásna",
+   "lat": 48.67971,
+   "lng": 21.315145,
+   "poles": [
+    [
+     48.679691,
+     21.315189
+    ],
+    [
+     48.679729,
+     21.3151
+    ]
+   ]
+  },
+  {
+   "id": "257",
+   "label": "Minská - Krásna",
+   "name": "Minská",
+   "district": "Krásna",
+   "lat": 48.671545,
+   "lng": 21.320751,
+   "poles": [
+    [
+     48.670399,
+     21.321211
+    ],
+    [
+     48.672691,
+     21.32029
+    ]
+   ]
+  },
+  {
+   "id": "261",
+   "label": "Heringeš - Vyšné Opátske",
+   "name": "Heringeš",
+   "district": "Vyšné Opátske",
+   "lat": 48.720489,
+   "lng": 21.295119,
+   "poles": [
+    [
+     48.720421,
+     21.295059
+    ],
+    [
+     48.720558,
+     21.295179
+    ]
+   ]
+  },
+  {
+   "id": "262",
+   "label": "EcoPoint - Sídl. Ťahanovce",
+   "name": "EcoPoint",
+   "district": "Sídl. Ťahanovce",
+   "lat": 48.743155,
+   "lng": 21.268115,
+   "poles": [
+    [
+     48.743149,
+     21.267839
+    ],
+    [
+     48.74316,
+     21.268391
+    ]
+   ]
+  },
+  {
+   "id": "264",
+   "label": "OC Optima, dolný vstup - Juh",
+   "name": "OC Optima, dolný vstup",
+   "district": "Juh",
+   "lat": 48.694385,
+   "lng": 21.238388,
+   "poles": [
+    [
+     48.694378,
+     21.238585
+    ],
+    [
+     48.694393,
+     21.23819
+    ]
+   ]
+  },
+  {
+   "id": "265",
+   "label": "Bocatiova - Sever",
+   "name": "Bocatiova",
+   "district": "Sever",
+   "lat": 48.729542,
+   "lng": 21.251874,
+   "poles": [
+    [
+     48.729261,
+     21.251959
+    ],
+    [
+     48.729382,
+     21.252007
+    ],
+    [
+     48.729728,
+     21.251734
+    ],
+    [
+     48.729796,
+     21.251798
+    ]
+   ]
+  },
+  {
+   "id": "266",
+   "label": "Tramínová - Krásna",
+   "name": "Tramínová",
+   "district": "Krásna",
+   "lat": 48.68218,
+   "lng": 21.313533,
+   "poles": [
+    [
+     48.682141,
+     21.31349
+    ],
+    [
+     48.682219,
+     21.313576
+    ]
+   ]
+  },
+  {
+   "id": "267",
+   "label": "Kruhový objazd, Trieda SNP - Západ",
+   "name": "Kruhový objazd, Trieda SNP",
+   "district": "Západ",
+   "lat": 48.705647,
+   "lng": 21.2418,
+   "poles": [
+    [
+     48.705647,
+     21.2418
+    ]
+   ]
+  },
+  {
+   "id": "268",
+   "label": "Kruhový objazd, Moldavská - Západ",
+   "name": "Kruhový objazd, Moldavská",
+   "district": "Západ",
+   "lat": 48.703873,
+   "lng": 21.242207,
+   "poles": [
+    [
+     48.703873,
+     21.242207
+    ]
+   ]
+  },
+  {
+   "id": "269",
+   "label": "Kruhový objazd, Alejová - Juh",
+   "name": "Kruhový objazd, Alejová",
+   "district": "Juh",
+   "lat": 48.704075,
+   "lng": 21.244535,
+   "poles": [
+    [
+     48.704075,
+     21.244535
+    ]
+   ]
+  },
+  {
+   "id": "271",
+   "label": "Priemyselný park pri letisku - Barca",
+   "name": "Priemyselný park pri letisku",
+   "district": "Barca",
+   "lat": 48.67782,
+   "lng": 21.230716,
+   "poles": [
+    [
+     48.676739,
+     21.230961
+    ],
+    [
+     48.678902,
+     21.230471
+    ]
+   ]
+  },
+  {
+   "id": "272",
+   "label": "Bahýľova - Barca",
+   "name": "Bahýľova",
+   "district": "Barca",
+   "lat": 48.678989,
+   "lng": 21.237379,
+   "poles": [
+    [
+     48.678989,
+     21.237379
+    ]
+   ]
+  },
+  {
+   "id": "273",
+   "label": "Zelená stráň - Košická Nová Ves",
+   "name": "Zelená stráň",
+   "district": "Košická Nová Ves",
+   "lat": 48.726866,
+   "lng": 21.29504,
+   "poles": [
+    [
+     48.726833,
+     21.294966
+    ],
+    [
+     48.726898,
+     21.295115
+    ]
+   ]
+  },
+  {
+   "id": "274",
+   "label": "Pollova - Krásna",
+   "name": "Pollova",
+   "district": "Krásna"
+  },
+  {
+   "id": "275",
+   "label": "Námestie sv. Cyrila a Metoda - Krásna",
+   "name": "Námestie sv. Cyrila a Metoda",
+   "district": "Krásna",
+   "lat": 48.671354,
+   "lng": 21.316357,
+   "poles": [
+    [
+     48.6712,
+     21.318371
+    ],
+    [
+     48.67131,
+     21.31196
+    ],
+    [
+     48.671551,
+     21.318741
+    ]
+   ]
+  },
+  {
+   "id": "276",
+   "label": "Jánošíkova - Západ",
+   "name": "Jánošíkova",
+   "district": "Západ",
+   "lat": 48.712916,
+   "lng": 21.246125,
+   "poles": [
+    [
+     48.712811,
+     21.24609
+    ],
+    [
+     48.71302,
+     21.246161
+    ]
+   ]
+  },
+  {
+   "id": "277",
+   "label": "Zelená stráň, Obchodné centrá - Košická Nová Ves",
+   "name": "Zelená stráň, Obchodné centrá",
+   "district": "Košická Nová Ves",
+   "lat": 48.727621,
+   "lng": 21.294069,
+   "poles": [
+    [
+     48.727589,
+     21.294125
+    ],
+    [
+     48.727654,
+     21.294012
+    ]
+   ]
+  },
+  {
+   "id": "278",
+   "label": "Lúčnicová - Lorinčík",
+   "name": "Lúčnicová",
+   "district": "Lorinčík"
+  },
+  {
+   "id": "279",
+   "label": "Hríbová - Lorinčík",
+   "name": "Hríbová",
+   "district": "Lorinčík"
+  },
+  {
+   "id": "280",
+   "label": "Košická futbalová aréna - Juh",
+   "name": "Košická futbalová aréna",
+   "district": "Juh",
+   "lat": 48.697229,
+   "lng": 21.24755,
+   "poles": [
+    [
+     48.697189,
+     21.247431
+    ],
+    [
+     48.697269,
+     21.247669
+    ]
+   ]
+  },
+  {
+   "id": "281",
+   "label": "Múzeum obetí komunizmu - Staré mesto",
+   "name": "Múzeum obetí komunizmu",
+   "district": "Staré mesto"
+  },
+  {
+   "id": "282",
+   "label": "Pytliacka - Pereš",
+   "name": "Pytliacka",
+   "district": "Pereš"
+  },
+  {
+   "id": "283",
+   "label": "Panoráma - Vyšné Opátske",
+   "name": "Panoráma",
+   "district": "Vyšné Opátske"
+  },
+  {
+   "id": "285",
+   "label": "Červený rak - Barca",
+   "name": "Červený rak",
+   "district": "Barca"
+  },
+  {
+   "id": "286",
+   "label": "A.Kvasa - Barca",
+   "name": "A.Kvasa",
+   "district": "Barca"
+  },
+  {
+   "id": "287",
+   "label": "Uralská - Nad jazerom",
+   "name": "Uralská",
+   "district": "Nad jazerom"
+  },
+  {
+   "id": "288",
+   "label": "Vstupný areál NIPPON STEEL - Šaca",
+   "name": "Vstupný areál NIPPON STEEL",
+   "district": "Šaca",
+   "lat": 48.622739,
+   "lng": 21.19217,
+   "poles": [
+    [
+     48.622639,
+     21.192329
+    ],
+    [
+     48.62265,
+     21.19116
+    ],
+    [
+     48.62265,
+     21.1922
+    ],
+    [
+     48.622681,
+     21.192381
+    ],
+    [
+     48.622719,
+     21.19253
+    ],
+    [
+     48.622749,
+     21.192616
+    ],
+    [
+     48.622761,
+     21.19079
+    ],
+    [
+     48.622849,
+     21.19268
+    ],
+    [
+     48.622952,
+     21.192841
+    ]
+   ]
+  },
+  {
+   "id": "289",
+   "label": "Valcovne NIPPON STEEL - Šaca",
+   "name": "Valcovne NIPPON STEEL",
+   "district": "Šaca",
+   "lat": 48.633197,
+   "lng": 21.19465,
+   "poles": [
+    [
+     48.632511,
+     21.19412
+    ],
+    [
+     48.632969,
+     21.19471
+    ],
+    [
+     48.633099,
+     21.19405
+    ],
+    [
+     48.633251,
+     21.19474
+    ],
+    [
+     48.633369,
+     21.194839
+    ],
+    [
+     48.633541,
+     21.194969
+    ],
+    [
+     48.63364,
+     21.19512
+    ]
+   ]
+  },
+  {
+   "id": "290",
+   "label": "Vrátnica 4 NIPPON STEEL - Šaca",
+   "name": "Vrátnica 4 NIPPON STEEL",
+   "district": "Šaca",
+   "lat": 48.630005,
+   "lng": 21.217751,
+   "poles": [
+    [
+     48.629761,
+     21.217951
+    ],
+    [
+     48.630249,
+     21.21755
+    ]
+   ]
+  },
+  {
+   "id": "291",
+   "label": "Centrálne prekladisko rúd - Šaca",
+   "name": "Centrálne prekladisko rúd",
+   "district": "Šaca",
+   "lat": 48.608036,
+   "lng": 21.208995,
+   "poles": [
+    [
+     48.60799,
+     21.208839
+    ],
+    [
+     48.608082,
+     21.20915
+    ]
+   ]
+  },
+  {
+   "id": "292",
+   "label": "Stavadlo 2 NIPPON STEEL - Šaca",
+   "name": "Stavadlo 2 NIPPON STEEL",
+   "district": "Šaca",
+   "lat": 48.610701,
+   "lng": 21.21408,
+   "poles": [
+    [
+     48.61068,
+     21.2141
+    ],
+    [
+     48.610722,
+     21.21406
+    ]
+   ]
+  },
+  {
+   "id": "411",
+   "label": "Ludvíkov Dvor - Šaca",
+   "name": "Ludvíkov Dvor",
+   "district": "Šaca",
+   "lat": 48.642208,
+   "lng": 21.20107,
+   "poles": [
+    [
+     48.640732,
+     21.202299
+    ],
+    [
+     48.641541,
+     21.200649
+    ],
+    [
+     48.642262,
+     21.19813
+    ],
+    [
+     48.642269,
+     21.201281
+    ],
+    [
+     48.642971,
+     21.201981
+    ],
+    [
+     48.643471,
+     21.20208
+    ]
+   ]
+  },
+  {
+   "id": "412",
+   "label": "ZŠ Bernolákova - Západ",
+   "name": "ZŠ Bernolákova",
+   "district": "Západ",
+   "lat": 48.710587,
+   "lng": 21.241308,
+   "poles": [
+    [
+     48.710587,
+     21.241308
+    ]
+   ]
+  },
+  {
+   "id": "501",
+   "label": "Volvo, lisovňa - Valaliky",
+   "name": "Volvo, lisovňa",
+   "district": "Valaliky"
+  },
+  {
+   "id": "502",
+   "label": "Volvo, vstupný areál - Valaliky",
+   "name": "Volvo, vstupný areál",
+   "district": "Valaliky"
+  },
+  {
+   "id": "503",
+   "label": "Volvo, hala pohonu - Valaliky",
+   "name": "Volvo, hala pohonu",
+   "district": "Valaliky"
+  },
+  {
+   "id": "901",
+   "label": "Garáž Hornádska - Džungľa",
+   "name": "Garáž Hornádska",
+   "district": "Džungľa",
+   "lat": 48.737667,
+   "lng": 21.270632,
+   "poles": [
+    [
+     48.736454,
+     21.271179
+    ],
+    [
+     48.73888,
+     21.270084
+    ]
+   ]
+  }
+ ]
+}

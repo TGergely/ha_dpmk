@@ -2,22 +2,45 @@
   "config": {
     "step": {
       "user": {
-        "title": "Zastávka DPMK Košice",
-        "description": "Zadajte začiatok názvu zastávky, napr. \"Hlavn\" alebo \"Aupark\".",
-        "data": {
-          "query": "Názov zastávky"
+        "title": "Pridať zastávku DPMK Košice",
+        "description": "Pridajte jednu zastávku, alebo miesto: viac zastávok pri jednom mieste (napríklad doma), zobrazených spolu na jednej karte a jednej mape.",
+        "menu_options": {
+          "stop": "Jedna zastávka zo zoznamu",
+          "place": "Miesto s viacerými zastávkami v okolí"
         }
       },
-      "pick": {
+      "stop": {
         "title": "Vyberte zastávku",
+        "description": "Vyberte zastávku zo zoznamu. Zoznam je súčasťou integrácie; ak je váš Home Assistant v Košiciach, najbližšie zastávky sú navrchu.",
         "data": {
-          "stop_id": "Zastávka"
+          "stop_id": "Zastávka",
+          "stop_number": "Číslo zastávky (iba ak vaša zastávka v zozname chýba)"
+        },
+        "data_description": {
+          "stop_number": "Číslo z adresy dpmk.sk/cp/zastavka/<číslo>. Má prednosť pred zoznamom."
+        }
+      },
+      "place": {
+        "title": "Pridať miesto",
+        "description": "Pomenujte miesto a vyznačte ho na mape. Potom môžete pridať všetky zastávky DPMK v zadanom okruhu.",
+        "data": {
+          "place_name": "Názov miesta",
+          "location": "Poloha a okruh na hľadanie zastávok"
+        }
+      },
+      "place_stops": {
+        "title": "Zastávky miesta",
+        "description": "Nájdených zastávok: {count}. Označte tie, ktoré chcete (označených je {ticked} najbližších).",
+        "data": {
+          "stop_ids": "Zastávky"
         }
       }
     },
     "error": {
       "cannot_connect": "Nepodarilo sa spojiť s dpmk.sk",
-      "no_stops": "Zastávka sa nenašla, skúste prvé písmená názvu"
+      "choose_stop": "Vyberte zastávku",
+      "unknown_stop": "dpmk.sk nepozná zastávku s týmto číslom",
+      "no_stops_nearby": "V tomto okruhu nie je žiadna zastávka DPMK: posuňte značku alebo zväčšite okruh"
     },
     "abort": {
       "already_configured": "Táto zastávka je už pridaná"
@@ -31,12 +54,23 @@
           "routes": "Iba tieto linky/smery (prázdne = všetky)",
           "max_departures": "Počet odchodov",
           "school_mode": "Variant cestovného poriadku vo všedné dni",
-          "location": "Poloha zastávky na mape a okruh (zobrazia sa vozidlá v okruhu)",
+          "location": "Stred mapy",
           "map_scope": "Vozidlá zobrazené na mape",
-          "update_interval": "Interval obnovenia (sekundy)"
+          "update_interval": "Interval obnovenia (sekundy)",
+          "language": "Jazyk kariet",
+          "stop_ids": "Zastávky tohto miesta",
+          "auto_location": "Mapu umiestniť na zastávku",
+          "map_radius": "Polomer mapy (metre)",
+          "is_default": "Použiť ako predvolenú pre karty"
         },
         "data_description": {
-          "update_interval": "Ako často sa číta živý prehľad vozidiel. Minimum 5 s. DPMK aktualizuje polohu vozidla zhruba každých 20 s, takže hodnoty pod 10 s zvyčajne nepomôžu."
+          "update_interval": "Ako často sa číta živý prehľad vozidiel. Minimum 5 s. DPMK aktualizuje polohu vozidla zhruba každých 20 s, takže hodnoty pod 10 s zvyčajne nepomôžu.",
+          "language": "Použije sa na oboch kartách, ak karta nemá nastavený vlastný jazyk. Automaticky = podľa jazyka Home Assistanta (slovenčina alebo angličtina).",
+          "stop_ids": "Zastávky do 1 km od miesta a tie, ktoré ste vybrali.",
+          "auto_location": "Iba pre jednu zastávku. Vypnite, ak chcete mapu na vlastnom bode (nasledujúce pole).",
+          "location": "Použije sa pre miesto, a pre zastávku, keď je predchádzajúca voľba vypnutá.",
+          "map_radius": "Ako ďaleko okolo stredu sa zobrazujú vozidlá.",
+          "is_default": "Karty bez zvolenej entity použijú túto zastávku alebo miesto."
         }
       }
     }
@@ -53,6 +87,13 @@
       "options": {
         "serving": "Iba tie, ktoré obsluhujú túto zastávku",
         "all": "Všetky vozidlá v okruhu (ostatné stlmené)"
+      }
+    },
+    "language": {
+      "options": {
+        "auto": "Automaticky (podľa Home Assistanta)",
+        "sk": "Slovenčina",
+        "en": "Angličtina"
       }
     }
   },
