@@ -1,4 +1,4 @@
-<img src="custom_components/dpmk/brand/icon@2x.png" alt="Košice Public Transport – DPMK" width="120" align="right">
+<img src="https://raw.githubusercontent.com/TGergely/ha_dpmk/main/custom_components/dpmk/brand/icon@2x.png" alt="Košice Public Transport – DPMK" width="120" align="right">
 
 # Košice Public Transport – DPMK for Home Assistant
 
@@ -29,16 +29,13 @@ Slovak and English. By default the language is automatic: Slovak when Home Assis
 
 Dark theme, live data. The left column is a **place** called "Home" with five stops in the centre of Košice; the right column is a **single stop** (Slovak texts, because the language follows Home Assistant).
 
-<table>
-<tr>
-<td><b>Place: map</b><br><img src="docs/images/example-place-map.png" width="360" alt="Map card of a place with five stops"></td>
-<td><b>Single stop: map</b><br><img src="docs/images/example-stop-map.png" width="360" alt="Map card of a single stop"></td>
-</tr>
-<tr>
-<td><b>Place: departures of all its stops</b><br><img src="docs/images/example-place-departures.png" width="360" alt="Departures card of a place"></td>
-<td><b>Single stop: departures</b><br><img src="docs/images/example-stop-departures.png" width="360" alt="Departures card of a single stop"></td>
-</tr>
-</table>
+| Place: map | Single stop: map |
+|---|---|
+| ![Map card of a place with five stops](https://raw.githubusercontent.com/TGergely/ha_dpmk/main/docs/images/example-place-map.png) | ![Map card of a single stop](https://raw.githubusercontent.com/TGergely/ha_dpmk/main/docs/images/example-stop-map.png) |
+
+| Place: departures of all its stops | Single stop: departures |
+|---|---|
+| ![Departures card of a place](https://raw.githubusercontent.com/TGergely/ha_dpmk/main/docs/images/example-place-departures.png) | ![Departures card of a single stop](https://raw.githubusercontent.com/TGergely/ha_dpmk/main/docs/images/example-stop-departures.png) |
 
 ## Install with HACS (custom repository)
 
@@ -201,7 +198,7 @@ Each stop or place has one device called `DPMK <name>` with one sensor, for exam
 
 ## Versions
 
-See [CHANGELOG.md](CHANGELOG.md). The version is set in `custom_components/dpmk/manifest.json`. HACS offers an update when a new GitHub release is published.
+See [CHANGELOG.md](https://github.com/TGergely/ha_dpmk/blob/main/CHANGELOG.md). The version is set in `custom_components/dpmk/manifest.json`. HACS offers an update when a new GitHub release is published.
 
 The integration icon and logo are in `custom_components/dpmk/brand/`. Home Assistant 2026.3 and newer show them directly. On older versions, or in the HACS list, the generic icon may appear until the images are also added to the [home-assistant/brands](https://github.com/home-assistant/brands) repository.
 
@@ -209,7 +206,7 @@ The integration icon and logo are in `custom_components/dpmk/brand/`. Home Assis
 
 Contributions are welcome: open an issue, or fork the repository and send a pull request.
 
-Released under the [MIT License](LICENSE). The DPMK timetable and live data, and the Esri / OpenStreetMap map tiles, are not covered by it and stay under their owners' terms (see "Credits and data").
+Released under the [MIT License](https://github.com/TGergely/ha_dpmk/blob/main/LICENSE). The DPMK timetable and live data, and the Esri / OpenStreetMap map tiles, are not covered by it and stay under their owners' terms (see "Credits and data").
 
 ## Credits and data
 

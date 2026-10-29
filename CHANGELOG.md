@@ -4,6 +4,12 @@ All notable changes to this project are listed here. The version number lives on
 `custom_components/dpmk/manifest.json`. While the number starts with 0, new features may still
 change how things work.
 
+## 0.2.2 - 2026-10-29
+
+- The README's pictures and links use full web addresses, so they also show inside HACS in Home Assistant
+  (HACS displays the README itself, where a relative path like `docs/images/...` points nowhere). The
+  screenshots are in a plain Markdown table.
+
 ## 0.2.1 - 2026-10-25
 
 - **Renamed to "Košice Public Transport – DPMK"** (the name Home Assistant and HACS show). The technical
