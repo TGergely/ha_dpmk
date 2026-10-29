@@ -30,6 +30,13 @@ class Route:
     def key(self) -> str:
         return f"{self.line_id}_{self.direction}"
 
+    def to_json(self) -> list[str]:
+        return [self.line_id, self.line, self.line_type, self.destination, self.seq, self.direction]
+
+    @classmethod
+    def from_json(cls, data: list[str]) -> "Route":
+        return cls(*[str(x) for x in data])
+
 
 @dataclass
 class Stop:
@@ -44,6 +51,18 @@ class Timetable:
 
     stops: list[tuple[str, str]]  # (stop_id, seq), first = origin
     tables: dict[str, list[tuple[str, int]]]  # day type -> [(conn_id, minutes)]
+    # derived data (sorted times, start-time lookups) that schedule.py builds once and reuses
+    _cache: dict = field(default_factory=dict, init=False, repr=False, compare=False)
+
+    def to_json(self) -> dict:
+        return {"stops": [list(s) for s in self.stops], "tables": {d: [list(r) for r in rows] for d, rows in self.tables.items()}}
+
+    @classmethod
+    def from_json(cls, data: dict) -> "Timetable":
+        return cls(
+            [(str(s), str(q)) for s, q in data["stops"]],
+            {str(d): [(str(c), int(m)) for c, m in rows] for d, rows in data["tables"].items()},
+        )
 
 
 def _strip(text: str) -> str:
@@ -121,24 +140,6 @@ class DpmkApi:
         )
         resp.raise_for_status()
         return resp
-
-    async def list_stops(self) -> dict[str, str]:
-        """Every stop as {stop_id: label}, e.g. {"42": "Hlavná pošta - Staré mesto"}.
-
-        The site only offers a search box, but every label carries its district after " - ",
-        so asking for "-" returns all stops at once. If that ever stops working, the vowels
-        together cover practically every name.
-        """
-        found: dict[str, str] = {}
-        for term in ("-", "a", "e", "o", "i"):
-            resp = await self._get("/search/autocomplete", term=term)
-            for item in await resp.json(content_type=None):
-                value = item.get("value", "")
-                if value.startswith("stop_"):
-                    found[value[5:]] = item["label"]
-            if len(found) >= 100:  # "-" normally returns the lot, no need to ask more
-                break
-        return found
 
     async def get_stop(self, stop_id: str) -> Stop:
         resp = await self._get(f"/cp/zastavka/{stop_id}")

@@ -14,7 +14,9 @@
       now: "teraz",
       in: "o",
       ontime: "načas",
+      live: "naživo",
       none: "Žiadne ďalšie odchody",
+      unavailable: "Údaje DPMK nie sú dostupné",
       missing: "Entita nebola nájdená:",
       choose: "Nenašiel sa žiadny senzor DPMK. Pridajte zastávku v integrácii Košice Public Transport – DPMK.",
       entity: "Zastávka (senzor)",
@@ -40,7 +42,9 @@
       now: "now",
       in: "in",
       ontime: "on time",
+      live: "live",
       none: "No upcoming departures",
+      unavailable: "DPMK data is unavailable",
       missing: "Entity not found:",
       choose: "No DPMK sensor found. Add a stop in the Košice Public Transport – DPMK integration.",
       entity: "Stop (sensor)",
@@ -83,6 +87,8 @@
     return I18N[l] ? l : "sk";
   }
 
+  const UNSET = Symbol("not drawn yet");
+
   const clock = (iso, lang) =>
     new Date(iso).toLocaleTimeString(lang === "en" ? "en-GB" : "sk-SK", {
       hour: "2-digit",
@@ -90,8 +96,14 @@
       hour12: false,
     });
 
-  const sizeClass = (line) => (line.length <= 2 ? "" : line.length === 3 ? "s3" : "s4");
+  const sizeClass = (line) => (String(line).length <= 2 ? "" : String(line).length === 3 ? "s3" : "s4");
 
+  // Everything that comes from the sensor or the card config is escaped before it goes into HTML.
+  const esc = (value) =>
+    String(value ?? "").replace(
+      /[&<>"']/g,
+      (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]
+    );
 
   /* Badge look shared by both cards: bus = rounded square, tram = circle. */
   const BADGE_CSS = `
@@ -118,6 +130,7 @@
 
     setConfig(config) {
       this._config = config;
+      this._lastState = UNSET;
       if (!this._root) {
         this._root = this.attachShadow({ mode: "open" });
         this._timer = setInterval(() => this._render(), 15000);
@@ -125,9 +138,18 @@
       this._render();
     }
 
+    // Home Assistant hands over a new `hass` on every state change of every entity: only redraw
+    // when our sensor, the language or the chosen entity changed (the timer keeps countdowns fresh).
     set hass(hass) {
       this._hass = hass;
-      this._render();
+      const entity = resolveEntity(this._config, hass);
+      const st = hass.states[entity];
+      if (st !== this._lastState || hass.language !== this._lastLanguage || entity !== this._lastEntity) {
+        this._lastState = st;
+        this._lastLanguage = hass.language;
+        this._lastEntity = entity;
+        this._render();
+      }
     }
 
     disconnectedCallback() {
@@ -158,7 +180,9 @@
       const lang = pickLanguage(this._config, this._hass);
       let rows = "";
       if (!st) {
-        rows = `<div class="empty">${entity ? `${this._t("missing")} ${entity}` : this._t("choose")}</div>`;
+        rows = `<div class="empty">${entity ? `${this._t("missing")} ${esc(entity)}` : this._t("choose")}</div>`;
+      } else if (st.state === "unavailable") {
+        rows = `<div class="empty">${this._t("unavailable")}</div>`;
       } else {
         const now = new Date();
         const deps = (st.attributes.departures || [])
@@ -169,21 +193,26 @@
               .map((d) => {
                 const delay = d.live
                   ? d.delay_min > 0
-                    ? `<span class="late">+${d.delay_min} min</span>`
+                    ? `<span class="late">+${esc(d.delay_min)} min</span>`
                     : d.delay_min < 0
-                    ? `<span class="early">${d.delay_min} min</span>`
+                    ? `<span class="early">${esc(d.delay_min)} min</span>`
                     : `<span class="ok">${this._t("ontime")}</span>`
                   : "";
-                const live = `<span class="dot${d.live ? " on" : ""}" title="live"></span>`;
+                const live = `<span class="dot${d.live ? " on" : ""}" ${d.live ? `role="img" aria-label="${this._t("live")}" title="${this._t("live")}"` : 'aria-hidden="true"'}></span>`;
                 const real = `<span class="real">${d.live ? `[${clock(d.expected, lang)}]` : ""}</span>`;
                 // a place with several stops: say which stop each departure is from
                 const stopName = st.attributes.multi_stop && d.stop ? d.stop : "";
-                const sub = [stopName, this._countdown(d, now), this._config.show_delay === false ? "" : delay]
+                const sub = [esc(stopName), this._countdown(d, now), this._config.show_delay === false ? "" : delay]
                   .filter(Boolean)
                   .join(" · ");
-                return `<div class="row">
-                  <span class="line t${d.type} ${sizeClass(d.line)}" style="${d.bg ? `background:${d.bg};` : ""}${d.fg ? `color:${d.fg};` : ""}">${d.line}</span>
-                  <span class="dest">${d.destination}<span class="sub">${sub}</span></span>
+                const spoken = [d.line, d.destination, stopName, this._countdown(d, now), d.live ? this._t("live") : ""]
+                  .filter(Boolean)
+                  .join(", ");
+                const bg = /^[#\w(),.% -]+$/.test(d.bg || "") ? d.bg : "";
+                const fg = /^[#\w(),.% -]+$/.test(d.fg || "") ? d.fg : "";
+                return `<div class="row" role="listitem" aria-label="${esc(spoken)}">
+                  <span class="line t${esc(d.type)} ${sizeClass(d.line)}" style="${bg ? `background:${esc(bg)};` : ""}${fg ? `color:${esc(fg)};` : ""}">${esc(d.line)}</span>
+                  <span class="dest">${esc(d.destination)}<span class="sub">${sub}</span></span>
                   <span class="when">${live}<span class="off">${clock(d.scheduled, lang)}</span>${real}</span>
                 </div>`;
               })
@@ -191,7 +220,7 @@
           : `<div class="empty">${this._t("none")}</div>`;
       }
       this._root.innerHTML = `
-        <ha-card header="${title}">
+        <ha-card>
           <style>
             ${BADGE_CSS}
             .row { display:flex; align-items:center; gap:12px; padding:6px 16px; }
@@ -210,8 +239,9 @@
             .ok { color:#43a047; } .empty { padding:12px 16px; color:var(--secondary-text-color); }
             ha-card { padding-bottom:8px; }
           </style>
-          ${rows}
+          <div role="list">${rows}</div>
         </ha-card>`;
+      this._root.querySelector("ha-card").header = title; // a property, so nothing is parsed as HTML
     }
   }
 
@@ -240,14 +270,18 @@
         this._timer = setInterval(() => this._update(true), 15000);
       }
       this._build();
+      this._lastState = UNSET;
       this._update();
     }
 
     set hass(hass) {
       this._hass = hass;
-      const st = hass.states[resolveEntity(this._config, hass)];
-      if (st !== this._lastState) {
+      const entity = resolveEntity(this._config, hass);
+      const st = hass.states[entity];
+      if (st !== this._lastState || hass.language !== this._lastLanguage || entity !== this._lastEntity) {
         this._lastState = st;
+        this._lastLanguage = hass.language;
+        this._lastEntity = entity;
         this._update();
       }
     }
@@ -321,11 +355,12 @@
                    color:var(--secondary-text-color); }
             .legend { display:flex; justify-content:center; gap:18px; padding:4px 16px 8px;
                       font-size:12px; color:var(--secondary-text-color); }
-            .legend i { display:inline-block; width:10px; height:10px; border-radius:3px;
-                        vertical-align:-1px; margin-right:6px; background:#9b9c9f; }
+            .legend i { display:inline-block; width:12px; height:12px; border-radius:4px; box-sizing:border-box;
+                        vertical-align:-2px; margin-right:6px; background:#9b9c9f; border:2px solid; }
+            .legend i.l { border-style:dashed; }
           </style>
-          <div class="radar">
-            <div class="mapbg" hidden></div>
+          <div class="radar" role="group">
+            <div class="mapbg" hidden aria-hidden="true"></div>
             <div class="mapattr" hidden>Esri, HERE, Garmin, © OpenStreetMap contributors</div>
             <div class="ring" style="width:${(2 * SPAN) / 3}%;height:${(2 * SPAN) / 3}%"><span class="rlabel"></span></div>
             <div class="ring" style="width:${(4 * SPAN) / 3}%;height:${(4 * SPAN) / 3}%"><span class="rlabel"></span></div>
@@ -384,6 +419,7 @@
           const img = new Image();
           img.alt = "";
           img.draggable = false;
+          img.referrerPolicy = "no-referrer"; // do not send the Home Assistant address to the tile server
           img.src = `https://services.arcgisonline.com/ArcGIS/rest/services/Canvas/${layer}/MapServer/tile/${z}/${y}/${xi}`;
           img.style.left = `${50 + (x * 256 - cx) * u * 100}%`;
           img.style.top = `${50 + (y * 256 - cy) * u * 100}%`;
@@ -412,6 +448,10 @@
       for (const s of stops.length ? stops : [{ name: "", dx: 0, dy: 0 }]) {
         const dot = document.createElement("div");
         dot.className = this._multi ? "stop small" : "stop";
+        if (s.name) {
+          dot.setAttribute("role", "img");
+          dot.setAttribute("aria-label", s.name);
+        }
         dot.style.left = `${50 + (s.dx / radius) * SPAN}%`;
         dot.style.top = `${50 - (s.dy / radius) * SPAN}%`;
         if (this._multi && s.name) {
@@ -430,11 +470,13 @@
       const entity = resolveEntity(this._config, this._hass);
       const st = this._hass.states[entity];
       this._card.header = this._config.title ?? this._t("map_title");
+      q(".radar").setAttribute("aria-label", this._card.header);
       q(".north").textContent = this._t("north");
       const legend = q(".legend");
       legend.style.display = this._config.show_legend === false ? "none" : "";
-      legend.innerHTML = `<span><i style="background:${RING.approaching}"></i>${this._t("arriving")}</span>
-                          <span><i style="background:${RING.leaving}"></i>${this._t("leaving")}</span>`;
+      // arriving = solid ring, leaving = dashed ring: the difference does not rely on colour alone
+      legend.innerHTML = `<span><i class="a" style="border-color:${RING.approaching}"></i>${this._t("arriving")}</span>
+                          <span><i class="l" style="border-color:${RING.leaving}"></i>${this._t("leaving")}</span>`;
       if (!st) {
         q(".nov").textContent = entity ? `${this._t("missing")} ${entity}` : this._t("choose");
         return;
@@ -483,10 +525,19 @@
         // vehicles that do not serve this stop (map_scope: all): dimmed, no ring, no label
         const serves = v.serves !== false;
         const ring = serves ? RING[v.movement] : null;
-        b.style.boxShadow = serves
-          ? `0 0 0 3px ${ring || "rgba(255,255,255,.75)"}, 0 1px 4px rgba(0,0,0,.45)`
-          : "0 1px 3px rgba(0,0,0,.35)";
+        // arriving: solid ring; leaving: dashed outline (so the two differ by shape, not only colour)
+        const dashed = serves && v.movement === "leaving";
+        b.style.boxShadow = !serves
+          ? "0 1px 3px rgba(0,0,0,.35)"
+          : dashed
+          ? "0 1px 4px rgba(0,0,0,.45)"
+          : `0 0 0 3px ${ring || "rgba(255,255,255,.75)"}, 0 1px 4px rgba(0,0,0,.45)`;
+        b.style.outline = dashed ? `3px dashed ${ring}` : "";
+        b.style.outlineOffset = dashed ? "2px" : "";
         el.style.opacity = serves ? "1" : "0.5";
+        const way = v.movement === "approaching" ? this._t("arriving") : v.movement === "leaving" ? this._t("leaving") : "";
+        el.setAttribute("role", "img");
+        el.setAttribute("aria-label", serves ? [v.line, way, this._label(v, now)].filter(Boolean).join(", ") : String(v.line));
         el.lastElementChild.textContent = serves ? this._label(v, now) : "";
         el.lastElementChild.style.display = serves ? "" : "none";
       }
@@ -496,7 +547,8 @@
           this._els.delete(id);
         }
       }
-      q(".nov").textContent = vehicles.length ? "" : this._t("no_vehicles");
+      q(".nov").textContent =
+        st.state === "unavailable" ? this._t("unavailable") : vehicles.length ? "" : this._t("no_vehicles");
     }
   }
 

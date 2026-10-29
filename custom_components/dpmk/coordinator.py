@@ -10,6 +10,7 @@ from datetime import timedelta
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
+from homeassistant.helpers.storage import Store
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 from homeassistant.util import dt as dt_util
 
@@ -42,12 +43,29 @@ from .const import (
     SCOPE_ALL,
     SCOPE_SERVING,
 )
-from .schedule import build_departures, classify_movement, distance_m, nearby_vehicles, offset_m
+from .schedule import (
+    build_departures,
+    classify_movement,
+    distance_m,
+    index_vehicles,
+    nearby_vehicles,
+    offset_m,
+)
 from .stops import Catalog
 
 _LOGGER = logging.getLogger(__name__)
 
 MAX_START_LOOKUPS = 12  # extra timetable pages fetched per line direction to find trip starts
+RETRY_SECONDS = 300  # after a failed or partial timetable load, try again after this long...
+MAX_RETRY_SECONDS = 3600  # ...doubling each time up to this
+IDLE_INTERVAL = 60  # refresh at least this slowly while nothing is running or due soon...
+IDLE_MINUTES = 20  # ...meaning the next departure is at least this far away
+CACHE_VERSION = 1
+
+
+def cache_store(hass: HomeAssistant, entry_id: str) -> Store:
+    """The file that keeps an entry's timetables between restarts."""
+    return Store(hass, CACHE_VERSION, f"{DOMAIN}.schedule.{entry_id}")
 
 
 def clamp_interval(value) -> int:
@@ -105,10 +123,15 @@ class DpmkCoordinator(DataUpdateCoordinator[dict]):
         self._schedule: dict[str, list[tuple[Route, Timetable, Timetable | None]]] = {}
         self._names: dict[str, str] = {}
         self._pages: dict[tuple, Timetable] = {}
-        self._schedule_at = 0.0
+        self._load_after = 0.0  # monotonic time before which the timetables are not loaded again
+        self._retry = 0  # current retry pause in seconds (0 = the last load was complete)
+        self._resume = False  # the last load was partial: a retry keeps the pages it already has
         self._colors: dict[str, dict[str, str]] = {}
         self._types: dict[str, str] = {}
         self._distances: dict[str, float] = {}
+        self._store = cache_store(hass, entry.entry_id)
+        self._restored = False
+        self._task: asyncio.Task | None = None  # background timetable reload
 
     # ---- what this entry is made of -------------------------------------------------------
 
@@ -195,12 +218,19 @@ class DpmkCoordinator(DataUpdateCoordinator[dict]):
         return Timetable(stops=[], tables={d: list(s.items()) for d, s in starts.items()})
 
     async def _load_schedule(self) -> None:
-        self._pages = {}
+        """(Re)load the timetables of every stop.
+
+        A stop that fails keeps the timetable it had, instead of the whole set being replaced by an
+        incomplete one. After a failure the load is retried after a growing pause (not every refresh),
+        and a retry continues with the pages that were already fetched.
+        """
+        if not self._resume:
+            self._pages = {}
         wanted = self.entry.options.get(CONF_ROUTES)
         sem = asyncio.Semaphore(3)
-        schedule: dict[str, list] = {}
-        routes_by_stop: dict[str, list[Route]] = {}
-        names: dict[str, str] = {}
+        fresh: dict[str, list] = {}
+        fresh_routes: dict[str, list[Route]] = {}
+        fresh_names: dict[str, str] = {}
         errors: list[Exception] = []
 
         async def load_route(stop_id: str, route: Route):
@@ -211,14 +241,30 @@ class DpmkCoordinator(DataUpdateCoordinator[dict]):
         for stop_id in self.stop_ids:
             try:
                 stop = await self.api.get_stop(stop_id)
-                routes_by_stop[stop_id] = stop.routes
                 info = self.catalog.get(stop_id)
-                names[stop_id] = info.name if info else stop.name
                 chosen = [r for r in stop.routes if not wanted or r.key in wanted]
-                schedule[stop_id] = list(await asyncio.gather(*(load_route(stop_id, r) for r in chosen)))
+                loaded = list(await asyncio.gather(*(load_route(stop_id, r) for r in chosen)))
+                fresh[stop_id], fresh_routes[stop_id] = loaded, stop.routes
+                fresh_names[stop_id] = info.name if info else stop.name
             except Exception as err:  # one stop of a place failing must not hide the others
                 _LOGGER.warning("Could not load stop %s: %s", stop_id, err)
                 errors.append(err)
+
+        # what failed keeps its previous timetable
+        schedule = {s: fresh.get(s) or self._schedule.get(s) for s in self.stop_ids}
+        schedule = {s: v for s, v in schedule.items() if v is not None}
+        routes_by_stop = {s: fresh_routes.get(s, self.routes_by_stop.get(s, [])) for s in schedule}
+        names = {s: fresh_names.get(s) or self._names.get(s) or s for s in schedule}
+
+        now = time.monotonic()
+        if errors:
+            self._resume = True
+            self._retry = min(self._retry * 2, MAX_RETRY_SECONDS) if self._retry else RETRY_SECONDS
+            self._load_after = now + self._retry
+            _LOGGER.warning("Timetables incomplete, trying again in %s s", self._retry)
+        else:
+            self._resume, self._retry = False, 0
+            self._load_after = now + SCHEDULE_TTL_SECONDS
         if not schedule:
             raise errors[0] if errors else UpdateFailed("no stops configured")
         try:
@@ -228,14 +274,95 @@ class DpmkCoordinator(DataUpdateCoordinator[dict]):
         except Exception as err:  # cosmetic only: the card falls back to default colours
             _LOGGER.debug("Could not load line colours: %s", err)
         self._schedule, self.routes_by_stop, self._names = schedule, routes_by_stop, names
-        self._schedule_at = time.monotonic()
+        if not errors:  # never keep an incomplete set as if it were whole
+            await self._save()
+
+    # ---- the timetable file ----------------------------------------------------------------
+
+    async def _save(self) -> None:
+        """Write the timetables to disk, so a restart or an options change does not refetch them."""
+        stops = {
+            sid: {
+                "name": self._names.get(sid),
+                "routes": [r.to_json() for r in self.routes_by_stop.get(sid, [])],
+                "loaded": [
+                    [r.to_json(), t.to_json(), o.to_json() if o else None] for r, t, o in loaded
+                ],
+            }
+            for sid, loaded in self._schedule.items()
+        }
+        data = {
+            "saved": time.time(), "stops": stops, "colors": self._colors, "types": self._types,
+        }
+        try:
+            await self._store.async_save(data)
+        except Exception as err:  # a cache that cannot be written is only a slower next start
+            _LOGGER.debug("Could not save the timetable cache: %s", err)
+
+    async def _restore(self) -> None:
+        """Use the saved timetables, if they cover this entry. Anything odd is ignored."""
+        try:
+            data = await self._store.async_load()
+            if not data:
+                return
+            wanted = self.entry.options.get(CONF_ROUTES)
+            schedule, routes_by_stop, names = {}, {}, {}
+            for sid in self.stop_ids:
+                saved = data["stops"][sid]
+                have = {}
+                for r, t, o in saved["loaded"]:
+                    route = Route.from_json(r)
+                    have[route.key] = (route, Timetable.from_json(t), Timetable.from_json(o) if o else None)
+                every = [Route.from_json(r) for r in saved["routes"]]
+                needed = [r for r in every if not wanted or r.key in wanted]
+                if any(r.key not in have for r in needed):  # a route that was never loaded
+                    return
+                schedule[sid] = [have[r.key] for r in needed]
+                routes_by_stop[sid] = every
+                names[sid] = str(saved["name"] or sid)
+            colors = dict(data.get("colors") or {})
+            age = time.time() - float(data["saved"])
+        except Exception as err:  # unreadable or from another version: just load afresh
+            _LOGGER.debug("Ignoring the timetable cache: %s", err)
+            return
+        self._schedule, self.routes_by_stop, self._names = schedule, routes_by_stop, names
+        self._colors = colors
+        self._types = dict(data.get("types") or {})
+        # fresh enough: wait out the rest of its life; otherwise it serves until a reload finishes
+        if colors and 0 <= age < SCHEDULE_TTL_SECONDS:
+            self._load_after = time.monotonic() + SCHEDULE_TTL_SECONDS - age
+        _LOGGER.debug("Timetables restored from the cache (%d s old)", age)
+
+    def _reload_in_background(self) -> None:
+        """Reload the timetables without holding up the live refresh."""
+        if self._task and not self._task.done():
+            return
+        self._load_after = time.monotonic() + RETRY_SECONDS  # until the load sets the real time
+
+        async def run() -> None:
+            try:
+                await self._load_schedule()
+            except Exception as err:  # the old timetables keep serving
+                _LOGGER.warning("Timetable reload failed: %s", err)
+
+        self._task = self.entry.async_create_background_task(
+            self.hass, run(), f"{DOMAIN} timetable reload"
+        )
 
     # ---- the refresh -----------------------------------------------------------------------
 
     async def _async_update_data(self) -> dict:
         try:
-            if not self._schedule or time.monotonic() - self._schedule_at > SCHEDULE_TTL_SECONDS:
-                await self._load_schedule()
+            if not self._restored:
+                self._restored = True
+                await self._restore()
+            if time.monotonic() >= self._load_after:
+                if self._schedule:
+                    self._reload_in_background()
+                else:
+                    await self._load_schedule()
+            elif not self._schedule:  # nothing loaded and it is not time to retry yet
+                raise UpdateFailed("DPMK timetables could not be loaded, trying again later")
             try:
                 # a hair under our own interval, so every refresh gets fresh data, never <5 s
                 vehicles = await self.live.get(self.update_interval.total_seconds() - 0.5)
@@ -250,15 +377,18 @@ class DpmkCoordinator(DataUpdateCoordinator[dict]):
         school = opts.get(CONF_SCHOOL_MODE, SCHOOL_AUTO)
         multi = len(self._schedule) > 1
 
-        # Long lists per stop: the map needs the live ETA of buses beyond the displayed rows.
+        # The soonest rows per stop, plus every departure a running vehicle is matched to: the map
+        # needs the live ETA of buses beyond the displayed rows.
+        max_rows = int(opts.get(CONF_MAX_DEPARTURES, DEFAULT_MAX_DEPARTURES))
         everything = []
+        live = index_vehicles(vehicles)  # once for all stops
         for stop_id, routes in self._schedule.items():
             everything += build_departures(
-                routes, vehicles, now, school, limit=80,
-                stop_name=self._names.get(stop_id), stop_id=stop_id,
+                routes, vehicles, now, school, limit=max_rows,
+                stop_name=self._names.get(stop_id), stop_id=stop_id, live=live, extra_live=True,
             )
         everything.sort(key=lambda d: d.expected)
-        departures = everything[: int(opts.get(CONF_MAX_DEPARTURES, DEFAULT_MAX_DEPARTURES))]
+        departures = everything[:max_rows]
 
         # for every running vehicle: when it reaches the first of our stops it is heading to
         eta: dict[str, str] = {}
@@ -308,6 +438,15 @@ class DpmkCoordinator(DataUpdateCoordinator[dict]):
         for stop_id, (slat, slng) in points.items():
             dx, dy = offset_m(clat, clng, slat, slng)
             stops.append({"id": stop_id, "name": self._names.get(stop_id), "dx": dx, "dy": dy})
+
+        # nothing running for us and nothing due soon: no need to ask as often as the chosen interval
+        base = clamp_interval(opts.get(CONF_UPDATE_INTERVAL))
+        idle = (
+            not eta
+            and not near
+            and (not departures or departures[0].expected - now >= timedelta(minutes=IDLE_MINUTES))
+        )
+        self.update_interval = timedelta(seconds=max(base, IDLE_INTERVAL) if idle else base)
 
         return {
             "departures": rows,

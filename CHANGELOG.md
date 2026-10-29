@@ -4,6 +4,43 @@ All notable changes to this project are listed here. The version number lives on
 `custom_components/dpmk/manifest.json`. While the number starts with 0, new features may still
 change how things work.
 
+## 0.3.0 - 2026-10-29
+
+- **Database**: the sensor's large attributes that change on every refresh (departures, vehicles, stops,
+  lines) are no longer recorded. Before, each sensor added roughly 20-30 MB a day to the Home Assistant
+  database, and a big place with many vehicles could pass the 16 KB limit above which attributes are not
+  stored at all. The state (the next departure) is still recorded.
+- **Timetable reload is safe**: if DPMK fails part-way through the 12-hourly reload, a stop that failed
+  keeps its previous timetable (before, the timetable could shrink to a few routes for 12 hours). After a
+  failure the load is retried after 5 minutes, then 10, 20 and so on up to an hour, and refreshes during
+  that pause make no timetable requests. If DPMK is down at start-up, only the first attempt hits the site.
+- **Departures card** redraws only when its sensor, the language or the entity changes, not on every state
+  change of every entity in Home Assistant.
+- **Cards say "DPMK data is unavailable"** when the sensor is unavailable, instead of "No upcoming
+  departures" or "No vehicles within range". The map card also shows its message for a missing entity.
+- **Map tiles** are requested without a referrer, so the address of your Home Assistant is not sent to the
+  tile server.
+- **Faster refreshes**: the schedule is sorted once and each refresh only looks at the departures around
+  the current time, instead of expanding every trip of every day type. A refresh is roughly 6-11 times
+  faster, which matters for a place with many stops. The result is identical to the old method (checked
+  against it on random timetables, both clock changes and public holidays).
+- **Timetables are kept on disk**: a restart or a change of options no longer downloads hundreds of pages
+  again; the saved copy is used straight away (also when dpmk.sk is down) and renewed in the background
+  when it is more than 12 hours old. Changing the line filter reuses it as well. The file is deleted when
+  the entry is removed.
+- **Timetable reloads run in the background**, so the live data keeps refreshing while they are fetched.
+- **Fewer requests at night**: while no vehicle of yours is running or nearby and the next departure is
+  20 minutes or more away, the sensor refreshes once a minute at most; it returns to your chosen interval
+  as soon as something is due.
+- **Easier to read without colour**: a vehicle that is leaving has a dashed outline and one that is
+  arriving a solid ring (the legend shows both); departures, vehicles, stops and the map have spoken
+  labels for screen readers.
+- **Safer cards**: all text from the sensor (stop names, destinations, colours) is escaped before it is
+  shown, and the card title is set as plain text.
+- Removed an unused function from the DPMK client.
+- **Logbook**: the next-departure sensor changes state every time its departure passes, which fills the
+  Logbook. To hide it, exclude the sensor (see the README, "Good to know").
+
 ## 0.2.2 - 2026-10-29
 
 - The README's pictures and links use full web addresses, so they also show inside HACS in Home Assistant

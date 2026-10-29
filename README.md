@@ -112,7 +112,7 @@ language: sk                  # optional: sk | en | auto. Leave it out to use th
 
 - The picture covers the radius you set in the integration options.
 - Vehicle labels show the live minutes to your stop. A vehicle with no matching departure (for example one that already passed) shows its distance instead.
-- Movement (green/red ring) is worked out from two readings, so a new vehicle starts white for one refresh.
+- Movement is worked out from two readings, so a new vehicle starts with a white ring for one refresh. Arriving is a solid green ring, leaving a dashed red outline.
 
 ## Options
 
@@ -137,9 +137,9 @@ Weekends and Slovak public holidays always use the "free days" timetable.
 ## How it works
 
 - **The stop list** is a file inside the integration (`data/stops.json`), so adding a stop makes no request. It joins the stop list of dpmk.sk with the stop positions of the city's open data, and OpenStreetMap for the few stops that data lacks. `tools/build_stops.py` rebuilds it; run it before a release, because DPMK may add or rename stops.
-- **Timetables** come from the current timetable pages of dpmk.sk (cached for 12 hours). On start-up the integration fetches a few extra pages per line, so it can tell where each trip starts. Trips that start partway along a line are handled as well. A place with 7 stops needs about 350 pages for this, fetched three at a time (a few seconds) once at start-up and then every 12 hours; a normal refresh makes no timetable request.
+- **Timetables** come from the current timetable pages of dpmk.sk (cached for 12 hours). On start-up the integration fetches a few extra pages per line, so it can tell where each trip starts. Trips that start partway along a line are handled as well. A place with 7 stops needs about 350 pages for this, fetched three at a time (a few seconds). They are saved in Home Assistant's `.storage` folder, so a restart or a change of options reuses them; they are renewed in the background every 12 hours (or after a failure, retrying after 5 minutes and then less often). A normal refresh makes no timetable request.
 - **Live data** comes from the feed behind DPMK's own map page, `https://www.dpmk.sk/api/cp/map` (position, delay, direction and start time of every running vehicle). A vehicle is matched to a timetable trip by its line, direction and start time, so the delay is applied to the right departure. The real time assumes the vehicle's current delay stays the same until your stop.
-- **Request rate**: all stops share one cached read of the live feed. It is never requested more often than every **5 seconds**, whatever you configure. Timetables are requested only at start-up and then every 12 hours.
+- **Request rate**: all stops share one cached read of the live feed. It is never requested more often than every **5 seconds**, whatever you configure. While nothing of yours is running or nearby and the next departure is 20 minutes or more away, the sensor refreshes only once a minute. Timetables are requested on the first start and then every 12 hours.
 - **Line colors** are read from DPMK's stylesheet, so they follow DPMK's own palette. Lines that DPMK leaves uncolored are shown gray.
 - **Map tiles** are Esri's gray base maps (© Esri, HERE, Garmin, © OpenStreetMap contributors). They need no key. Your browser loads them directly, so Esri can see the map area and your IP address, like with any web map. Use `background: none` to avoid that.
 
@@ -148,6 +148,16 @@ Weekends and Slovak public holidays always use the "free days" timetable.
 - DPMK refreshes a vehicle's position only about every **20 seconds** (sometimes up to a minute), and vehicles occasionally drop out of the feed for a while when their GPS signal is lost. A bus that is close to your stop can therefore appear late. Update intervals below 10 s rarely help.
 - The feed has no destination or heading. Arriving or leaving is guessed from whether a vehicle gets closer to or farther from your stop between readings, using straight-line distance.
 - Only DPMK Košice city lines are covered.
+- The sensor's state is the next departure, so it changes every time a departure passes and fills the **Logbook**. To hide it, add the sensor to the exclusions in `configuration.yaml`:
+
+  ```yaml
+  logbook:
+    exclude:
+      entities:
+        - sensor.dpmk_<your_stop>_next_departure
+  ```
+
+  The big attributes (departures, vehicles, stops) are not stored in the database.
 
 ## Troubleshooting
 

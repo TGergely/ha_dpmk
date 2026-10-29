@@ -2,8 +2,10 @@
 
 from __future__ import annotations
 
+from bisect import bisect_left, bisect_right
 from dataclasses import dataclass
 from datetime import date, datetime, timedelta
+from functools import cached_property
 from math import asin, cos, radians, sin, sqrt
 
 from dateutil.easter import easter
@@ -48,7 +50,7 @@ class Departure:
     stop: str | None = None  # name of the stop, shown on cards when a place has several
     stop_id: str | None = None
 
-    @property
+    @cached_property
     def expected(self) -> datetime:
         return self.scheduled + timedelta(seconds=self.delay or 0)
 
@@ -129,10 +131,42 @@ def nearby_vehicles(
 
 
 def index_vehicles(vehicles: list[dict]) -> dict[tuple[str, str], dict[int, dict]]:
+    """Running vehicles as {(line, direction): {start minute: vehicle}}."""
     out: dict[tuple[str, str], dict[int, dict]] = {}
     for v in vehicles:
         out.setdefault((str(v["Line"]), str(v["Dir"])), {})[int(v["TripTime"])] = v
     return out
+
+
+# ---- derived timetable data, built once per timetable and kept on it -------------------------
+
+
+def _times(table: Timetable, dtype: str) -> tuple[list[int], list[str]]:
+    """The minutes and conn ids of one day type, sorted by time."""
+    key = ("times", dtype)
+    if key not in table._cache:
+        rows = sorted((minutes, conn) for conn, minutes in table.tables.get(dtype) or [])
+        table._cache[key] = ([m for m, _ in rows], [c for _, c in rows])
+    return table._cache[key]
+
+
+def _lookup(table: Timetable, dtype: str) -> dict[str, int]:
+    """conn id -> minute, for one day type (the start minutes, for a line-origin timetable)."""
+    key = ("lookup", dtype)
+    if key not in table._cache:
+        table._cache[key] = dict(table.tables.get(dtype, []))
+    return table._cache[key]
+
+
+def _trips_by_start(origin: Timetable, dtype: str) -> dict[int, list[str]]:
+    """start minute -> conn ids that leave the first stop at that minute."""
+    key = ("by_start", dtype)
+    if key not in origin._cache:
+        out: dict[int, list[str]] = {}
+        for conn, start in origin.tables.get(dtype, []):
+            out.setdefault(start, []).append(conn)
+        origin._cache[key] = out
+    return origin._cache[key]
 
 
 def build_departures(
@@ -143,41 +177,86 @@ def build_departures(
     limit: int = 8,
     stop_name: str | None = None,
     stop_id: str | None = None,
+    live: dict[tuple[str, str], dict[int, dict]] | None = None,
+    extra_live: bool = False,
 ) -> list[Departure]:
-    """routes: (route, timetable at the stop, timetable at the line origin)."""
-    live = index_vehicles(vehicles)
+    """routes: (route, timetable at the stop, timetable at the line origin).
+
+    Returns the `limit` soonest departures. The timetables are sorted once, so a call only looks at
+    the departures around `now` (a binary search) instead of expanding every trip of every day type.
+
+    live: the vehicles indexed by index_vehicles(); pass it when building several stops from one feed.
+    extra_live: also return every departure that a running vehicle is matched to, even beyond
+    `limit`. The map needs those to tell each vehicle when it reaches the stop.
+    """
+    if live is None:
+        live = index_vehicles(vehicles)
     midnight = now.replace(hour=0, minute=0, second=0, microsecond=0)
+    earliest, latest = now - timedelta(minutes=1), now + timedelta(hours=26)
+    days = []
+    for offset in (-1, 0, 1):
+        day = midnight + timedelta(days=offset)
+        # a wall-clock window in minutes since this day's midnight, widened by 90 minutes because
+        # the clock changes make wall-clock and real time differ by an hour; the exact check in
+        # add() decides, so the widening only costs a few extra comparisons
+        wall_day = day.replace(tzinfo=None)
+        lo = (earliest.replace(tzinfo=None) - wall_day).total_seconds() / 60 - 90
+        hi = (latest.replace(tzinfo=None) - wall_day).total_seconds() / 60 + 90
+        days.append((offset, day, day_type_for(day.date(), school_mode), lo, hi))
+    per_route = max(limit * 2, 10)  # one route cannot contribute more than this to the soonest `limit`
     result: list[Departure] = []
-    for route, table, origin in routes:
+    seen: set[tuple[int, str, int]] = set()  # (route index, conn id, day offset) already added
+
+    def add(ri, route, trips, offset, day, minutes, conn, starts) -> bool:
+        scheduled = day + timedelta(minutes=minutes)
+        if not earliest <= scheduled <= latest:
+            return False
+        delay = None
+        vehicle_id = None
+        if offset == 0 or minutes >= 1440:
+            start = starts.get(conn)
+            vehicle = trips.get(start) if start is not None else None
+            if vehicle is not None:
+                delay = int(vehicle["Delay"])
+                vehicle_id = f"{vehicle['Line']}_{vehicle['Trip']}_{vehicle['Dir']}"
+        result.append(
+            Departure(
+                route.line, route.line_type, route.destination, scheduled, delay, vehicle_id,
+                stop_name, stop_id,
+            )
+        )
+        seen.add((ri, conn, offset))
+        return True
+
+    for ri, (route, table, origin) in enumerate(routes):
         trips = live.get((route.line, route.direction), {})
-        for offset in (-1, 0, 1):
-            day = midnight + timedelta(days=offset)
-            dtype = day_type_for(day.date(), school_mode)
-            times = table.tables.get(dtype) or []
-            starts = dict(origin.tables.get(dtype, [])) if origin else {}
-            for conn, minutes in times:
-                scheduled = day + timedelta(minutes=minutes)
-                if not now - timedelta(minutes=1) <= scheduled <= now + timedelta(hours=26):
-                    continue
-                delay = None
-                vehicle_id = None
-                if offset == 0 or minutes >= 1440:
-                    start = starts.get(conn)
-                    vehicle = trips.get(start) if start is not None else None
-                    if vehicle is not None:
-                        delay = int(vehicle["Delay"])
-                        vehicle_id = f"{vehicle['Line']}_{vehicle['Trip']}_{vehicle['Dir']}"
-                result.append(
-                    Departure(
-                        route.line,
-                        route.line_type,
-                        route.destination,
-                        scheduled,
-                        delay,
-                        vehicle_id,
-                        stop_name,
-                        stop_id,
-                    )
-                )
+        taken = 0
+        for offset, day, dtype, lo, hi in days:
+            minutes_list, conns = _times(table, dtype)
+            if not minutes_list:
+                continue
+            starts = _lookup(origin, dtype) if origin else {}
+            for i in range(bisect_left(minutes_list, lo), bisect_right(minutes_list, hi)):
+                if add(ri, route, trips, offset, day, minutes_list[i], conns[i], starts):
+                    taken += 1
+                    if taken >= per_route:
+                        break
+            if taken >= per_route:
+                break
+        if extra_live and trips and origin:
+            # the few running vehicles say which trips to look at: no need to scan the timetable
+            for offset, day, dtype, _lo, _hi in days:
+                by_start, minutes_of = _trips_by_start(origin, dtype), _lookup(table, dtype)
+                starts = _lookup(origin, dtype)
+                for start in trips:
+                    for conn in by_start.get(start, ()):
+                        if (ri, conn, offset) not in seen and conn in minutes_of:
+                            add(ri, route, trips, offset, day, minutes_of[conn], conn, starts)
+
     result.sort(key=lambda d: d.expected)
-    return [d for d in result if d.expected >= now - timedelta(seconds=30)][:limit]
+    cutoff = now - timedelta(seconds=30)
+    result = [d for d in result if d.expected >= cutoff]
+    if not extra_live:
+        return result[:limit]
+    # the soonest `limit`, plus every live-matched departure after them
+    return result[:limit] + [d for d in result[limit:] if d.vehicle_id]

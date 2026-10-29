@@ -26,6 +26,9 @@ class NextDepartureSensor(CoordinatorEntity[DpmkCoordinator], SensorEntity):
     _attr_icon = "mdi:bus-clock"
     _attr_has_entity_name = True
     _attr_translation_key = "next_departure"
+    # These change on every refresh and are large: stored, they would add ~20-30 MB a day per sensor
+    # to the Home Assistant database. The state itself (the next departure) is still recorded.
+    _unrecorded_attributes = frozenset({"departures", "vehicles", "stops", "lines", "live_vehicles"})
 
     def __init__(self, coordinator: DpmkCoordinator) -> None:
         super().__init__(coordinator)
