@@ -4,6 +4,15 @@ All notable changes to this project are listed here. The version number lives on
 `custom_components/dpmk/manifest.json`. While the number starts with 0, new features may still
 change how things work.
 
+## 0.3.1 - 2026-11-09
+
+- **Line filter on both cards**: a switch All / Bus / Tram (Všetky / Autobus / Električka) and one button
+  per line; a dropdown ("All lines") when a stop has more than 8 lines. On the departures card it filters the
+  list, on the map card it hides the other vehicles. The choice is remembered in the browser and does not
+  change the sensor. `show_filter: false` hides it.
+- The sensor has a new attribute `line_types` and keeps at least 30 upcoming departures (the cards still
+  show the number you set), so a card filtered to one line still has rows to show.
+
 ## 0.3.0 - 2026-10-29
 
 - **Database**: the sensor's large attributes that change on every refresh (departures, vehicles, stops,

@@ -37,6 +37,12 @@ Dark theme, live data. The left column is a **place** called "Home" with five st
 |---|---|
 | ![Departures card of a place](https://raw.githubusercontent.com/TGergely/ha_dpmk/main/docs/images/example-place-departures.png) | ![Departures card of a single stop](https://raw.githubusercontent.com/TGergely/ha_dpmk/main/docs/images/example-stop-departures.png) |
 
+The line filter (**Všetky / Autobus / Električka**, then one button per line) on both cards:
+
+| Departures: only trams | Map: only line 36 |
+|---|---|
+| ![Departures card filtered to trams](https://raw.githubusercontent.com/TGergely/ha_dpmk/main/docs/images/example-filter-departures.png) | ![Map card filtered to line 36](https://raw.githubusercontent.com/TGergely/ha_dpmk/main/docs/images/example-filter-map.png) |
+
 ## Install with HACS (custom repository)
 
 1. In Home Assistant open **HACS**, then the ⋮ menu (top right), then **Custom repositories**.
@@ -87,6 +93,7 @@ entity: sensor.dpmk_hlavna_posta_stare_mesto_next_departure
 title: Hlavná pošta   # optional, defaults to the stop name
 max_rows: 6           # optional, 1-20
 show_delay: true      # optional
+show_filter: true     # optional: the line filter below (false hides it)
 language: sk          # optional: sk | en | auto. Leave it out to use the integration setting
 ```
 
@@ -96,6 +103,8 @@ language: sk          # optional: sk | en | auto. Leave it out to use the integr
 ```
 
 The main time is the official timetable time. The bracket is the real time (timetable plus the live delay) and appears only for trips that have live data (green dot). Rows without a dot are timetable only, because that vehicle has not started its trip yet.
+
+**Line filter.** Above the list there is a switch **Všetky / Autobus / Električka** (All / Bus / Tram) and one button per line of the stop. Tap a line to show only that line, tap it again to show all. With more than 8 lines the buttons become a dropdown **Všetky linky** (All lines). The switch appears only when the stop has both buses and trams. The choice is remembered in your browser (per card and device) and does not change the sensor, so other cards and automations still see everything. Use `show_filter: false` to hide the filter. The map card has the same filter (it hides the other vehicles).
 
 ### Map
 
@@ -107,6 +116,7 @@ show_legend: true             # optional
 background: map               # map (default) | none  (none = plain radar view)
 map_style: auto               # auto (follows the theme) | light | dark
 show_rings: false             # draw distance rings over the map
+show_filter: true             # the line filter (see above); false hides it
 language: sk                  # optional: sk | en | auto. Leave it out to use the integration setting
 ```
 

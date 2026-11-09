@@ -15,6 +15,14 @@
       in: "o",
       ontime: "načas",
       live: "naživo",
+      show_filter: "Zobraziť filter liniek",
+      filter_type: "Typ vozidla",
+      filter_line: "Linka",
+      filter_all: "Všetky",
+      filter_bus: "Autobus",
+      filter_tram: "Električka",
+      all_lines: "Všetky linky",
+      none_filter: "Žiadne odchody pre tento filter",
       none: "Žiadne ďalšie odchody",
       unavailable: "Údaje DPMK nie sú dostupné",
       missing: "Entita nebola nájdená:",
@@ -43,6 +51,14 @@
       in: "in",
       ontime: "on time",
       live: "live",
+      show_filter: "Show line filter",
+      filter_type: "Vehicle type",
+      filter_line: "Line",
+      filter_all: "All",
+      filter_bus: "Bus",
+      filter_tram: "Tram",
+      all_lines: "All lines",
+      none_filter: "No departures for this filter",
       none: "No upcoming departures",
       unavailable: "DPMK data is unavailable",
       missing: "Entity not found:",
@@ -105,6 +121,120 @@
       (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]
     );
 
+  /* ------------------------------------------------------------------ */
+  /* Line filter shared by both cards: a bus/tram switch plus one chip   */
+  /* per line (a dropdown when there are many). The choice is remembered */
+  /* in this browser only and never touches the sensor.                  */
+  /* ------------------------------------------------------------------ */
+  const MAX_CHIPS = 8;
+  const NO_FILTER = { type: "all", line: null };
+
+  const loadFilter = (key) => {
+    try {
+      const v = JSON.parse(localStorage.getItem(key));
+      if (v && typeof v === "object") {
+        return { type: v.type === "A" || v.type === "E" ? v.type : "all", line: v.line ? String(v.line) : null };
+      }
+    } catch (e) {
+      /* storage blocked or unreadable: start unfiltered */
+    }
+    return { ...NO_FILTER };
+  };
+  const saveFilter = (key, f) => {
+    try {
+      localStorage.setItem(key, JSON.stringify(f));
+    } catch (e) {
+      /* not remembered, still works */
+    }
+  };
+
+  // Drop a stored choice that no longer fits the stop (a line that was removed, the other type).
+  const fixFilter = (f, lineTypes) => {
+    let { type, line } = f;
+    if (type !== "all" && !Object.values(lineTypes).includes(type)) type = "all";
+    if (line && (!(line in lineTypes) || (type !== "all" && lineTypes[line] !== type))) line = null;
+    return { type, line };
+  };
+  const passes = (f, line, type) =>
+    (f.type === "all" || type === f.type) && (!f.line || String(line) === f.line);
+
+  const byLine = (a, b) => parseInt(a, 10) - parseInt(b, 10) || a.localeCompare(b);
+
+  // The markup of the bar, or "" when there is nothing to choose between.
+  function filterBar(t, lineTypes, f) {
+    const lines = Object.keys(lineTypes).sort(byLine);
+    if (lines.length < 2) return "";
+    const typeName = (ty) => (ty === "E" ? t("filter_tram") : t("filter_bus"));
+    const types = new Set(Object.values(lineTypes));
+    let html = "";
+    if (types.has("A") && types.has("E")) {
+      const seg = [["all", t("filter_all")], ["A", t("filter_bus")], ["E", t("filter_tram")]];
+      html += `<span class="seg" role="group" aria-label="${esc(t("filter_type"))}">${seg
+        .map(([k, name]) => `<button type="button" data-t="${k}" aria-pressed="${f.type === k}">${esc(name)}</button>`)
+        .join("")}</span>`;
+    }
+    const shown = lines.filter((l) => f.type === "all" || lineTypes[l] === f.type);
+    if (shown.length > MAX_CHIPS) {
+      html += `<select data-sel aria-label="${esc(t("filter_line"))}"><option value="">${esc(t("all_lines"))}</option>${shown
+        .map((l) => `<option value="${esc(l)}"${f.line === l ? " selected" : ""}>${esc(l)} (${esc(typeName(lineTypes[l]))})</option>`)
+        .join("")}</select>`;
+    } else {
+      html += shown
+        .map((l) => `<button type="button" class="chip" data-l="${esc(l)}" aria-pressed="${f.line === l}" aria-label="${esc(t("filter_line"))} ${esc(l)}">${esc(l)}</button>`)
+        .join("");
+    }
+    return html;
+  }
+
+  // Put the bar in its place, but only when it changed: a periodic redraw must not close an open dropdown.
+  function updateBar(root, el, html) {
+    if (el._html !== html) {
+      el._html = html;
+      el.innerHTML = html;
+    }
+    if (root._focus) {
+      root.querySelector(root._focus)?.focus();
+      root._focus = null;
+    }
+  }
+
+  // One listener per card; `apply(fn)` receives a function that turns the old choice into the new one.
+  function bindFilter(root, apply) {
+    root.addEventListener("click", (ev) => {
+      const b = ev.target.closest?.("button[data-t], button[data-l]");
+      if (!b) return;
+      if (b.dataset.t) {
+        root._focus = `[data-t="${b.dataset.t}"]`;
+        apply(() => ({ type: b.dataset.t, line: null }));
+      } else {
+        root._focus = `[data-l="${CSS.escape(b.dataset.l)}"]`;
+        apply((f) => ({ ...f, line: f.line === b.dataset.l ? null : b.dataset.l }));
+      }
+    });
+    root.addEventListener("change", (ev) => {
+      if (!ev.target.matches?.("select[data-sel]")) return;
+      const value = ev.target.value || null;
+      root._focus = "select[data-sel]";
+      apply((f) => ({ ...f, line: value }));
+    });
+  }
+
+  const FILTER_CSS = `
+    .filter { display:flex; flex-wrap:wrap; gap:6px; align-items:center; padding:0 16px 8px; }
+    .filter:empty { display:none; }
+    .filter button { font:inherit; color:var(--primary-text-color); background:transparent; border:0;
+                     cursor:pointer; padding:5px 12px; }
+    .seg { display:inline-flex; border:1px solid var(--divider-color); border-radius:999px; overflow:hidden; margin-right:4px; }
+    .seg button[aria-pressed="true"], .chip[aria-pressed="true"] {
+      background:var(--primary-color); color:var(--text-primary-color, #fff); }
+    .chip { border:1px solid var(--divider-color) !important; border-radius:999px; padding:4px 11px !important; font-weight:600; }
+    .chip[aria-pressed="true"] { border-color:var(--primary-color) !important; }
+    .chip[aria-pressed="true"]::before { content:"\\2713\\00a0"; }
+    .filter select { font:inherit; color:var(--primary-text-color); background:var(--card-background-color);
+                     border:1px solid var(--divider-color); border-radius:8px; padding:6px 10px; max-width:100%; }
+    .filter button:focus-visible, .filter select:focus-visible { outline:2px solid var(--primary-color); outline-offset:2px; }
+  `;
+
   /* Badge look shared by both cards: bus = rounded square, tram = circle. */
   const BADGE_CSS = `
     .line { flex:none; box-sizing:border-box; display:inline-flex; align-items:center;
@@ -134,6 +264,11 @@
       if (!this._root) {
         this._root = this.attachShadow({ mode: "open" });
         this._timer = setInterval(() => this._render(), 15000);
+        bindFilter(this._root, (change) => {
+          this._filter = fixFilter(change(this._filter || NO_FILTER), this._lineTypes || {});
+          saveFilter(this._filterKey, this._filter);
+          this._render();
+        });
       }
       this._render();
     }
@@ -179,14 +314,25 @@
       const title = this._config.title ?? st?.attributes.stop_name ?? "DPMK";
       const lang = pickLanguage(this._config, this._hass);
       let rows = "";
+      let bar = "";
+      const key = `dpmk-filter:dep:${entity}`;
+      if (this._filterKey !== key) {
+        this._filterKey = key;
+        this._filter = loadFilter(key);
+      }
+      this._lineTypes = st?.attributes.line_types || {};
+      const filtering = this._config.show_filter !== false && !!st && st.state !== "unavailable";
+      const f = filtering ? fixFilter(this._filter, this._lineTypes) : NO_FILTER;
       if (!st) {
         rows = `<div class="empty">${entity ? `${this._t("missing")} ${esc(entity)}` : this._t("choose")}</div>`;
       } else if (st.state === "unavailable") {
         rows = `<div class="empty">${this._t("unavailable")}</div>`;
       } else {
         const now = new Date();
+        if (filtering) bar = filterBar((k) => this._t(k), this._lineTypes, f);
         const deps = (st.attributes.departures || [])
           .filter((d) => new Date(d.expected) > now - 30000)
+          .filter((d) => passes(f, d.line, d.type))
           .slice(0, this._config.max_rows || 6);
         rows = deps.length
           ? deps
@@ -217,12 +363,14 @@
                 </div>`;
               })
               .join("")
-          : `<div class="empty">${this._t("none")}</div>`;
+          : `<div class="empty">${this._t(f.type !== "all" || f.line ? "none_filter" : "none")}</div>`;
       }
-      this._root.innerHTML = `
+      // built once; afterwards only the header, the filter bar and the rows are updated
+      if (!this._card) this._root.innerHTML = `
         <ha-card>
           <style>
             ${BADGE_CSS}
+            ${FILTER_CSS}
             .row { display:flex; align-items:center; gap:12px; padding:6px 16px; }
             .line { width:40px; height:40px; padding:0; font-size:17px; }
             .line.s3 { font-size:13px; } .line.s4 { font-size:11px; }
@@ -239,9 +387,13 @@
             .ok { color:#43a047; } .empty { padding:12px 16px; color:var(--secondary-text-color); }
             ha-card { padding-bottom:8px; }
           </style>
-          <div role="list">${rows}</div>
+          <div class="filter"></div>
+          <div role="list"></div>
         </ha-card>`;
-      this._root.querySelector("ha-card").header = title; // a property, so nothing is parsed as HTML
+      this._card = this._root.querySelector("ha-card");
+      this._card.header = title; // a property, so nothing is parsed as HTML
+      updateBar(this._root, this._root.querySelector(".filter"), bar);
+      this._root.querySelector("[role=list]").innerHTML = rows;
     }
   }
 
@@ -268,6 +420,11 @@
       if (!this._root) {
         this._root = this.attachShadow({ mode: "open" });
         this._timer = setInterval(() => this._update(true), 15000);
+        bindFilter(this._root, (change) => {
+          this._filter = fixFilter(change(this._filter || NO_FILTER), this._lineTypes || {});
+          saveFilter(this._filterKey, this._filter);
+          this._update();
+        });
       }
       this._build();
       this._lastState = UNSET;
@@ -309,6 +466,7 @@
         <ha-card>
           <style>
             ${BADGE_CSS}
+            ${FILTER_CSS}
             .radar { position:relative; width:100%; max-width:440px; aspect-ratio:1; margin:0 auto; }
             /* simple map picture behind everything (not interactive) */
             .mapbg { position:absolute; inset:0; overflow:hidden; border-radius:12px;
@@ -359,6 +517,7 @@
                         vertical-align:-2px; margin-right:6px; background:#9b9c9f; border:2px solid; }
             .legend i.l { border-style:dashed; }
           </style>
+          <div class="filter"></div>
           <div class="radar" role="group">
             <div class="mapbg" hidden aria-hidden="true"></div>
             <div class="mapattr" hidden>Esri, HERE, Garmin, © OpenStreetMap contributors</div>
@@ -477,6 +636,15 @@
       // arriving = solid ring, leaving = dashed ring: the difference does not rely on colour alone
       legend.innerHTML = `<span><i class="a" style="border-color:${RING.approaching}"></i>${this._t("arriving")}</span>
                           <span><i class="l" style="border-color:${RING.leaving}"></i>${this._t("leaving")}</span>`;
+      const key = `dpmk-filter:map:${entity}`;
+      if (this._filterKey !== key) {
+        this._filterKey = key;
+        this._filter = loadFilter(key);
+      }
+      this._lineTypes = st?.attributes.line_types || {};
+      const filtering = this._config.show_filter !== false && !!st && st.state !== "unavailable";
+      const f = filtering ? fixFilter(this._filter, this._lineTypes) : NO_FILTER;
+      updateBar(this._root, q(".filter"), filtering ? filterBar((k) => this._t(k), this._lineTypes, f) : "");
       if (!st) {
         q(".nov").textContent = entity ? `${this._t("missing")} ${entity}` : this._t("choose");
         return;
@@ -496,7 +664,7 @@
       }
 
       const now = new Date();
-      const vehicles = a.vehicles || [];
+      const vehicles = (a.vehicles || []).filter((v) => passes(f, v.line, v.type));
       const seen = new Set();
       for (const v of vehicles) {
         seen.add(v.id);
@@ -615,6 +783,7 @@
       { name: "title", selector: { text: {} } },
       { name: "max_rows", selector: { number: { min: 1, max: 20, mode: "box" } } },
       { name: "show_delay", selector: { boolean: {} } },
+      { name: "show_filter", selector: { boolean: {} } },
       LANGUAGE_FIELD,
     ])
   );
@@ -650,6 +819,7 @@
         },
       },
       { name: "show_rings", selector: { boolean: {} } },
+      { name: "show_filter", selector: { boolean: {} } },
       LANGUAGE_FIELD,
     ])
   );

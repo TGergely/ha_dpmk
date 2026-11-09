@@ -28,7 +28,9 @@ class NextDepartureSensor(CoordinatorEntity[DpmkCoordinator], SensorEntity):
     _attr_translation_key = "next_departure"
     # These change on every refresh and are large: stored, they would add ~20-30 MB a day per sensor
     # to the Home Assistant database. The state itself (the next departure) is still recorded.
-    _unrecorded_attributes = frozenset({"departures", "vehicles", "stops", "lines", "live_vehicles"})
+    _unrecorded_attributes = frozenset(
+        {"departures", "vehicles", "stops", "lines", "line_types", "live_vehicles"}
+    )
 
     def __init__(self, coordinator: DpmkCoordinator) -> None:
         super().__init__(coordinator)
@@ -74,5 +76,6 @@ class NextDepartureSensor(CoordinatorEntity[DpmkCoordinator], SensorEntity):
             "radius": data["radius"],
             "language": data["language"],
             "lines": data["lines"],
+            "line_types": data["line_types"],
             "live_vehicles": data["live_vehicles"],
         }

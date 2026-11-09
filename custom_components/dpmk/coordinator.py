@@ -60,6 +60,7 @@ RETRY_SECONDS = 300  # after a failed or partial timetable load, try again after
 MAX_RETRY_SECONDS = 3600  # ...doubling each time up to this
 IDLE_INTERVAL = 60  # refresh at least this slowly while nothing is running or due soon...
 IDLE_MINUTES = 20  # ...meaning the next departure is at least this far away
+KEEP_DEPARTURES = 30  # rows kept in the sensor at least, so a card filtered to one line still has some
 CACHE_VERSION = 1
 
 
@@ -379,7 +380,8 @@ class DpmkCoordinator(DataUpdateCoordinator[dict]):
 
         # The soonest rows per stop, plus every departure a running vehicle is matched to: the map
         # needs the live ETA of buses beyond the displayed rows.
-        max_rows = int(opts.get(CONF_MAX_DEPARTURES, DEFAULT_MAX_DEPARTURES))
+        # (the card filters by line, so it is given more rows than it shows at once)
+        max_rows = max(int(opts.get(CONF_MAX_DEPARTURES, DEFAULT_MAX_DEPARTURES)), KEEP_DEPARTURES)
         everything = []
         live = index_vehicles(vehicles)  # once for all stops
         for stop_id, routes in self._schedule.items():
@@ -451,6 +453,7 @@ class DpmkCoordinator(DataUpdateCoordinator[dict]):
         return {
             "departures": rows,
             "lines": sorted(lines),
+            "line_types": {r.line: r.line_type for r in all_routes},
             "vehicles": near,
             "stops": stops,
             "multi_stop": multi,
