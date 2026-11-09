@@ -742,7 +742,8 @@
     selector: { entity: { domain: "sensor", device_class: "timestamp" } },
   };
 
-  const makeEditor = (schema) =>
+  // `defaults` are what the card does when an option is left out, so the switches show the real state.
+  const makeEditor = (schema, defaults = {}) =>
     class extends HTMLElement {
       setConfig(config) {
         this._config = config;
@@ -766,7 +767,7 @@
           this.appendChild(this._form);
         }
         this._form.hass = this._hass;
-        this._form.data = this._config;
+        this._form.data = { ...defaults, ...this._config };
         this._form.schema = schema;
       }
     };
@@ -785,7 +786,7 @@
       { name: "show_delay", selector: { boolean: {} } },
       { name: "show_filter", selector: { boolean: {} } },
       LANGUAGE_FIELD,
-    ])
+    ], { show_delay: true, show_filter: true })
   );
   define(
     "dpmk-map-card-editor",
@@ -821,7 +822,7 @@
       { name: "show_rings", selector: { boolean: {} } },
       { name: "show_filter", selector: { boolean: {} } },
       LANGUAGE_FIELD,
-    ])
+    ], { show_legend: true, show_filter: true })
   );
 
   window.customCards = window.customCards || [];
