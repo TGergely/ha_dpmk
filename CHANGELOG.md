@@ -4,6 +4,15 @@ All notable changes to this project are listed here. The version number lives on
 `custom_components/dpmk/manifest.json`. While the number starts with 0, new features may still
 change how things work.
 
+## 0.3.2 - 2026-11-21
+
+- **Cards are always known**: the integration now also adds the card to the dashboard resources (the list
+  Home Assistant loads before it draws any card). Before, the card file was added to the page only through
+  an extra script URL, and a page opened or hard-refreshed right after a restart, before the integration
+  had started, was built without it. That showed "Custom element doesn't exist" or a dashboard that did not
+  load, until the next reload. Dashboards defined in YAML cannot be changed this way and keep the old
+  behaviour. The resource is removed again when the last stop or place is removed.
+
 ## 0.3.1 - 2026-11-09
 
 - **Line filter on both cards**: a switch All / Bus / Tram (Všetky / Autobus / Električka) and one button
