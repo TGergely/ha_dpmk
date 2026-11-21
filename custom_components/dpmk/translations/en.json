@@ -6,7 +6,8 @@
         "description": "Add one stop, or a place: several stops near one spot (for example your home) shown together on one card and one map.",
         "menu_options": {
           "stop": "One stop, chosen from the list",
-          "place": "A place with several nearby stops"
+          "place": "A place with several nearby stops",
+          "route": "A saved route from one stop to another"
         }
       },
       "stop": {
@@ -28,6 +29,15 @@
           "location": "Location and radius for finding stops"
         }
       },
+      "route": {
+        "title": "Saved route",
+        "description": "Choose the start and the destination. The sensor shows the next connections (also with one change) and is handy in automations, for example a notice when to leave home.",
+        "data": {
+          "route_from": "Start",
+          "route_to": "Destination",
+          "route_name": "Name (optional)"
+        }
+      },
       "place_stops": {
         "title": "Stops of the place",
         "description": "{count} stops found around the spot; the {inside} within your {radius} m radius are ticked. Tick more or fewer as you like: the others are just outside the radius, with their distance.",
@@ -40,7 +50,8 @@
       "cannot_connect": "Could not reach dpmk.sk",
       "choose_stop": "Choose a stop",
       "unknown_stop": "dpmk.sk does not know a stop with this number",
-      "no_stops_nearby": "No DPMK stop within this radius: move the pin or make the radius larger"
+      "no_stops_nearby": "No DPMK stop within this radius: move the pin or make the radius larger",
+      "same_stop": "The start and the destination must be different stops"
     },
     "abort": {
       "already_configured": "This stop is already added"
@@ -61,7 +72,10 @@
           "stop_ids": "Stops of this place",
           "auto_location": "Put the map where the stop is",
           "map_radius": "Map radius (metres)",
-          "is_default": "Use as the default for cards"
+          "is_default": "Use as the default for cards",
+          "route_from": "Start",
+          "route_to": "Destination",
+          "route_connections": "Number of connections kept"
         },
         "data_description": {
           "update_interval": "How often the live vehicle feed is read. Minimum 5 s. DPMK itself updates a vehicle roughly every 20 s, so values below 10 s rarely help.",
@@ -101,6 +115,9 @@
     "sensor": {
       "next_departure": {
         "name": "Next departure"
+      },
+      "next_connection": {
+        "name": "Next connection"
       }
     }
   }

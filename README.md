@@ -62,8 +62,9 @@ Go to **Settings → Devices & services → Add integration → Košice Public T
 
 - **One stop, chosen from the list.** The list is built into the integration: all 262 DPMK stops, each with its district (for example `Hlavná pošta - Staré mesto`). When your Home Assistant is in Košice, the nearest stops come first with their distance. Two stops share the name `Ludvíkov Dvor - Šaca`, so those two also show their stop number. If a stop is missing from the list (DPMK added one after the list was made), type its number in the second field; it is the number in `dpmk.sk/cp/zastavka/<number>`.
 - **A place with several nearby stops** (below).
+- **A saved route from one stop to another** ([Saved routes](#saved-routes) below).
 
-Repeat for as many stops or places as you like. A stop that is already added is refused.
+Repeat for as many stops, places or routes as you like. A stop that is already added is refused.
 
 The map centres itself on the stop. Every stop has a position: 248 come from the city's open data, and the 14 stops that it lacks (for example `Panoráma - Vyšné Opátske`) come from OpenStreetMap. If a position is off, set the map centre yourself in **Configure**.
 
@@ -76,6 +77,43 @@ If two to five stops are close to where you live, add them as one **place**:
 3. You get **one sensor** and **one device**. The departures of all the stops are merged into one list sorted by time, and each row says which stop it is from. The map shows every stop as a named dot, and each vehicle's minutes are to the stop it is heading for.
 
 You can change the stops, the map centre and the radius later in **Configure**.
+
+## Saved routes
+
+A saved route is a trip you make often, for example home to work. Choose **A saved route from one stop to another**, pick the start and the destination (and a name if you like), and you get a device `DPMK <name>` with one sensor, for example `sensor.dpmk_heringes_hlavna_posta_next_connection`:
+
+- **State:** when the next connection leaves (a time), including the live delay of the first vehicle when DPMK reports one.
+- **Attributes:** `from`, `to`, `scheduled_departure`, `arrival`, `duration` (minutes), `changes` (0 or 1), `lines`, `live`, `delay_min`, and `connections`: the next connections (3 by default, 1 to 8 in **Configure**), each with its legs, times, change stop and waiting time.
+- It looks up the trip once a minute, with the same planner as the route card (direct trips and trips with one change, by the timetable), and does not use the live feed more often than the rest of the integration.
+- You can change the start, the destination and the number of connections later in **Configure**.
+
+Example: a notice 10 minutes before you have to leave.
+
+```yaml
+automation:
+  - alias: Time to leave for work
+    triggers:
+      - trigger: time_pattern
+        minutes: "/1"
+    conditions:
+      - condition: time
+        after: "06:30:00"
+        before: "08:30:00"
+        weekday: [mon, tue, wed, thu, fri]
+      - condition: template
+        value_template: >
+          {{ (states('sensor.dpmk_heringes_hlavna_posta_next_connection') | as_datetime
+              - now()).total_seconds() | int in range(540, 601) }}
+    actions:
+      - action: notify.notify
+        data:
+          message: >
+            Leave in 10 minutes: line
+            {{ state_attr('sensor.dpmk_heringes_hlavna_posta_next_connection', 'lines') | join(' › ') }},
+            arriving at {{ (state_attr('sensor.dpmk_heringes_hlavna_posta_next_connection', 'arrival') | as_datetime | as_local).strftime('%H:%M') }}.
+```
+
+The sensor's state changes whenever the next connection changes, so it fills the Logbook; exclude it as described under [Good to know](#good-to-know) if that bothers you.
 
 ## Default stop
 
@@ -123,6 +161,28 @@ language: sk                  # optional: sk | en | auto. Leave it out to use th
 - The picture covers the radius you set in the integration options.
 - Vehicle labels show the live minutes to your stop. A vehicle with no matching departure (for example one that already passed) shows its distance instead.
 - Movement is worked out from two readings, so a new vehicle starts with a white ring for one refresh. Arriving is a solid green ring, leaving a dashed red outline.
+
+### Route planner
+
+```yaml
+type: custom:dpmk-route-card
+from_stop: "42"        # optional start (stop number); leave out to pick it in the card
+to_stop: "113"         # optional destination
+title: Plánovač trasy  # optional
+max_rows: 4            # optional, 1-8 connections
+language: sk           # optional: sk | en | auto. Leave it out to use the integration setting
+```
+
+Pick a start and a destination (type to search the stop list), choose **Teraz / Odchod / Príchod** (now / depart at / arrive by) and the card lists the next connections: departure and arrival time, travel time, the lines, and for a trip with a change the stop, the walk (to a stop up to 250 m away) and the waiting time. The connection that arrives first is marked, and the first vehicle shows its live delay when DPMK reports it.
+
+| Direct connections | With a change |
+|---|---|
+| ![Route card, direct connections](https://raw.githubusercontent.com/TGergely/ha_dpmk/main/docs/images/example-route-direct.png) | ![Route card, connection with a change](https://raw.githubusercontent.com/TGergely/ha_dpmk/main/docs/images/example-route-change.png) |
+
+- The card editor has stop lists for the start and the destination. Your choice in the card is remembered in this browser.
+- The planner runs inside Home Assistant and uses only dpmk.sk data. It learns which stops each line serves from the 70 line pages once (kept for 12 hours, also on disk) and then reads only the timetable pages a search needs, so the first search of a pair of stops takes a few seconds and later ones are quick.
+- It finds direct trips and trips with **one change**. Trips that need two or more changes are not found. It plans by the timetable: a detour or a cancelled trip is not known.
+- It needs the integration to be set up (at least one stop or place), but it does not matter which stop.
 
 ## Options
 
@@ -215,6 +275,8 @@ hacs.json
 ## Sensor names
 
 Each stop or place has one device called `DPMK <name>` with one sensor, for example `sensor.dpmk_heringes_vysne_opatske_next_departure` (a stop) or `sensor.dpmk_home_next_departure` (a place called "Home"). Sensors created by version 0.2.0 or older keep their old ids, which Home Assistant never renames by itself; you can rename them in the sensor's settings (**Entity ID**).
+
+A saved route has a device with the same prefix and one sensor, for example `sensor.dpmk_heringes_hlavna_posta_next_connection`.
 
 ## Versions
 

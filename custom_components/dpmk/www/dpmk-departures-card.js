@@ -23,6 +23,36 @@
       filter_tram: "Električka",
       all_lines: "Všetky linky",
       none_filter: "Žiadne odchody pre tento filter",
+      route_title: "Plánovač trasy",
+      route_from: "Z",
+      route_to: "Do",
+      route_pick_from: "Vyberte začiatok",
+      route_pick_to: "Vyberte cieľ",
+      route_swap: "Vymeniť začiatok a cieľ",
+      route_now: "Teraz",
+      route_depart: "Odchod",
+      route_arrive: "Príchod",
+      route_time: "Čas",
+      route_pick: "Vyberte zastávku, odkiaľ a kam idete.",
+      route_loading: "Hľadám spojenie…",
+      route_none: "Žiadne spojenie v najbližších 6 hodinách",
+      route_hint: "Skúste neskorší čas alebo iné zastávky.",
+      route_best: "najskôr v cieli",
+      route_change: "Prestup",
+      route_wait: "čakanie",
+      route_walk: "chôdza",
+      route_direct: "priamo",
+      route_tomorrow: "zajtra",
+      route_note: "Podľa cestovného poriadku DPMK, meškanie len pri prvom vozidle",
+      route_same: "Začiatok a cieľ sú rovnaká zastávka.",
+      route_unknown: "Neznáma zastávka.",
+      route_no_service: "Do alebo z tejto zastávky nejde žiadna linka.",
+      route_unavailable: "Plánovač teraz nie je dostupný. Skúste to neskôr.",
+      route_no_integration: "Integrácia DPMK nie je načítaná.",
+      from_stop: "Začiatok (zastávka)",
+      to_stop: "Cieľ (zastávka)",
+      route_name: "DPMK plánovač trasy",
+      route_desc: "Spojenie medzi dvoma zastávkami DPMK Košice, aj s prestupom",
       none: "Žiadne ďalšie odchody",
       unavailable: "Údaje DPMK nie sú dostupné",
       missing: "Entita nebola nájdená:",
@@ -59,6 +89,36 @@
       filter_tram: "Tram",
       all_lines: "All lines",
       none_filter: "No departures for this filter",
+      route_title: "Route planner",
+      route_from: "From",
+      route_to: "To",
+      route_pick_from: "Choose start",
+      route_pick_to: "Choose destination",
+      route_swap: "Swap start and destination",
+      route_now: "Now",
+      route_depart: "Depart",
+      route_arrive: "Arrive",
+      route_time: "Time",
+      route_pick: "Choose the stop you start from and the one you go to.",
+      route_loading: "Looking for a connection…",
+      route_none: "No connection in the next 6 hours",
+      route_hint: "Try a later time or other stops.",
+      route_best: "earliest arrival",
+      route_change: "Change",
+      route_wait: "wait",
+      route_walk: "walk",
+      route_direct: "direct",
+      route_tomorrow: "tomorrow",
+      route_note: "Based on the DPMK timetable, delay only for the first vehicle",
+      route_same: "Start and destination are the same stop.",
+      route_unknown: "Unknown stop.",
+      route_no_service: "No line serves this stop.",
+      route_unavailable: "The planner is not available right now. Try again later.",
+      route_no_integration: "The DPMK integration is not loaded.",
+      from_stop: "Start (stop)",
+      to_stop: "Destination (stop)",
+      route_name: "DPMK route planner",
+      route_desc: "Connections between two DPMK Košice stops, also with a change",
       none: "No upcoming departures",
       unavailable: "DPMK data is unavailable",
       missing: "Entity not found:",
@@ -723,6 +783,395 @@
   /* ------------------------------------------------------------------ */
   /* Editors                                                             */
   /* ------------------------------------------------------------------ */
+  /* ------------------------------------------------------------------ */
+  /* Route planner: connections between two stops, with a change if     */
+  /* needed. The work is done by the integration (websocket command      */
+  /* dpmk/plan_route); nothing leaves Home Assistant from the card.      */
+  /* ------------------------------------------------------------------ */
+  const ROUTE_ERRORS = {
+    same_stop: "route_same",
+    unknown_stop: "route_unknown",
+    no_service: "route_no_service",
+    unavailable: "route_unavailable",
+    unknown_command: "route_no_integration",
+  };
+  const pad2 = (n) => String(n).padStart(2, "0");
+  const nowHHMM = () => {
+    const d = new Date();
+    return `${pad2(d.getHours())}:${pad2(d.getMinutes())}`;
+  };
+  const colorOk = (c) => (/^[#\w(),.% -]+$/.test(c || "") ? c : "");
+
+  class DpmkRouteCard extends HTMLElement {
+    _t(key) {
+      return I18N[pickLanguage(this._config, this._hass)][key];
+    }
+
+    static getConfigElement() {
+      return document.createElement("dpmk-route-card-editor");
+    }
+    static getStubConfig() {
+      return {};
+    }
+
+    setConfig(config) {
+      this._config = config;
+      if (!this._root) {
+        this._root = this.attachShadow({ mode: "open" });
+        this._build();
+        this._timer = setInterval(() => this._search(true), 60000); // fresh delays and countdowns
+      }
+      this._key = `dpmk-route:${config.from_stop || ""}:${config.to_stop || ""}`;
+      this._state = this._load();
+      this._sync();
+      this._search();
+    }
+
+    set hass(hass) {
+      const first = !this._hass;
+      this._hass = hass;
+      const lang = pickLanguage(this._config, hass);
+      if (lang !== this._lang) {
+        this._lang = lang;
+        this._sync();
+      }
+      if (first) {
+        this._loadStops();
+        this._search();
+      }
+    }
+
+    disconnectedCallback() {
+      clearInterval(this._timer);
+      this._timer = null;
+    }
+
+    connectedCallback() {
+      if (this._root && !this._timer) this._timer = setInterval(() => this._search(true), 60000);
+    }
+
+    getCardSize() {
+      return 6;
+    }
+
+    /* what was chosen last time on this device, else the stops from the card settings */
+    _load() {
+      let s = {};
+      try {
+        s = JSON.parse(localStorage.getItem(this._key)) || {};
+      } catch (e) {
+        /* storage blocked: the settings are used */
+      }
+      return {
+        from: String(s.from || this._config.from_stop || ""),
+        to: String(s.to || this._config.to_stop || ""),
+        mode: ["now", "depart", "arrive"].includes(s.mode) ? s.mode : "now",
+        time: /^\d\d:\d\d$/.test(s.time || "") ? s.time : nowHHMM(),
+      };
+    }
+
+    _save() {
+      try {
+        localStorage.setItem(this._key, JSON.stringify(this._state));
+      } catch (e) {
+        /* not remembered, still works */
+      }
+    }
+
+    async _loadStops() {
+      if (this._stops || this._loadingStops || !this._hass) return;
+      this._loadingStops = true;
+      try {
+        const { stops } = await this._hass.callWS({ type: "dpmk/stops" });
+        this._stops = stops;
+        this._byId = new Map(stops.map((s) => [s.id, s]));
+        this._byText = new Map();
+        const names = new Map();
+        for (const s of stops) names.set(s.name.toLowerCase(), (names.get(s.name.toLowerCase()) || []).concat(s.id));
+        for (const [name, ids] of names) if (ids.length === 1) this._byText.set(name, ids[0]);
+        for (const s of stops) this._byText.set(s.label.toLowerCase(), s.id);
+        this._root.querySelector("datalist").innerHTML = stops.map((s) => `<option value="${esc(s.label)}"></option>`).join("");
+        this._sync();
+      } catch (e) {
+        this._stops = null; // the integration is not loaded (yet): the search shows why
+      } finally {
+        this._loadingStops = false;
+      }
+    }
+
+    _label(id) {
+      return this._byId?.get(id)?.label || "";
+    }
+
+    _build() {
+      this._seq = 0;
+      this._root.innerHTML = `
+        <ha-card>
+          <style>
+            ${BADGE_CSS}
+            .form { padding:0 16px 8px; display:grid; grid-template-columns:1fr 40px; gap:8px; align-items:center; }
+            .fields { display:grid; gap:8px; }
+            .field { display:flex; align-items:center; gap:8px; border:1px solid var(--divider-color); border-radius:10px;
+                     padding:2px 10px; background:var(--secondary-background-color); }
+            .field:focus-within { outline:2px solid var(--primary-color); }
+            .field span { font-size:12px; color:var(--secondary-text-color); width:2.6em; flex:none; }
+            .field input { font:inherit; color:var(--primary-text-color); background:transparent; border:0; padding:8px 4px;
+                           width:100%; min-width:0; outline:none; }
+            .field input[aria-invalid="true"] { text-decoration:underline wavy var(--error-color, #e53935); }
+            button { font:inherit; color:var(--primary-text-color); cursor:pointer; }
+            .icon { width:40px; height:40px; border-radius:50%; border:1px solid var(--divider-color);
+                    background:var(--card-background-color); font-size:18px; }
+            .when { display:flex; gap:6px; padding:2px 16px 10px; flex-wrap:wrap; align-items:center; }
+            .when button { background:transparent; border:1px solid var(--divider-color); border-radius:999px; padding:4px 12px; }
+            .when button[aria-pressed="true"] { background:var(--primary-color); border-color:var(--primary-color);
+                                                color:var(--text-primary-color, #fff); }
+            .when button[aria-pressed="true"]::before { content:"\\2713\\00a0"; }
+            .when input { font:inherit; color:var(--primary-text-color); background:transparent;
+                          border:1px solid var(--divider-color); border-radius:999px; padding:3px 10px; }
+            button:focus-visible, input:focus-visible { outline:2px solid var(--primary-color); outline-offset:2px; }
+            .conn { margin:0 12px 8px; border:1px solid var(--divider-color); border-radius:12px; padding:10px 12px; }
+            .conn.best { border-color:var(--primary-color); }
+            .top { display:flex; align-items:baseline; justify-content:space-between; gap:8px; }
+            .times { font-size:18px; font-weight:600; font-variant-numeric:tabular-nums; }
+            .dur { color:var(--secondary-text-color); font-size:13px; white-space:nowrap; }
+            .legs { display:flex; align-items:center; gap:6px; margin-top:8px; flex-wrap:wrap; }
+            .legs .line { width:30px; height:30px; font-size:14px; }
+            .legs .line.s3 { font-size:11px; } .legs .line.s4 { font-size:9px; }
+            .arrow { color:var(--secondary-text-color); }
+            .detail { margin-top:6px; color:var(--secondary-text-color); font-size:13px; }
+            .detail b { color:var(--primary-text-color); font-weight:600; }
+            .late { color:#e53935; } .early { color:#fb8c00; } .ok { color:#43a047; }
+            .tag { display:inline-block; font-size:11px; padding:1px 7px; border-radius:999px; margin-left:6px;
+                   border:1px solid var(--divider-color); color:var(--secondary-text-color); font-weight:400; }
+            .tag.live { border-color:#43a047; color:#43a047; margin-left:0; }
+            .empty { margin:6px 16px 8px; padding:14px; border:1px dashed var(--divider-color); border-radius:12px;
+                     color:var(--secondary-text-color); }
+            .foot { padding:2px 16px 0; font-size:12px; color:var(--secondary-text-color); }
+            ha-card { padding-bottom:10px; }
+          </style>
+          <div class="form">
+            <div class="fields">
+              <label class="field"><span class="lf"></span><input data-f="from" list="stops" autocomplete="off" spellcheck="false"></label>
+              <label class="field"><span class="lt"></span><input data-f="to" list="stops" autocomplete="off" spellcheck="false"></label>
+            </div>
+            <button type="button" class="icon" data-swap>\u21c5</button>
+          </div>
+          <datalist id="stops"></datalist>
+          <div class="when" role="group">
+            <button type="button" data-m="now"></button>
+            <button type="button" data-m="depart"></button>
+            <button type="button" data-m="arrive"></button>
+            <input type="time">
+          </div>
+          <div class="results" aria-live="polite" aria-busy="false"></div>
+          <div class="foot"></div>
+        </ha-card>`;
+      this._card = this._root.querySelector("ha-card");
+      const root = this._root;
+      root.addEventListener("input", (ev) => ev.target.dataset?.f && this._pick(ev.target, false));
+      root.addEventListener("change", (ev) => {
+        if (ev.target.dataset?.f) this._pick(ev.target, true);
+        else if (ev.target.type === "time" && ev.target.value) this._set({ time: ev.target.value });
+      });
+      root.addEventListener("click", (ev) => {
+        const b = ev.target.closest?.("button");
+        if (!b) return;
+        if (b.dataset.m) this._set({ mode: b.dataset.m });
+        else if (b.hasAttribute("data-swap")) this._set({ from: this._state.to, to: this._state.from });
+      });
+    }
+
+    _pick(input, commit) {
+      const key = input.dataset.f;
+      const text = input.value.trim().toLowerCase();
+      const id = this._byText?.get(text);
+      if (id) {
+        input.removeAttribute("aria-invalid");
+        if (this._state[key] !== id) this._set({ [key]: id }, false);
+      } else if (commit) {
+        if (!text) {
+          input.removeAttribute("aria-invalid");
+          this._set({ [key]: "" }, false);
+        } else {
+          input.setAttribute("aria-invalid", "true");
+        }
+      }
+    }
+
+    _set(change, sync = true) {
+      this._state = { ...this._state, ...change };
+      this._save();
+      if (sync) this._sync();
+      clearTimeout(this._debounce);
+      this._debounce = setTimeout(() => this._search(), 250);
+    }
+
+    _sync() {
+      if (!this._root || !this._config) return;
+      const q = (s) => this._root.querySelector(s);
+      const t = (k) => this._t(k);
+      this._card.header = this._config.title ?? t("route_title");
+      q(".lf").textContent = t("route_from");
+      q(".lt").textContent = t("route_to");
+      const swap = q("[data-swap]");
+      swap.setAttribute("aria-label", t("route_swap"));
+      swap.title = t("route_swap");
+      for (const b of this._root.querySelectorAll("[data-m]")) {
+        b.textContent = t(`route_${b.dataset.m}`);
+        b.setAttribute("aria-pressed", String(this._state.mode === b.dataset.m));
+      }
+      const time = q("input[type=time]");
+      time.hidden = this._state.mode === "now";
+      time.value = this._state.time;
+      time.setAttribute("aria-label", t("route_time"));
+      for (const key of ["from", "to"]) {
+        const input = q(`[data-f=${key}]`);
+        if (this._root.activeElement !== input) input.value = this._label(this._state[key]);
+        input.placeholder = t(`route_pick_${key}`);
+        input.setAttribute("aria-label", t(`route_${key}`));
+      }
+      q(".foot").textContent = t("route_note");
+    }
+
+    _show(html) {
+      this._root.querySelector(".results").innerHTML = html;
+    }
+
+    async _search(silent = false) {
+      if (!this._hass || !this._root || !this._state) return;
+      clearTimeout(this._debounce);
+      const t = (k) => this._t(k);
+      const { from, to, mode, time } = this._state;
+      const box = this._root.querySelector(".results");
+      if (!from || !to) return this._show(`<div class="empty">${esc(t("route_pick"))}</div>`);
+      if (from === to) return this._show(`<div class="empty">${esc(t("route_same"))}</div>`);
+      if (silent && document.hidden) return;
+      const seq = ++this._seq;
+      if (!silent) {
+        box.setAttribute("aria-busy", "true");
+        if (!this._hasResults) this._show(`<div class="empty">${esc(t("route_loading"))}</div>`);
+      }
+      try {
+        const msg = { type: "dpmk/plan_route", from, to, mode, limit: this._config.max_rows || 4 };
+        if (mode !== "now") msg.time = time;
+        const result = await this._hass.callWS(msg);
+        if (seq !== this._seq) return;
+        this._hasResults = true;
+        this._render(result);
+      } catch (err) {
+        if (seq !== this._seq || silent) return; // a refresh that fails keeps what is shown
+        this._hasResults = false;
+        this._show(`<div class="empty">${esc(t(ROUTE_ERRORS[err?.code] || "route_unavailable"))}</div>`);
+      } finally {
+        if (seq === this._seq) box.setAttribute("aria-busy", "false");
+      }
+    }
+
+    _render(result) {
+      const t = (k) => this._t(k);
+      const lang = pickLanguage(this._config, this._hass);
+      const list = result.connections || [];
+      if (!list.length) {
+        return this._show(`<div class="empty"><b>${esc(t("route_none"))}</b><br>${esc(t("route_hint"))}</div>`);
+      }
+      const earliest = list.length > 1 ? list.reduce((a, b) => (new Date(b.arrive) < new Date(a.arrive) ? b : a)) : null;
+      const today = new Date().toDateString();
+      this._show(
+        list
+          .map((c) => {
+            const first = c.legs[0];
+            let delay = "";
+            if (first.live) {
+              delay =
+                first.delay_min > 0
+                  ? `<span class="late">+${esc(first.delay_min)} min</span>`
+                  : first.delay_min < 0
+                  ? `<span class="early">${esc(first.delay_min)} min</span>`
+                  : `<span class="ok">${esc(t("ontime"))}</span>`;
+            }
+            const badges = c.legs
+              .map((l, i) => {
+                const bg = colorOk(l.bg);
+                const fg = colorOk(l.fg);
+                return (
+                  (i ? '<span class="arrow" aria-hidden="true">\u203a</span>' : "") +
+                  `<span class="line t${esc(l.type)} ${sizeClass(l.line)}" style="${bg ? `background:${esc(bg)};` : ""}${fg ? `color:${esc(fg)};` : ""}">${esc(l.line)}</span>`
+                );
+              })
+              .join("");
+            const changes = c.changes.map((ch) => {
+              const to = ch.walk ? ` \u2192 ${ch.to_stop} (${t("route_walk")} ${ch.walk} min)` : "";
+              return `<b>${esc(t("route_change"))}</b> ${esc(ch.stop)}${esc(to)} \u00b7 ${esc(t("route_wait"))} ${esc(ch.wait)} min`;
+            });
+            const where = changes.length
+              ? changes.join("<br>")
+              : `<b>${esc(first.from)}</b> \u2192 ${esc(first.to)} \u00b7 ${esc(t("route_direct"))}`;
+            const day = new Date(c.depart).toDateString() !== today ? `<span class="tag">${esc(t("route_tomorrow"))}</span>` : "";
+            const spoken = [
+              `${clock(c.depart, lang)} \u2013 ${clock(c.arrive, lang)}`,
+              `${c.minutes} min`,
+              c.legs.map((l) => l.line).join(" \u203a "),
+              c.changes.map((ch) => `${t("route_change")} ${ch.stop}`).join(", "),
+              first.live ? t("live") : "",
+            ]
+              .filter(Boolean)
+              .join(", ");
+            return `<div class="conn${c === earliest ? " best" : ""}" role="group" aria-label="${esc(spoken)}">
+              <div class="top"><span class="times">${clock(c.depart, lang)} \u2192 ${clock(c.arrive, lang)}${day}${c === earliest ? `<span class="tag">${esc(t("route_best"))}</span>` : ""}</span><span class="dur">${esc(c.minutes)} min</span></div>
+              <div class="legs">${badges}${first.live ? ` <span class="tag live">${esc(t("live"))}</span>` : ""}</div>
+              <div class="detail">${where}${delay ? ` \u00b7 ${delay}` : ""}</div>
+            </div>`;
+          })
+          .join("")
+      );
+    }
+  }
+
+  /* The editor needs the stop list, which comes from the integration. */
+  class DpmkRouteEditor extends HTMLElement {
+    setConfig(config) {
+      this._config = config;
+      this._render();
+    }
+    set hass(hass) {
+      this._hass = hass;
+      if (!this._stops && !this._loading) {
+        this._loading = true;
+        hass
+          .callWS({ type: "dpmk/stops" })
+          .then((r) => (this._stops = r.stops))
+          .catch(() => (this._stops = []))
+          .finally(() => this._render());
+      }
+      this._render();
+    }
+    _render() {
+      if (!this._hass || !this._config) return;
+      if (!this._form) {
+        this._form = document.createElement("ha-form");
+        this._form.computeLabel = (s) => I18N[pickLanguage(this._config, this._hass)][s.name] || s.name;
+        this._form.addEventListener("value-changed", (ev) =>
+          this.dispatchEvent(new CustomEvent("config-changed", { detail: { config: ev.detail.value } }))
+        );
+        this.appendChild(this._form);
+      }
+      const stops = this._stops || [];
+      const pick = (name) =>
+        stops.length
+          ? { name, selector: { select: { mode: "dropdown", options: stops.map((s) => ({ value: s.id, label: s.label })) } } }
+          : { name, selector: { text: {} } };
+      this._form.hass = this._hass;
+      this._form.data = { max_rows: 4, ...this._config };
+      this._form.schema = [
+        pick("from_stop"),
+        pick("to_stop"),
+        { name: "title", selector: { text: {} } },
+        { name: "max_rows", selector: { number: { min: 1, max: 8, mode: "box" } } },
+        LANGUAGE_FIELD,
+      ];
+    }
+  }
+
   const LANGUAGE_FIELD = {
     name: "language",
     selector: {
@@ -777,6 +1226,8 @@
   };
   define("dpmk-departures-card", DpmkDeparturesCard);
   define("dpmk-map-card", DpmkMapCard);
+  define("dpmk-route-card", DpmkRouteCard);
+  define("dpmk-route-card-editor", DpmkRouteEditor);
   define(
     "dpmk-departures-card-editor",
     makeEditor([
@@ -837,6 +1288,11 @@
       "dpmk-map-card",
       "DPMK mapa / map",
       "Vozidlá DPMK v okolí zastávky / DPMK vehicles around the stop, simple overview",
+    ],
+    [
+      "dpmk-route-card",
+      "DPMK plánovač trasy / route planner",
+      "Spojenie medzi dvoma zastávkami, aj s prestupom / Connections between two stops, also with a change",
     ],
   ]) {
     if (!window.customCards.some((c) => c.type === type)) {

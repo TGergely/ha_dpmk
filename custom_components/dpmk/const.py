@@ -38,6 +38,14 @@ CONF_STOP_IDS = "stop_ids"
 DEFAULT_PLACE_RADIUS = 300
 PLACE_CANDIDATE_RADIUS = 1000  # the options form offers stops this close to a place
 
+# A saved route: from one stop to another, shown as one sensor with the next connections
+CONF_ROUTE_FROM = "route_from"
+CONF_ROUTE_TO = "route_to"
+CONF_ROUTE_NAME = "route_name"
+CONF_ROUTE_COUNT = "route_connections"
+DEFAULT_ROUTE_COUNT = 3
+ROUTE_UPDATE_SECONDS = 60
+
 DEFAULT_MAX_DEPARTURES = 8
 CONF_UPDATE_INTERVAL = "update_interval"
 DEFAULT_UPDATE_INTERVAL = 10  # seconds between refreshes (DPMK itself updates a vehicle ~every 20 s)

@@ -65,6 +65,28 @@ class Timetable:
         )
 
 
+@dataclass(frozen=True)
+class Pattern:
+    """One line in one direction with every stop it serves, in travel order."""
+
+    line_id: str
+    line: str
+    line_type: str
+    direction: str
+    destination: str
+    stops: tuple[tuple[str, str], ...]  # (stop_id, seq) first stop first
+
+    def to_json(self) -> list:
+        return [self.line_id, self.line, self.line_type, self.direction, self.destination,
+                [list(s) for s in self.stops]]
+
+    @classmethod
+    def from_json(cls, data: list) -> "Pattern":
+        line_id, line, line_type, direction, destination, stops = data
+        return cls(str(line_id), str(line), str(line_type), str(direction), str(destination),
+                   tuple((str(s), str(q)) for s, q in stops))
+
+
 def _strip(text: str) -> str:
     return re.sub(r"<[^>]+>", "", text).strip()
 
@@ -114,6 +136,35 @@ def parse_timetable(html: str) -> Timetable:
     return Timetable(stops, tables)
 
 
+def parse_line_ids(html: str) -> list[str]:
+    """Every line id linked from the /cp page."""
+    return sorted(set(re.findall(r'href="/cp/linka/(\d+)"', html)), key=int)
+
+
+def parse_line_page(html: str, line_id: str) -> list[Pattern]:
+    """The two directions of a line from its own page: a table per direction, stops in order."""
+    name = re.search(r"line--name-([^\"\s]+)", html)
+    kind = re.search(r"line--type-(\w+)", html)
+    patterns: list[Pattern] = []
+    for table in html.split("<table")[1:]:
+        table = table.split("</table>")[0]
+        links = re.findall(rf'href="/cp/linka/{line_id}/(\d+)/(\d+)/(\d)"', table)
+        if not links:
+            continue
+        head = re.search(r"<th[^>]*>(.*?)</th>", table, re.S)
+        patterns.append(
+            Pattern(
+                line_id,
+                name.group(1) if name else line_id,
+                kind.group(1) if kind else "A",
+                links[0][2],
+                _strip(head.group(1)) if head else "",
+                tuple((stop, seq) for stop, seq, _direction in links),
+            )
+        )
+    return patterns
+
+
 def parse_line_colors(css: str) -> dict[str, dict[str, str]]:
     """Read per-line badge colours from DPMK's stylesheet (later rules override)."""
     colors: dict[str, dict[str, str]] = {}
@@ -150,6 +201,14 @@ class DpmkApi:
             f"/cp/linka/{route.line_id}/{stop_id}/{seq or route.seq}/{route.direction}"
         )
         return parse_timetable(await resp.text())
+
+    async def get_line_ids(self) -> list[str]:
+        resp = await self._get("/cp")
+        return parse_line_ids(await resp.text())
+
+    async def get_patterns(self, line_id: str) -> list[Pattern]:
+        resp = await self._get(f"/cp/linka/{line_id}")
+        return parse_line_page(await resp.text(), line_id)
 
     async def get_line_types(self) -> dict[str, str]:
         """{line: 'A' (bus) | 'E' (tram)} for every line, from the config of DPMK's map page."""

@@ -1,0 +1,228 @@
+"""The planner must agree with a brute-force version that tries every trip combination."""
+
+from __future__ import annotations
+
+import asyncio
+import random
+from datetime import datetime, timedelta
+from zoneinfo import ZoneInfo
+
+import pytest
+
+from custom_components.dpmk.api import Pattern, parse_line_ids, parse_line_page
+from custom_components.dpmk import planner
+from custom_components.dpmk.planner import MIN_TRANSFER, Network, plan_route
+from custom_components.dpmk.schedule import day_type_for
+
+TZ = ZoneInfo("Europe/Bratislava")
+DAY_TYPES = ("school", "holidays", "free")
+MOMENTS = [
+    datetime(2026, 10, 23, 7, 30, tzinfo=TZ),
+    datetime(2026, 10, 23, 23, 40, tzinfo=TZ),
+    datetime(2026, 10, 24, 12, 0, tzinfo=TZ),  # Saturday
+    datetime(2026, 11, 17, 9, 15, tzinfo=TZ),  # public holiday
+    datetime(2026, 10, 25, 1, 30, tzinfo=TZ),  # the night the clocks go back
+]
+
+
+def run(coro):
+    return asyncio.run(coro)
+
+
+def make_world(rng, n_stops=9, n_patterns=7):
+    stops = [str(100 + i) for i in range(n_stops)]
+    patterns, trips = [], []
+    for pi in range(n_patterns):
+        seq = rng.sample(stops, rng.randint(3, 7))
+        patterns.append(
+            Pattern(str(40000 + pi), str(pi + 1), "A", str(pi % 2), f"Dest {pi}",
+                    tuple((s, str(k + 1)) for k, s in enumerate(seq)))
+        )
+        by_type = {}
+        for dtype in DAY_TYPES:
+            rows = []
+            for k in range(rng.choice([0, 6, 30, 60])):
+                t, times = rng.randint(240, 1500), []
+                for _ in seq:
+                    times.append(t)
+                    t += rng.randint(1, 6)
+                rows.append((f"{pi}-{k}", times))
+            by_type[dtype] = rows
+        trips.append(by_type)
+    return stops, patterns, trips
+
+
+def make_source(patterns, trips):
+    index = {(p.line_id, p.direction): i for i, p in enumerate(patterns)}
+    calls = []
+
+    async def source(pattern, stop):
+        calls.append((pattern.line_id, stop))
+        i = index[(pattern.line_id, pattern.direction)]
+        pos = [s for s, _ in pattern.stops].index(stop)
+        return {dtype: {trip: times[pos] for trip, times in rows} for dtype, rows in trips[i].items()}
+
+    source.calls = calls
+    return source
+
+
+def signature(connections):
+    return [
+        (c.depart, c.arrive, tuple((l.pattern.line_id, l.day_offset, l.board, l.alight) for l in c.legs))
+        for c in connections
+    ]
+
+
+def reference(patterns, trips, starts, ends, now, school_mode, limit, neighbours=None):
+    """Every vehicle trip between every pair of stops, then every pairing, then the same filtering."""
+    midnight = now.replace(hour=0, minute=0, second=0, microsecond=0)
+    earliest, latest = now - timedelta(minutes=1), now + planner.HORIZON
+    legs = []
+    for pi, pattern in enumerate(patterns):
+        ids = [s for s, _ in pattern.stops]
+        for offset in (-1, 0, 1):
+            day = midnight + timedelta(days=offset)
+            for trip, times in trips[pi][day_type_for(day.date(), school_mode)]:
+                for i in range(len(ids)):
+                    for j in range(i + 1, len(ids)):
+                        legs.append(planner.Leg(pattern, ids[i], ids[j], day + timedelta(minutes=times[i]),
+                                                day + timedelta(minutes=times[j]), trip, offset))
+    found = [planner.Connection((l,), ()) for l in legs if l.board in starts and l.alight in ends and earliest <= l.depart <= latest]
+    for l1 in legs:
+        if l1.board not in starts or not earliest <= l1.depart <= latest:
+            continue
+        for l2 in legs:
+            if l2.alight not in ends or l2.pattern is l1.pattern and l2.board == l1.alight:
+                continue
+            walk = 0 if l2.board == l1.alight else dict(neighbours(l1.alight)).get(l2.board) if neighbours else None
+            if walk is None:
+                continue
+            if l2.depart >= l1.arrive + timedelta(minutes=walk + MIN_TRANSFER) and \
+                    earliest - timedelta(hours=1) <= l2.depart <= latest + timedelta(hours=3):
+                found.append(planner.Connection((l1, l2), (walk,)))
+    unique = {tuple((l.pattern.line_id, l.trip, l.day_offset, l.board, l.alight) for l in c.legs): c for c in found}
+    pool = list(unique.values())
+    good = [c for c in pool if not planner._dominated(c, pool)]
+    good.sort(key=lambda c: (c.depart, c.arrive, len(c.legs), [(l.pattern.line_id, l.trip, l.board, l.alight) for l in c.legs]))
+    return planner.dedupe(good)[:limit]
+
+
+@pytest.mark.parametrize("seed", range(10))
+def test_same_connections_as_brute_force(seed):
+    rng = random.Random(seed)
+    stops, patterns, trips = make_world(rng)
+    network, source = Network(patterns), make_source(patterns, trips)
+    a, b = rng.sample(stops, 2)
+    for now in MOMENTS:
+        for mode in ("auto", "school"):
+            want = reference(patterns, trips, {a}, {b}, now, mode, 50)
+            got = run(plan_route(network, source, [a], [b], now, mode, 50, transfers="always", max_plans=None))
+            assert signature(got) == signature(want), (seed, now, mode)
+
+
+@pytest.mark.parametrize("seed", range(6))
+def test_walking_between_nearby_stops(seed):
+    rng = random.Random(100 + seed)
+    stops, patterns, trips = make_world(rng)
+    near = {s: [(o, rng.randint(1, 5)) for o in rng.sample(stops, 2) if o != s] for s in stops}
+    network, source = Network(patterns), make_source(patterns, trips)
+    a, b = rng.sample(stops, 2)
+    now = MOMENTS[0]
+    want = reference(patterns, trips, {a}, {b}, now, "auto", 50, neighbours=lambda s: near[s])
+    got = run(plan_route(network, source, [a], [b], now, "auto", 50, neighbours=lambda s: near[s],
+                         transfers="always", max_plans=None))
+    assert signature(got) == signature(want)
+
+
+def test_several_poles_of_one_stop():
+    rng = random.Random(3)
+    stops, patterns, trips = make_world(rng)
+    network, source = Network(patterns), make_source(patterns, trips)
+    now = MOMENTS[0]
+    want = reference(patterns, trips, set(stops[:2]), set(stops[-2:]), now, "auto", 50)
+    got = run(plan_route(network, source, stops[:2], stops[-2:], now, "auto", 50, transfers="always", max_plans=None))
+    assert signature(got) == signature(want)
+
+
+def line_world(times_direct=4):
+    """Stops A-B-C on line 1 (several trips) and B-D on line 2, so A to D needs a change at B."""
+    p1 = Pattern("40001", "1", "A", "0", "C", (("A", "1"), ("B", "2"), ("C", "3")))
+    p2 = Pattern("40002", "2", "A", "0", "D", (("B", "1"), ("D", "2")))
+    t1 = [(f"t{k}", [600 + 10 * k, 605 + 10 * k, 610 + 10 * k]) for k in range(times_direct)]
+    t2 = [(f"u{k}", [607 + 10 * k, 615 + 10 * k]) for k in range(times_direct)]
+    trips = [{d: t1 for d in DAY_TYPES}, {d: t2 for d in DAY_TYPES}]
+    return [p1, p2], trips
+
+
+def test_change_is_found_and_respects_the_minimum_time():
+    patterns, trips = line_world()
+    network, source = Network(patterns), make_source(patterns, trips)
+    now = datetime(2026, 10, 23, 9, 55, tzinfo=TZ)
+    got = run(plan_route(network, source, ["A"], ["D"], now, "school", 3))
+    first = got[0]
+    assert [l.pattern.line for l in first.legs] == ["1", "2"]
+    # line 1 arrives at B 10:05, so the 10:07 departure is exactly MIN_TRANSFER later: just possible
+    assert first.legs[1].depart - first.legs[0].arrive >= timedelta(minutes=MIN_TRANSFER)
+    assert first.arrive.strftime("%H:%M") == "10:15"
+    assert first.transfers == 1
+
+
+def test_direct_trips_skip_the_search_for_changes():
+    patterns, trips = line_world()
+    network, source = Network(patterns), make_source(patterns, trips)
+    now = datetime(2026, 10, 23, 9, 55, tzinfo=TZ)
+    got = run(plan_route(network, source, ["A"], ["C"], now, "school", 3))
+    assert len(got) == 3 and all(c.transfers == 0 for c in got)
+    assert {line for line, _ in source.calls} == {"40001"}  # line 2 was never looked at
+
+
+def test_transfers_never_and_unreachable():
+    patterns, trips = line_world()
+    network, source = Network(patterns), make_source(patterns, trips)
+    now = datetime(2026, 10, 23, 9, 55, tzinfo=TZ)
+    assert run(plan_route(network, source, ["A"], ["D"], now, "school", 3, transfers="never")) == []
+    assert run(plan_route(network, source, ["D"], ["A"], now, "school", 3)) == []  # lines only go one way
+    assert run(plan_route(network, source, ["A"], ["Z"], now, "school", 3)) == []  # unknown stop
+
+
+def test_a_trip_that_runs_past_midnight():
+    p = Pattern("40001", "N1", "A", "0", "C", (("A", "1"), ("B", "2")))
+    # 23:58 at A, and at B the table says 00:03 (3 minutes) instead of 1443
+    tables = {d: [("t1", [1438, 3])] for d in DAY_TYPES}
+
+    async def source(pattern, stop):
+        pos = 0 if stop == "A" else 1
+        return {d: {"t1": tables[d][0][1][pos]} for d in tables}
+
+    now = datetime(2026, 10, 23, 23, 50, tzinfo=TZ)
+    got = run(plan_route(Network([p]), source, ["A"], ["B"], now, "school", 3))
+    assert len(got) == 1 and got[0].arrive - got[0].depart == timedelta(minutes=5)
+
+
+def test_at_most_a_dozen_line_pairs_are_looked_up():
+    rng = random.Random(5)
+    stops, patterns, trips = make_world(rng, n_stops=12, n_patterns=14)
+    network = Network(patterns)
+    for a in stops[:4]:
+        for b in stops[-4:]:
+            assert len(network.candidates([a], [b], transfers=True)) <= 12 + len(network.candidates([a], [b], transfers=False))
+
+
+LINE_PAGE = """
+<h1>Linka <span class="line line--type-A line--name-35">35</span></h1>
+<table><thead><tr><th><i></i>Staré mesto, Nám. osloboditeľov</th></tr></thead><tbody>
+<tr><td><a href="/cp/linka/40035/32/2/1">Exnárova</a></td></tr>
+<tr><td><a href="/cp/linka/40035/150/3/1">Heringeš</a></td></tr></tbody></table>
+<table><thead><tr><th><i></i>Darg. hrdinov, Exnárova</th></tr></thead><tbody>
+<tr><td><a href="/cp/linka/40035/113/16/0">Nám. osloboditeľov</a></td></tr>
+<tr><td><a href="/cp/linka/40035/150/3/0">Heringeš</a></td></tr></tbody></table>
+"""
+
+
+def test_line_page_and_line_list_are_read():
+    a, b = parse_line_page(LINE_PAGE, "40035")
+    assert (a.line, a.line_type, a.direction, a.destination) == ("35", "A", "1", "Staré mesto, Nám. osloboditeľov")
+    assert a.stops == (("32", "2"), ("150", "3"))
+    assert (b.direction, b.stops[0], b.stops[-1]) == ("0", ("113", "16"), ("150", "3"))
+    assert Pattern.from_json(a.to_json()) == a
+    assert parse_line_ids('<a href="/cp/linka/40002">x</a><a href="/cp/linka/40001">y</a><a href="/cp/linka/40001/5/1/0">z</a>') == ["40001", "40002"]

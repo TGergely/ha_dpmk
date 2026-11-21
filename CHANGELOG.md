@@ -4,6 +4,22 @@ All notable changes to this project are listed here. The version number lives on
 `custom_components/dpmk/manifest.json`. While the number starts with 0, new features may still
 change how things work.
 
+## 0.4.0 - 2026-11-21
+
+- **Route planner card** (`custom:dpmk-route-card`): pick a start and a destination stop and see the next
+  connections, with a change if needed (one change, walking up to 250 m between stops). Choose now, depart at
+  or arrive by. Shows the times, travel time, lines, the change stop and waiting time, marks the connection
+  that arrives first, and shows the live delay of the first vehicle. Slovak and English; the language is a
+  card setting. The work is done inside Home Assistant from dpmk.sk data (new websocket commands
+  `dpmk/plan_route` and `dpmk/stops`); nothing is sent to other sites.
+- **Saved routes**: add "A saved route from one stop to another" (for example home to work) and get a sensor
+  `sensor.dpmk_<from>_<to>_next_connection` whose state is when the next connection leaves (with the live delay
+  of the first vehicle) and whose attributes hold the next connections, the arrival time, the lines, the number
+  of changes and the delay. Refreshed once a minute; start, destination and the number of connections (1-8)
+  can be changed in Configure. Good for automations, for example a notice when to leave.
+- The line network is read once from the line pages and kept on disk for 12 hours.
+- Fix: the dashboard resource of 0.3.2 was rewritten at every start; it is now only written when it changes.
+
 ## 0.3.2 - 2026-11-21
 
 - **Cards are always known**: the integration now also adds the card to the dashboard resources (the list

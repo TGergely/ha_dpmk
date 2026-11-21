@@ -13,12 +13,17 @@ from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from .const import CONF_STOP_ID, DOMAIN
 from .coordinator import DpmkCoordinator
+from .route_entry import RouteCoordinator, RouteSensor
 
 
 async def async_setup_entry(
     hass: HomeAssistant, entry: ConfigEntry, async_add_entities: AddEntitiesCallback
 ) -> None:
-    async_add_entities([NextDepartureSensor(hass.data[DOMAIN][entry.entry_id])])
+    coordinator = hass.data[DOMAIN][entry.entry_id]
+    if isinstance(coordinator, RouteCoordinator):  # a saved route
+        async_add_entities([RouteSensor(coordinator)])
+        return
+    async_add_entities([NextDepartureSensor(coordinator)])
 
 
 class NextDepartureSensor(CoordinatorEntity[DpmkCoordinator], SensorEntity):

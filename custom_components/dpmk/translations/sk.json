@@ -6,7 +6,8 @@
         "description": "Pridajte jednu zastávku, alebo miesto: viac zastávok pri jednom mieste (napríklad doma), zobrazených spolu na jednej karte a jednej mape.",
         "menu_options": {
           "stop": "Jedna zastávka zo zoznamu",
-          "place": "Miesto s viacerými zastávkami v okolí"
+          "place": "Miesto s viacerými zastávkami v okolí",
+          "route": "Uložená trasa z jednej zastávky na druhú"
         }
       },
       "stop": {
@@ -28,6 +29,15 @@
           "location": "Poloha a okruh na hľadanie zastávok"
         }
       },
+      "route": {
+        "title": "Uložená trasa",
+        "description": "Vyberte začiatok a cieľ. Senzor ukáže najbližšie spojenia (aj s jedným prestupom) a hodí sa do automatizácií, napríklad upozornenie, kedy treba vyjsť z domu.",
+        "data": {
+          "route_from": "Začiatok",
+          "route_to": "Cieľ",
+          "route_name": "Názov (nepovinné)"
+        }
+      },
       "place_stops": {
         "title": "Zastávky miesta",
         "description": "Pri zvolenom mieste je {count} zastávok; {inside} v okruhu {radius} m je označených. Označte viac alebo menej: ostatné sú tesne za okruhom, s uvedenou vzdialenosťou.",
@@ -40,7 +50,8 @@
       "cannot_connect": "Nepodarilo sa spojiť s dpmk.sk",
       "choose_stop": "Vyberte zastávku",
       "unknown_stop": "dpmk.sk nepozná zastávku s týmto číslom",
-      "no_stops_nearby": "V tomto okruhu nie je žiadna zastávka DPMK: posuňte značku alebo zväčšite okruh"
+      "no_stops_nearby": "V tomto okruhu nie je žiadna zastávka DPMK: posuňte značku alebo zväčšite okruh",
+      "same_stop": "Začiatok a cieľ musia byť rôzne zastávky"
     },
     "abort": {
       "already_configured": "Táto zastávka je už pridaná"
@@ -61,7 +72,10 @@
           "stop_ids": "Zastávky tohto miesta",
           "auto_location": "Mapu umiestniť na zastávku",
           "map_radius": "Polomer mapy (metre)",
-          "is_default": "Použiť ako predvolenú pre karty"
+          "is_default": "Použiť ako predvolenú pre karty",
+          "route_from": "Začiatok",
+          "route_to": "Cieľ",
+          "route_connections": "Počet uložených spojení"
         },
         "data_description": {
           "update_interval": "Ako často sa číta živý prehľad vozidiel. Minimum 5 s. DPMK aktualizuje polohu vozidla zhruba každých 20 s, takže hodnoty pod 10 s zvyčajne nepomôžu.",
@@ -101,6 +115,9 @@
     "sensor": {
       "next_departure": {
         "name": "Najbližší odchod"
+      },
+      "next_connection": {
+        "name": "Najbližšie spojenie"
       }
     }
   }

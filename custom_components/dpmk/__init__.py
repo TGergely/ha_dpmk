@@ -7,17 +7,21 @@ import json
 import logging
 from pathlib import Path
 
+import voluptuous as vol
+from homeassistant.components import websocket_api
 from homeassistant.components.frontend import add_extra_js_url
 from homeassistant.components.http import StaticPathConfig
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.core import HomeAssistant
+from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.start import async_at_started
 from homeassistant.helpers.typing import ConfigType
 
 from .api import DpmkApi
-from .const import CARD_URL, DOMAIN
+from .const import CARD_URL, CONF_ROUTE_FROM, DOMAIN
 from .coordinator import DpmkCoordinator, LiveFeed, cache_store
+from .route_entry import RouteCoordinator
+from .routing import Router, RoutingError
 from .stops import load_catalog
 
 PLATFORMS = ["sensor"]
@@ -53,11 +57,12 @@ async def _ensure_resource(hass: HomeAssistant, url: str) -> None:
         if resources is None:
             return
         if not getattr(resources, "loaded", True):
-            await resources.async_load()
+            await resources.async_get_info()  # loads the stored list, as the frontend does
         wanted = {"res_type": "module", "url": url}
         for item in resources.async_items():
             if item["url"].split("?")[0] == CARD_URL:
-                if item["url"] != url or item.get("res_type") != "module":
+                # (stored items call the kind "type", while create and update take "res_type")
+                if item["url"] != url or item.get("type") != "module":
                     await resources.async_update_item(item["id"], wanted)
                 return
         await resources.async_create_item(wanted)
@@ -76,7 +81,47 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
         await _ensure_resource(hass, url)
 
     async_at_started(hass, add_resource)  # the dashboards are up by then
+
+    # the shared pieces, also used by the route card (which works without a configured stop)
+    store = hass.data.setdefault(DOMAIN, {})
+    if "live" not in store:
+        store["live"] = LiveFeed(DpmkApi(async_get_clientsession(hass)))
+    if "catalog" not in store:
+        store["catalog"] = await hass.async_add_executor_job(load_catalog)
+    store["router"] = Router(hass, store["live"], store["catalog"])
+    websocket_api.async_register_command(hass, ws_plan_route)
+    websocket_api.async_register_command(hass, ws_stops)
     return True
+
+
+@websocket_api.websocket_command(
+    {
+        vol.Required("type"): "dpmk/plan_route",
+        vol.Required("from"): str,
+        vol.Required("to"): str,
+        vol.Optional("mode", default="now"): vol.In(["now", "depart", "arrive"]),
+        vol.Optional("time"): str,
+        vol.Optional("limit", default=4): vol.All(int, vol.Range(min=1, max=8)),
+    }
+)
+@websocket_api.async_response
+async def ws_plan_route(hass: HomeAssistant, connection, msg: dict) -> None:
+    """The next connections between two stops, for the route card."""
+    try:
+        result = await hass.data[DOMAIN]["router"].plan(
+            msg["from"], msg["to"], msg["mode"], msg.get("time"), msg["limit"]
+        )
+    except RoutingError as err:
+        connection.send_error(msg["id"], err.code, err.code)
+        return
+    connection.send_result(msg["id"], result)
+
+
+@websocket_api.websocket_command({vol.Required("type"): "dpmk/stops"})
+@callback
+def ws_stops(hass: HomeAssistant, connection, msg: dict) -> None:
+    """Every stop, for the pick lists of the route card and its editor."""
+    connection.send_result(msg["id"], {"stops": hass.data[DOMAIN]["router"].stop_list()})
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
@@ -85,7 +130,10 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         store["live"] = LiveFeed(DpmkApi(async_get_clientsession(hass)))
     if "catalog" not in store:  # the bundled stop list: a local file, read once
         store["catalog"] = await hass.async_add_executor_job(load_catalog)
-    coordinator = DpmkCoordinator(hass, entry, store["live"], store["catalog"])
+    if CONF_ROUTE_FROM in entry.data:  # a saved route: from one stop to another
+        coordinator = RouteCoordinator(hass, entry, store["router"])
+    else:
+        coordinator = DpmkCoordinator(hass, entry, store["live"], store["catalog"])
     await coordinator.async_config_entry_first_refresh()
     store[entry.entry_id] = coordinator
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
