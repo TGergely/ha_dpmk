@@ -28,6 +28,25 @@ TableSource = Callable[[Pattern, str], Awaitable[Tables]]
 Neighbours = Callable[[str], list[tuple[str, int]]]  # stop id -> [(nearby stop id, walking minutes)]
 
 
+TERMINUS_GAP = 2  # minutes from the one-before-last stop to the last, when it cannot be worked out
+
+
+def estimate_arrivals(previous: Tables, before: Tables | None = None) -> Tables:
+    """Arrival times at the last stop of a line direction, which DPMK does not publish.
+
+    It is the time at the stop before it plus the usual gap, taken from the two stops before that
+    (the median over all trips, kept between 1 and 5 minutes).
+    """
+    gaps = sorted(
+        m - before[dtype][trip]
+        for dtype, rows in previous.items()
+        for trip, m in rows.items()
+        if before and trip in before.get(dtype, {}) and m > before[dtype][trip]
+    )
+    gap = min(5, max(1, gaps[len(gaps) // 2])) if gaps else TERMINUS_GAP
+    return {dtype: {trip: m + gap for trip, m in rows.items()} for dtype, rows in previous.items()}
+
+
 @dataclass(frozen=True)
 class Leg:
     pattern: Pattern

@@ -76,6 +76,17 @@ class Pattern:
     destination: str
     stops: tuple[tuple[str, str], ...]  # (stop_id, seq) first stop first
 
+    def completed(self, page_stops: list[tuple[str, str]]) -> "Pattern":
+        """This pattern with the stops of a timetable page of the same line direction.
+
+        The line page does not link the last stop, but the timetable page lists every stop in order.
+        The page is used only when it continues this pattern (the same stops first, then more).
+        """
+        stops = tuple((str(s), str(q)) for s, q in page_stops)
+        if len(stops) > len(self.stops) and stops[: len(self.stops)] == self.stops:
+            return Pattern(self.line_id, self.line, self.line_type, self.direction, self.destination, stops)
+        return self
+
     def to_json(self) -> list:
         return [self.line_id, self.line, self.line_type, self.direction, self.destination,
                 [list(s) for s in self.stops]]

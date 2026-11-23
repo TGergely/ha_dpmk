@@ -4,6 +4,16 @@ All notable changes to this project are listed here. The version number lives on
 `custom_components/dpmk/manifest.json`. While the number starts with 0, new features may still
 change how things work.
 
+## 0.4.1 - 2026-11-23
+
+- **Route planner: the last stop of every line direction is now known.** The line pages of dpmk.sk leave out
+  the final stop (for example Madridská for N1, Staničné námestie for the night lines toward the station,
+  Exnárova for line 35), so the planner could not find a trip ending there. Night buses toward the station
+  seemed to stop one stop early, at Senný trh; that was this gap. The stop lists are now completed from the
+  timetable pages. DPMK publishes no times at a last stop, so the arrival there is estimated from the stops
+  before it (the usual gap, 1 to 5 minutes).
+- The line network is prepared in the background after start-up, so the first route search does not wait.
+
 ## 0.4.0 - 2026-11-21
 
 - **Route planner card** (`custom:dpmk-route-card`): pick a start and a destination stop and see the next

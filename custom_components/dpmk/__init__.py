@@ -70,6 +70,13 @@ async def _ensure_resource(hass: HomeAssistant, url: str) -> None:
         _LOGGER.debug("Could not add the card to the dashboard resources: %s", err)
 
 
+async def _warm_network(hass: HomeAssistant) -> None:
+    try:
+        await hass.data[DOMAIN]["router"].network()
+    except Exception as err:  # the first search tries again
+        _LOGGER.debug("Could not prepare the line network: %s", err)
+
+
 async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
     """Serve the Lovelace card and load it on every dashboard."""
     card = Path(__file__).parent / "www" / "dpmk-departures-card.js"
@@ -79,6 +86,8 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
 
     async def add_resource(_hass: HomeAssistant) -> None:
         await _ensure_resource(hass, url)
+        # build the line network now, so the first route search does not wait for it
+        hass.async_create_background_task(_warm_network(hass), f"{DOMAIN} line network")
 
     async_at_started(hass, add_resource)  # the dashboards are up by then
 

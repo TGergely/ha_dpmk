@@ -208,6 +208,40 @@ def test_at_most_a_dozen_line_pairs_are_looked_up():
             assert len(network.candidates([a], [b], transfers=True)) <= 12 + len(network.candidates([a], [b], transfers=False))
 
 
+def test_last_stop_is_added_from_the_timetable_page():
+    # the line page leaves out the last stop; the timetable page lists all of them
+    p = Pattern("40101", "N1", "A", "1", "Madridská", (("229", "2"), ("55", "3"), ("94", "16")))
+    page = [("229", "2"), ("55", "3"), ("94", "16"), ("85", "19")]
+    assert p.completed(page).stops == p.stops + (("85", "19"),)
+    assert p.completed(page[:3]) is p  # nothing more to add
+    assert p.completed([("1", "1")] + page) is p  # a page that does not continue the pattern is ignored
+    assert p.completed(page).destination == "Madridská"
+
+
+def test_arrival_at_the_last_stop_is_estimated():
+    previous = {"free": {"a": 100, "b": 130}, "school": {"a": 105}}
+    before = {"free": {"a": 97, "b": 126}, "school": {"a": 104}}  # gaps 3, 4, 1 -> median 3
+    assert planner.estimate_arrivals(previous, before) == {"free": {"a": 103, "b": 133}, "school": {"a": 108}}
+    assert planner.estimate_arrivals(previous, None) == {"free": {"a": 102, "b": 132}, "school": {"a": 107}}
+    far = {"free": {"a": 50, "b": 50}}  # a gap of 50 minutes is not believed: at most 5
+    assert planner.estimate_arrivals({"free": {"a": 100}}, far)["free"]["a"] == 105
+    assert planner.estimate_arrivals({"free": {"a": 100}}, {"free": {"a": 100}})["free"]["a"] == 102  # no usable gap
+
+
+def test_a_trip_to_the_last_stop_is_found_with_an_estimated_arrival():
+    p = Pattern("40101", "N1", "A", "1", "End", (("A", "1"), ("B", "2"), ("C", "3"), ("D", "4")))
+    at = {"A": 1500, "B": 1505, "C": 1509}  # 01:00 of the next day, so the trip belongs to this service day
+
+    async def source(pattern, stop):
+        if stop in at:
+            return {d: {"t1": at[stop]} for d in DAY_TYPES}
+        return planner.estimate_arrivals(await source(pattern, "C"), await source(pattern, "B"))  # D has no page
+
+    now = datetime(2026, 10, 23, 23, 30, tzinfo=TZ)
+    got = run(plan_route(Network([p]), source, ["A"], ["D"], now, "school", 3))
+    assert len(got) == 1 and got[0].arrive - got[0].depart == timedelta(minutes=13)  # 1509 + gap 4 = 1513
+
+
 LINE_PAGE = """
 <h1>Linka <span class="line line--type-A line--name-35">35</span></h1>
 <table><thead><tr><th><i></i>Staré mesto, Nám. osloboditeľov</th></tr></thead><tbody>

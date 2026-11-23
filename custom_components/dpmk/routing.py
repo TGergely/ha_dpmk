@@ -14,7 +14,7 @@ from homeassistant.util import dt as dt_util
 
 from .api import DpmkApi, Pattern, Route
 from .const import CONF_SCHOOL_MODE, DOMAIN, SCHEDULE_TTL_SECONDS, SCHOOL_AUTO
-from .planner import WALK_METERS_PER_MINUTE, Connection, Network, Tables, plan_route
+from .planner import WALK_METERS_PER_MINUTE, Connection, Network, Tables, estimate_arrivals, plan_route
 from .schedule import day_type_for, index_vehicles
 from .stops import Catalog, sort_key
 
@@ -72,7 +72,7 @@ class Router:
     async def _restore(self) -> None:
         try:
             data = await self._store.async_load()
-            if not data:
+            if not data or not data.get("complete"):  # a file from before the last stops were added
                 return
             patterns = [Pattern.from_json(p) for p in data["patterns"]]
             age = time.time() - float(data["saved"])
@@ -85,7 +85,7 @@ class Router:
 
     async def _download(self) -> None:
         ids = await self.api.get_line_ids()
-        sem = asyncio.Semaphore(3)
+        sem = asyncio.Semaphore(5)  # one-off: the line pages and one timetable page per line direction
 
         async def one(line_id: str) -> list[Pattern]:
             async with sem:
@@ -94,11 +94,33 @@ class Router:
         patterns = [p for group in await asyncio.gather(*(one(i) for i in ids)) for p in group]
         if not patterns:
             raise RoutingError("unavailable")
+        self._tables.clear()  # a new timetable version: the pages are renewed too
+
+        async def complete(pattern: Pattern) -> Pattern:
+            """The line page leaves out the last stop; the timetable page of the first stop has it."""
+            first, seq = pattern.stops[0]
+            async with sem:
+                try:
+                    page = await self.api.get_timetable(
+                        Route(pattern.line_id, pattern.line, pattern.line_type, pattern.destination, seq, pattern.direction),
+                        first, seq,
+                    )
+                except Exception as err:  # this one keeps its shorter list
+                    _LOGGER.debug("Could not complete line %s: %s", pattern.line, err)
+                    return pattern
+            self._tables[(pattern.line_id, pattern.direction, first)] = (
+                time.monotonic() + SCHEDULE_TTL_SECONDS,
+                {dtype: dict(rows) for dtype, rows in page.tables.items()},
+            )
+            return pattern.completed(page.stops)
+
+        patterns = list(await asyncio.gather(*(complete(p) for p in patterns)))
         self._network = Network(patterns)
         self._network_until = time.monotonic() + SCHEDULE_TTL_SECONDS
-        self._tables.clear()  # a new timetable version: the pages are renewed too
         try:
-            await self._store.async_save({"saved": time.time(), "patterns": [p.to_json() for p in patterns]})
+            await self._store.async_save(
+                {"saved": time.time(), "complete": True, "patterns": [p.to_json() for p in patterns]}
+            )
         except Exception as err:  # only a slower next start
             _LOGGER.debug("Could not save the line network: %s", err)
 
@@ -113,6 +135,11 @@ class Router:
         route = Route(pattern.line_id, pattern.line, pattern.line_type, pattern.destination, seq or "", pattern.direction)
         page = await self.api.get_timetable(route, stop_id, seq)
         tables = {dtype: dict(rows) for dtype, rows in page.tables.items()}
+        if not any(tables.values()) and len(pattern.stops) >= 2 and stop_id == pattern.stops[-1][0]:
+            # the last stop has no times of its own: work them out from the stops before it
+            previous = await self.table(pattern, pattern.stops[-2][0])
+            before = await self.table(pattern, pattern.stops[-3][0]) if len(pattern.stops) >= 3 else None
+            tables = estimate_arrivals(previous, before)
         self._tables[key] = (time.monotonic() + SCHEDULE_TTL_SECONDS, tables)
         return tables
 

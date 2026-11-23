@@ -179,8 +179,13 @@ Pick a start and a destination (type to search the stop list), choose **Teraz / 
 |---|---|
 | ![Route card, direct connections](https://raw.githubusercontent.com/TGergely/ha_dpmk/main/docs/images/example-route-direct.png) | ![Route card, connection with a change](https://raw.githubusercontent.com/TGergely/ha_dpmk/main/docs/images/example-route-change.png) |
 
+Night lines work too, for example N1 from Staničné námestie to Madridská at 23:15, 00:15 and 03:45 (trips after midnight are marked **zajtra** / tomorrow):
+
+![Route card, night line N1](https://raw.githubusercontent.com/TGergely/ha_dpmk/main/docs/images/example-route-night.png)
+
 - The card editor has stop lists for the start and the destination. Your choice in the card is remembered in this browser.
 - The planner runs inside Home Assistant and uses only dpmk.sk data. It learns which stops each line serves from the 70 line pages once (kept for 12 hours, also on disk) and then reads only the timetable pages a search needs, so the first search of a pair of stops takes a few seconds and later ones are quick.
+- DPMK publishes no times at the last stop of a line direction, so an arrival there (for example at the end of a night line) is estimated from the stops before it, usually within a minute or two.
 - It finds direct trips and trips with **one change**. Trips that need two or more changes are not found. It plans by the timetable: a detour or a cancelled trip is not known.
 - It needs the integration to be set up (at least one stop or place), but it does not matter which stop.
 
