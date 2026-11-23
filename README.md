@@ -171,6 +171,7 @@ to_stop: "113"         # optional destination
 title: Plánovač trasy  # optional
 max_rows: 4            # optional, 1-8 connections
 walk: 300              # optional, metres to walk to a nearby stop at the start and the end (default 0 = off)
+show_walk: true        # optional, false hides the walk switch of the card
 language: sk           # optional: sk | en | auto. Leave it out to use the integration setting
 ```
 
@@ -184,7 +185,7 @@ Night lines work too, for example N1 from Staničné námestie to Madridská at 
 
 ![Route card, night line N1](https://raw.githubusercontent.com/TGergely/ha_dpmk/main/docs/images/example-route-night.png)
 
-**Walking to a nearby stop.** Maybe no bus goes from your stop at that hour, but one stop away a better line runs. Walking is **off by default**. Turn it on with `walk` (for example 300 m, about one stop; 0 = off; up to 600 m) and the planner also tries the stops within that distance of the start and of the destination. It shows the walk as a line on the connection ("Chôdza 3 min na zastávku …" / "Walk 3 min to …"), you set off earlier by the walking time, and the arrival includes the walk at the end. A bus that leaves before you could get to its stop is not offered. Walking is only tried when the stops you picked give fewer than three connections, so a good direct connection is never replaced. The distance is a straight line (about 70 m per minute), not a street route.
+**Walking to a nearby stop.** Maybe no bus goes from your stop at that hour, but one stop away a better line runs. Walking is **off by default**. Turn it on with `walk` (for example 300 m, about one stop; 0 = off; up to 600 m) and the planner also tries the stops within that distance of the start and of the destination. It shows the walk as a line on the connection ("Chôdza 3 min na zastávku …" / "Walk 3 min to …"), you set off earlier by the walking time, and the arrival includes the walk at the end. A bus that leaves before you could get to its stop is not offered. Walking is only tried when the stops you picked give fewer than three connections, so a good direct connection is never replaced. The distance is a straight line (about 70 m per minute), not a street route. The card has a **🚶 Chôdza / Walk** switch next to the time buttons: turn walking on or off right there (on = the `walk` distance, or 300 m when none is set). The choice is remembered in the browser; `show_walk: false` hides the switch.
 
 ![Route card, walking to a nearby stop](https://raw.githubusercontent.com/TGergely/ha_dpmk/main/docs/images/example-route-walk.png)
 
@@ -244,7 +245,7 @@ Weekends and Slovak public holidays always use the "free days" timetable.
 **"Custom element doesn't exist: dpmk-departures-card" (or the map card)**
 1. Open `http://YOUR_HA:8123/dpmk_static/dpmk-departures-card.js`. You should see JavaScript code. If not, the integration is not loaded: check **Settings → System → Logs** for `dpmk`.
 2. Clear the frontend cache (Ctrl+F5, or in the phone app: Settings → Companion App → Debugging → Reset frontend cache).
-3. If it still fails, add the file as a dashboard resource: **Settings → Dashboards → ⋮ → Resources → Add resource**, URL `/dpmk_static/dpmk-departures-card.js?v=1` (change the number after an update), type **JavaScript module**. The file protects itself against being loaded twice.
+3. If it still fails, add the file as a dashboard resource: **Settings → Dashboards → ⋮ → Resources → Add resource**, URL `/dpmk_static/dpmk-departures-card.js`, type **JavaScript module**. The file protects itself against being loaded twice.
 
 **Only a few buses on the map** — the radius is probably small. Increase it in the options (1500 m is a good start). Buses without a green dot in the departures list have not started their trip yet and are not on the map.
 

@@ -4,6 +4,21 @@ All notable changes to this project are listed here. The version number lives on
 `custom_components/dpmk/manifest.json`. While the number starts with 0, new features may still
 change how things work.
 
+## 0.4.3 - 2026-11-23
+
+- **Walk switch on the route card**: a "🚶 Chôdza / Walk" button next to Teraz / Odchod / Príchod turns walking to a
+  nearby stop on or off without opening the settings. On uses the card's `walk` distance (300 m when none is
+  set). The choice is remembered in the browser; the card starts with the switch on when `walk` is set.
+  `show_walk: false` hides the switch (new editor option "Show the walk switch").
+- **A new card file is picked up by a page refresh.** The card is now served from a fixed address and the browser
+  checks it on every load (a small "unchanged" answer when nothing changed). Before, the address carried a
+  version token that was only computed when Home Assistant started, so an updated card file could keep
+  showing the old card until then. Changes that only touch the card need no restart; changes to the Python
+  part of the integration are still loaded only when Home Assistant starts.
+- **The card is loaded as in 0.3.x** (one extra module URL). Versions 0.4.0 to 0.4.2 also added it to the
+  dashboard resources (the 0.3.2 attempt never took effect because of a wrong call); that is gone, and a
+  resource entry left by those versions is removed once Home Assistant has started.
+
 ## 0.4.2 - 2026-11-23
 
 - **Walking to a nearby stop at the start and the end** (route card and saved routes), off by default. When the stops you

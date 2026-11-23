@@ -54,6 +54,8 @@
       route_name: "DPMK plánovač trasy",
       route_desc: "Spojenie medzi dvoma zastávkami DPMK Košice, aj s prestupom",
       walk: "Chôdza k blízkej zastávke (m, 0 = vypnuté)",
+      walk_switch: "Chôdza",
+      show_walk: "Zobraziť prepínač chôdze",
       route_walk_start: "Chôdza {min} min na zastávku {stop}",
       route_walk_end: "Chôdza {min} min zo zastávky {stop}",
       none: "Žiadne ďalšie odchody",
@@ -123,6 +125,8 @@
       route_name: "DPMK route planner",
       route_desc: "Connections between two DPMK Košice stops, also with a change",
       walk: "Walk to a nearby stop (m, 0 = off)",
+      walk_switch: "Walk",
+      show_walk: "Show the walk switch",
       route_walk_start: "Walk {min} min to {stop}",
       route_walk_end: "Walk {min} min from {stop}",
       none: "No upcoming departures",
@@ -873,6 +877,9 @@
         to: String(s.to || this._config.to_stop || ""),
         mode: ["now", "depart", "arrive"].includes(s.mode) ? s.mode : "now",
         time: /^\d\d:\d\d$/.test(s.time || "") ? s.time : nowHHMM(),
+        // the walk switch: what was chosen last time, else on when the card settings give a distance
+        walk: s.walkSet === true ? !!s.walk : Number(this._config.walk) > 0,
+        walkSet: s.walkSet === true, // only a click on the switch is remembered, not the default
       };
     }
 
@@ -968,6 +975,7 @@
             <button type="button" data-m="depart"></button>
             <button type="button" data-m="arrive"></button>
             <input type="time">
+            <button type="button" data-walk></button>
           </div>
           <div class="results" aria-live="polite" aria-busy="false"></div>
           <div class="foot"></div>
@@ -984,6 +992,7 @@
         if (!b) return;
         if (b.dataset.m) this._set({ mode: b.dataset.m });
         else if (b.hasAttribute("data-swap")) this._set({ from: this._state.to, to: this._state.from });
+        else if (b.hasAttribute("data-walk")) this._set({ walk: !this._state.walk, walkSet: true });
       });
     }
 
@@ -1026,6 +1035,10 @@
         b.textContent = t(`route_${b.dataset.m}`);
         b.setAttribute("aria-pressed", String(this._state.mode === b.dataset.m));
       }
+      const walk = q("[data-walk]");
+      walk.textContent = `🚶 ${t("walk_switch")}`;
+      walk.setAttribute("aria-pressed", String(!!this._state.walk));
+      walk.hidden = this._config.show_walk === false;
       const time = q("input[type=time]");
       time.hidden = this._state.mode === "now";
       time.value = this._state.time;
@@ -1061,7 +1074,13 @@
         const msg = { type: "dpmk/plan_route", from, to, mode, limit: this._config.max_rows || 4 };
         if (mode !== "now") msg.time = time;
         // metres one may walk to a nearby stop at the start and the end; left out = the integration's default
-        if (Number.isFinite(Number(this._config.walk))) msg.walk = Math.max(0, Math.min(600, Math.round(Number(this._config.walk))));
+        const cfgWalk = Number(this._config.walk);
+        if (this._config.show_walk === false) {
+          if (Number.isFinite(cfgWalk)) msg.walk = Math.max(0, Math.min(600, Math.round(cfgWalk)));
+        } else {
+          // the switch: on = the distance of the card settings (300 m when none is set), off = no walking
+          msg.walk = this._state.walk ? Math.max(0, Math.min(600, Math.round(cfgWalk > 0 ? cfgWalk : 300))) : 0;
+        }
         const result = await this._hass.callWS(msg);
         if (seq !== this._seq) return;
         this._hasResults = true;
@@ -1181,13 +1200,14 @@
           ? { name, selector: { select: { mode: "dropdown", options: stops.map((s) => ({ value: s.id, label: s.label })) } } }
           : { name, selector: { text: {} } };
       this._form.hass = this._hass;
-      this._form.data = { max_rows: 4, walk: 0, ...this._config };
+      this._form.data = { max_rows: 4, walk: 0, show_walk: true, ...this._config };
       this._form.schema = [
         pick("from_stop"),
         pick("to_stop"),
         { name: "title", selector: { text: {} } },
         { name: "max_rows", selector: { number: { min: 1, max: 8, mode: "box" } } },
         { name: "walk", selector: { number: { min: 0, max: 600, step: 50, mode: "box", unit_of_measurement: "m" } } },
+        { name: "show_walk", selector: { boolean: {} } },
         LANGUAGE_FIELD,
       ];
     }
