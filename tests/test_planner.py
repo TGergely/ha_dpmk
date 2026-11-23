@@ -73,7 +73,7 @@ def signature(connections):
     ]
 
 
-def reference(patterns, trips, starts, ends, now, school_mode, limit, neighbours=None):
+def reference(patterns, trips, starts, ends, now, school_mode, limit, neighbours=None, start_walk=None, end_walk=None):
     """Every vehicle trip between every pair of stops, then every pairing, then the same filtering."""
     midnight = now.replace(hour=0, minute=0, second=0, microsecond=0)
     earliest, latest = now - timedelta(minutes=1), now + planner.HORIZON
@@ -87,19 +87,26 @@ def reference(patterns, trips, starts, ends, now, school_mode, limit, neighbours
                     for j in range(i + 1, len(ids)):
                         legs.append(planner.Leg(pattern, ids[i], ids[j], day + timedelta(minutes=times[i]),
                                                 day + timedelta(minutes=times[j]), trip, offset))
-    found = [planner.Connection((l,), ()) for l in legs if l.board in starts and l.alight in ends and earliest <= l.depart <= latest]
+    ws = {**(start_walk or {}), **{s: 0 for s in starts}}  # where you can board, with the walk to it
+    we = {**(end_walk or {}), **{e: 0 for e in ends}}
+    minutes = lambda n: timedelta(minutes=n)
+    found = [
+        planner.Connection((l,), (), ws[l.board], we[l.alight])
+        for l in legs
+        if l.board in ws and l.alight in we and earliest + minutes(ws[l.board]) <= l.depart <= latest
+    ]
     for l1 in legs:
-        if l1.board not in starts or not earliest <= l1.depart <= latest:
+        if l1.board not in ws or not earliest + minutes(ws[l1.board]) <= l1.depart <= latest:
             continue
         for l2 in legs:
-            if l2.alight not in ends or l2.pattern is l1.pattern and l2.board == l1.alight:
+            if l2.alight not in we or l2.pattern is l1.pattern and l2.board == l1.alight:
                 continue
             walk = 0 if l2.board == l1.alight else dict(neighbours(l1.alight)).get(l2.board) if neighbours else None
             if walk is None:
                 continue
             if l2.depart >= l1.arrive + timedelta(minutes=walk + MIN_TRANSFER) and \
                     earliest - timedelta(hours=1) <= l2.depart <= latest + timedelta(hours=3):
-                found.append(planner.Connection((l1, l2), (walk,)))
+                found.append(planner.Connection((l1, l2), (walk,), ws[l1.board], we[l2.alight]))
     unique = {tuple((l.pattern.line_id, l.trip, l.day_offset, l.board, l.alight) for l in c.legs): c for c in found}
     pool = list(unique.values())
     good = [c for c in pool if not planner._dominated(c, pool)]
@@ -132,6 +139,66 @@ def test_walking_between_nearby_stops(seed):
     got = run(plan_route(network, source, [a], [b], now, "auto", 50, neighbours=lambda s: near[s],
                          transfers="always", max_plans=None))
     assert signature(got) == signature(want)
+
+
+@pytest.mark.parametrize("seed", range(8))
+def test_walking_at_the_start_and_the_end(seed):
+    rng = random.Random(200 + seed)
+    stops, patterns, trips = make_world(rng)
+    a, b = rng.sample(stops, 2)
+    others = [s for s in stops if s not in (a, b)]
+    sw = {s: rng.randint(1, 6) for s in rng.sample(others, 2)}
+    ew = {s: rng.randint(1, 6) for s in rng.sample(others, 2)}
+    network, source = Network(patterns), make_source(patterns, trips)
+    for now in MOMENTS[:3]:
+        want = reference(patterns, trips, {a}, {b}, now, "auto", 50, start_walk=sw, end_walk=ew)
+        got = run(plan_route(network, source, [a], [b], now, "auto", 50, transfers="always", max_plans=None,
+                             start_walk=sw, end_walk=ew))
+        assert signature(got) == signature(want), (seed, now)
+
+
+def walking_world():
+    """Line 1 serves only A2 and B (A2 is a short walk from A); line 2 serves A and B but only late."""
+    p1 = Pattern("40001", "1", "A", "0", "B", (("A2", "1"), ("B", "2")))
+    p2 = Pattern("40002", "2", "A", "0", "B", (("A", "1"), ("B", "2")))
+    t1 = [(f"t{k}", [600 + 10 * k, 608 + 10 * k]) for k in range(4)]
+    t2 = [("u0", [700, 710])]
+    return [p1, p2], [{d: t1 for d in DAY_TYPES}, {d: t2 for d in DAY_TYPES}]
+
+
+def test_walking_to_a_nearby_stop_gives_a_better_connection():
+    patterns, trips = walking_world()
+    network, source = Network(patterns), make_source(patterns, trips)
+    now = datetime(2026, 10, 23, 9, 50, tzinfo=TZ)
+    plain = run(plan_route(network, source, ["A"], ["B"], now, "school", 3))
+    walk = run(plan_route(network, source, ["A"], ["B"], now, "school", 3, start_walk={"A2": 4}))
+    assert [c.legs[0].pattern.line for c in plain] == ["2"]  # only the late line without walking
+    first = walk[0]
+    assert first.legs[0].pattern.line == "1" and first.walk_start == 4
+    assert first.legs[0].depart.strftime("%H:%M") == "10:00"
+    assert first.depart.strftime("%H:%M") == "09:56"  # you set off 4 minutes before the bus
+    assert first.arrive.strftime("%H:%M") == "10:08"
+    # too far to walk in time: the 10:00 bus leaves before you get there
+    late = datetime(2026, 10, 23, 9, 58, tzinfo=TZ)
+    assert run(plan_route(network, source, ["A"], ["B"], late, "school", 1, start_walk={"A2": 4}))[0].legs[0].depart.strftime("%H:%M") == "10:10"
+
+
+def test_walking_at_the_end_counts_in_the_arrival():
+    patterns, trips = walking_world()
+    network, source = Network(patterns), make_source(patterns, trips)
+    now = datetime(2026, 10, 23, 9, 50, tzinfo=TZ)
+    # the destination is B2, 3 minutes' walk from B, and no line serves B2
+    got = run(plan_route(network, source, ["A2"], ["B2"], now, "school", 2, end_walk={"B": 3}))
+    assert got[0].walk_end == 3 and got[0].arrive.strftime("%H:%M") == "10:11"
+
+
+def test_walking_is_not_tried_when_there_are_enough_connections():
+    patterns, trips = walking_world()
+    network, source = Network(patterns), make_source(patterns, trips)
+    now = datetime(2026, 10, 23, 9, 50, tzinfo=TZ)
+    got = run(plan_route(network, source, ["A2"], ["B"], now, "school", 3, start_walk={"A": 4}))
+    assert len(got) == 3 and all(c.walk_start == 0 for c in got)  # line 1 itself gives three
+    assert {line for line, _ in source.calls} == {"40001"}
 
 
 def test_several_poles_of_one_stop():

@@ -35,7 +35,11 @@
         "data": {
           "route_from": "Start",
           "route_to": "Destination",
-          "route_name": "Name (optional)"
+          "route_name": "Name (optional)",
+          "route_walk": "Walk to a nearby stop (metres, 0 = off)"
+        },
+        "data_description": {
+          "route_walk": "Off (0) by default. Set a distance, for example 300 m (about one stop), and at the start and the end the route may use a stop that far away when it gives a better connection. Counted as walking time."
         }
       },
       "place_stops": {
@@ -75,7 +79,8 @@
           "is_default": "Use as the default for cards",
           "route_from": "Start",
           "route_to": "Destination",
-          "route_connections": "Number of connections kept"
+          "route_connections": "Number of connections kept",
+          "route_walk": "Walk to a nearby stop (metres, 0 = off)"
         },
         "data_description": {
           "update_interval": "How often the live vehicle feed is read. Minimum 5 s. DPMK itself updates a vehicle roughly every 20 s, so values below 10 s rarely help.",
@@ -84,7 +89,8 @@
           "auto_location": "A single stop only. Turn off to place the map on a point of your own (the next field).",
           "location": "Used for a place, and for a stop when the option above is off.",
           "map_radius": "How far around the centre vehicles are shown.",
-          "is_default": "Cards without an entity use this stop or place."
+          "is_default": "Cards without an entity use this stop or place.",
+          "route_walk": "Saved routes only. Off (0) by default. Set a distance, for example 300 m (about one stop), and at the start and the end the route may use a stop that far away when it gives a better connection. Counted as walking time."
         }
       }
     }

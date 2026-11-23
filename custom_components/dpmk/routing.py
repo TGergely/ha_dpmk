@@ -13,7 +13,7 @@ from homeassistant.helpers.storage import Store
 from homeassistant.util import dt as dt_util
 
 from .api import DpmkApi, Pattern, Route
-from .const import CONF_SCHOOL_MODE, DOMAIN, SCHEDULE_TTL_SECONDS, SCHOOL_AUTO
+from .const import CONF_SCHOOL_MODE, DEFAULT_WALK_M, DOMAIN, MAX_WALK_M, SCHEDULE_TTL_SECONDS, SCHOOL_AUTO
 from .planner import WALK_METERS_PER_MINUTE, Connection, Network, Tables, estimate_arrivals, plan_route
 from .schedule import day_type_for, index_vehicles
 from .stops import Catalog, sort_key
@@ -49,7 +49,7 @@ class Router:
         self._tables: dict[tuple[str, str, str], tuple[float, Tables]] = {}
         self._colors: dict[str, dict[str, str]] = {}
         self._colors_until = 0.0
-        self._walk: dict[str, list[tuple[str, int]]] = {}
+        self._walk: dict[tuple[str, int], list[tuple[str, int]]] = {}
 
     # ---- the network -----------------------------------------------------------------------
 
@@ -159,17 +159,22 @@ class Router:
         entries = self.hass.config_entries.async_entries(DOMAIN)
         return entries[0].options.get(CONF_SCHOOL_MODE, SCHOOL_AUTO) if entries else SCHOOL_AUTO
 
-    def _neighbours(self, stop_id: str) -> list[tuple[str, int]]:
-        """Other stops within walking distance, with the minutes it takes."""
-        if stop_id not in self._walk:
+    def _near(self, stop_id: str, radius: int) -> list[tuple[str, int]]:
+        """Other stops within `radius` metres, with the minutes it takes to walk there."""
+        key = (stop_id, radius)
+        if key not in self._walk:
             info = self.catalog.get(stop_id)
             found: list[tuple[str, int]] = []
             if info and info.has_position:
-                for other, dist in self.catalog.near(info.lat, info.lng, WALK_RADIUS_M):
+                for other, dist in self.catalog.near(info.lat, info.lng, radius):
                     if other.stop_id != stop_id:
                         found.append((other.stop_id, max(1, round(dist / WALK_METERS_PER_MINUTE))))
-            self._walk[stop_id] = found
-        return self._walk[stop_id]
+            self._walk[key] = found
+        return self._walk[key]
+
+    def _neighbours(self, stop_id: str) -> list[tuple[str, int]]:
+        """Stops to change to on foot (a fixed short distance)."""
+        return self._near(stop_id, WALK_RADIUS_M)
 
     def stop_name(self, stop_id: str) -> str:
         info = self.catalog.get(stop_id)
@@ -182,7 +187,10 @@ class Router:
 
     # ---- the search ------------------------------------------------------------------------
 
-    async def plan(self, start: str, end: str, mode: str = "now", at: str | None = None, limit: int = 4) -> dict:
+    async def plan(
+        self, start: str, end: str, mode: str = "now", at: str | None = None, limit: int = 4, walk: int = DEFAULT_WALK_M
+    ) -> dict:
+        """The next connections. `walk`: metres one may walk to a nearby stop at the start and the end."""
         if start == end:
             raise RoutingError("same_stop")
         if self.catalog.get(start) is None or self.catalog.get(end) is None:
@@ -196,10 +204,14 @@ class Router:
 
         target = self._resolve_time(mode, at, now)
         search_from = target - SEARCH_BACK if mode == "arrive" else target
+        walk = max(0, min(MAX_WALK_M, int(walk)))
+        start_walk = {s: m for s, m in self._near(start, walk) if s != end} if walk else None
+        end_walk = {s: m for s, m in self._near(end, walk) if s != start} if walk else None
         try:
             found = await plan_route(
                 network, self.table, [start], [end], search_from, school,
                 limit=40 if mode == "arrive" else limit, neighbours=self._neighbours,
+                start_walk=start_walk, end_walk=end_walk,
             )
         except RoutingError:
             raise
@@ -295,4 +307,7 @@ class Router:
             "minutes": int((c.arrive - c.depart).total_seconds() // 60),
             "legs": legs,
             "changes": changes,
+            # the walk from where you start to the first stop, and from the last stop to where you go
+            "walk_start": {"minutes": c.walk_start, "stop": self.stop_name(c.legs[0].board)} if c.walk_start else None,
+            "walk_end": {"minutes": c.walk_end, "stop": self.stop_name(c.legs[-1].alight)} if c.walk_end else None,
         }

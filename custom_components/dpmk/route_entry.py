@@ -15,7 +15,9 @@ from .const import (
     CONF_ROUTE_COUNT,
     CONF_ROUTE_FROM,
     CONF_ROUTE_TO,
+    CONF_ROUTE_WALK,
     DEFAULT_ROUTE_COUNT,
+    DEFAULT_WALK_M,
     DOMAIN,
     ROUTE_UPDATE_SECONDS,
 )
@@ -49,9 +51,14 @@ class RouteCoordinator(DataUpdateCoordinator[dict]):
     def count(self) -> int:
         return int(self.entry.options.get(CONF_ROUTE_COUNT, DEFAULT_ROUTE_COUNT))
 
+    @property
+    def walk(self) -> int:
+        """Metres one may walk to a nearby stop at the start and the end (0 = off)."""
+        return int(self.entry.options.get(CONF_ROUTE_WALK, DEFAULT_WALK_M))
+
     async def _async_update_data(self) -> dict:
         try:
-            return await self.router.plan(self.from_id, self.to_id, "now", None, self.count)
+            return await self.router.plan(self.from_id, self.to_id, "now", None, self.count, self.walk)
         except RoutingError as err:
             raise UpdateFailed(f"No route search possible: {err.code}") from err
         except Exception as err:
@@ -110,6 +117,8 @@ class RouteSensor(CoordinatorEntity[RouteCoordinator], SensorEntity):
                 "arrival": _expected(first, "arrive").isoformat(),
                 "duration": first["minutes"],
                 "changes": len(first["changes"]),
+                "walk_start": first.get("walk_start"),
+                "walk_end": first.get("walk_end"),
                 "lines": [leg["line"] for leg in first["legs"]],
                 "live": first["legs"][0]["live"],
                 "delay_min": first["legs"][0]["delay_min"],

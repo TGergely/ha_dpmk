@@ -44,6 +44,9 @@ CONF_ROUTE_TO = "route_to"
 CONF_ROUTE_NAME = "route_name"
 CONF_ROUTE_COUNT = "route_connections"
 DEFAULT_ROUTE_COUNT = 3
+CONF_ROUTE_WALK = "route_walk"  # metres one may walk to a nearby stop at the start and the end (0 = off)
+DEFAULT_WALK_M = 0  # off by default; 300 m is about one stop
+MAX_WALK_M = 600
 ROUTE_UPDATE_SECONDS = 60
 
 DEFAULT_MAX_DEPARTURES = 8

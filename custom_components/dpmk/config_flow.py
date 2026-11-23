@@ -38,6 +38,7 @@ from .const import (
     CONF_ROUTE_FROM,
     CONF_ROUTE_NAME,
     CONF_ROUTE_TO,
+    CONF_ROUTE_WALK,
     CONF_ROUTES,
     CONF_SCHOOL_MODE,
     CONF_STOP_ID,
@@ -50,12 +51,14 @@ from .const import (
     DEFAULT_PLACE_RADIUS,
     DEFAULT_RADIUS,
     DEFAULT_ROUTE_COUNT,
+    DEFAULT_WALK_M,
     DEFAULT_UPDATE_INTERVAL,
     DOMAIN,
     LANG_AUTO,
     LANG_EN,
     LANG_SK,
     MAX_UPDATE_INTERVAL,
+    MAX_WALK_M,
     MIN_UPDATE_INTERVAL,
     PLACE_CANDIDATE_RADIUS,
     SCHOOL_AUTO,
@@ -68,6 +71,13 @@ from .stops import Catalog, StopInfo, load_catalog
 
 PLACE_PRETICKED = 8  # a place preselects at most this many stops (the nearest ones)
 PLACE_REACH = 800  # metres: stops this close are offered even when the radius is smaller
+
+
+def walk_selector() -> NumberSelector:
+    """How far one may walk to a nearby stop at the start and the end of a route; 0 turns it off."""
+    return NumberSelector(
+        NumberSelectorConfig(min=0, max=MAX_WALK_M, step=50, unit_of_measurement="m", mode=NumberSelectorMode.BOX)
+    )
 
 
 def format_distance(metres: float) -> str:
@@ -127,6 +137,7 @@ class DpmkConfigFlow(ConfigFlow, domain=DOMAIN):
                 return self.async_create_entry(
                     title=title,
                     data={CONF_ROUTE_FROM: start, CONF_ROUTE_TO: end, CONF_ROUTE_NAME: title},
+                    options={CONF_ROUTE_WALK: int(user_input.get(CONF_ROUTE_WALK, DEFAULT_WALK_M))},
                 )
         options = stop_options(catalog, self.hass.config.latitude, self.hass.config.longitude)
         picker = SelectSelector(SelectSelectorConfig(options=options, mode=SelectSelectorMode.DROPDOWN))
@@ -135,6 +146,7 @@ class DpmkConfigFlow(ConfigFlow, domain=DOMAIN):
                 vol.Required(CONF_ROUTE_FROM): picker,
                 vol.Required(CONF_ROUTE_TO): picker,
                 vol.Optional(CONF_ROUTE_NAME): str,
+                vol.Optional(CONF_ROUTE_WALK, default=DEFAULT_WALK_M): walk_selector(),
             }
         )
         return self.async_show_form(step_id="route", data_schema=schema, errors=errors)
@@ -290,6 +302,7 @@ class DpmkOptionsFlow(OptionsFlow):
                 vol.Optional(
                     CONF_ROUTE_COUNT, default=opts.get(CONF_ROUTE_COUNT, DEFAULT_ROUTE_COUNT)
                 ): NumberSelector(NumberSelectorConfig(min=1, max=8, step=1, mode=NumberSelectorMode.BOX)),
+                vol.Optional(CONF_ROUTE_WALK, default=opts.get(CONF_ROUTE_WALK, DEFAULT_WALK_M)): walk_selector(),
             }
         )
         return self.async_show_form(step_id="init", data_schema=schema, errors=errors)

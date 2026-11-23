@@ -85,7 +85,7 @@ A saved route is a trip you make often, for example home to work. Choose **A sav
 - **State:** when the next connection leaves (a time), including the live delay of the first vehicle when DPMK reports one.
 - **Attributes:** `from`, `to`, `scheduled_departure`, `arrival`, `duration` (minutes), `changes` (0 or 1), `lines`, `live`, `delay_min`, and `connections`: the next connections (3 by default, 1 to 8 in **Configure**), each with its legs, times, change stop and waiting time.
 - It looks up the trip once a minute, with the same planner as the route card (direct trips and trips with one change, by the timetable), and does not use the live feed more often than the rest of the integration.
-- You can change the start, the destination and the number of connections later in **Configure**.
+- You can change the start, the destination, the number of connections and the **walk to a nearby stop** (off by default; try 300 m) later in **Configure**. With walking on, the sensor's state is the time you set off, and `walk_start` / `walk_end` in the attributes say how many minutes to walk and to which stop.
 
 Example: a notice 10 minutes before you have to leave.
 
@@ -170,6 +170,7 @@ from_stop: "42"        # optional start (stop number); leave out to pick it in t
 to_stop: "113"         # optional destination
 title: Plánovač trasy  # optional
 max_rows: 4            # optional, 1-8 connections
+walk: 300              # optional, metres to walk to a nearby stop at the start and the end (default 0 = off)
 language: sk           # optional: sk | en | auto. Leave it out to use the integration setting
 ```
 
@@ -182,6 +183,10 @@ Pick a start and a destination (type to search the stop list), choose **Teraz / 
 Night lines work too, for example N1 from Staničné námestie to Madridská at 23:15, 00:15 and 03:45 (trips after midnight are marked **zajtra** / tomorrow):
 
 ![Route card, night line N1](https://raw.githubusercontent.com/TGergely/ha_dpmk/main/docs/images/example-route-night.png)
+
+**Walking to a nearby stop.** Maybe no bus goes from your stop at that hour, but one stop away a better line runs. Walking is **off by default**. Turn it on with `walk` (for example 300 m, about one stop; 0 = off; up to 600 m) and the planner also tries the stops within that distance of the start and of the destination. It shows the walk as a line on the connection ("Chôdza 3 min na zastávku …" / "Walk 3 min to …"), you set off earlier by the walking time, and the arrival includes the walk at the end. A bus that leaves before you could get to its stop is not offered. Walking is only tried when the stops you picked give fewer than three connections, so a good direct connection is never replaced. The distance is a straight line (about 70 m per minute), not a street route.
+
+![Route card, walking to a nearby stop](https://raw.githubusercontent.com/TGergely/ha_dpmk/main/docs/images/example-route-walk.png)
 
 - The card editor has stop lists for the start and the destination. Your choice in the card is remembered in this browser.
 - The planner runs inside Home Assistant and uses only dpmk.sk data. It learns which stops each line serves from the 70 line pages once (kept for 12 hours, also on disk) and then reads only the timetable pages a search needs, so the first search of a pair of stops takes a few seconds and later ones are quick.

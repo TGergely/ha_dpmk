@@ -35,7 +35,11 @@
         "data": {
           "route_from": "Začiatok",
           "route_to": "Cieľ",
-          "route_name": "Názov (nepovinné)"
+          "route_name": "Názov (nepovinné)",
+          "route_walk": "Chôdza k blízkej zastávke (metre, 0 = vypnuté)"
+        },
+        "data_description": {
+          "route_walk": "Predvolene vypnuté (0). Nastavte vzdialenosť, napríklad 300 m (zhruba jedna zastávka), a na začiatku a na konci môže trasa použiť zastávku vzdialenú toľko metrov, ak to dá lepšie spojenie. Počíta sa do času chôdze."
         }
       },
       "place_stops": {
@@ -75,7 +79,8 @@
           "is_default": "Použiť ako predvolenú pre karty",
           "route_from": "Začiatok",
           "route_to": "Cieľ",
-          "route_connections": "Počet uložených spojení"
+          "route_connections": "Počet uložených spojení",
+          "route_walk": "Chôdza k blízkej zastávke (metre, 0 = vypnuté)"
         },
         "data_description": {
           "update_interval": "Ako často sa číta živý prehľad vozidiel. Minimum 5 s. DPMK aktualizuje polohu vozidla zhruba každých 20 s, takže hodnoty pod 10 s zvyčajne nepomôžu.",
@@ -84,7 +89,8 @@
           "auto_location": "Iba pre jednu zastávku. Vypnite, ak chcete mapu na vlastnom bode (nasledujúce pole).",
           "location": "Použije sa pre miesto, a pre zastávku, keď je predchádzajúca voľba vypnutá.",
           "map_radius": "Ako ďaleko okolo stredu sa zobrazujú vozidlá.",
-          "is_default": "Karty bez zvolenej entity použijú túto zastávku alebo miesto."
+          "is_default": "Karty bez zvolenej entity použijú túto zastávku alebo miesto.",
+          "route_walk": "Iba uložené trasy. Predvolene vypnuté (0). Nastavte vzdialenosť, napríklad 300 m (zhruba jedna zastávka), a na začiatku a na konci môže trasa použiť zastávku vzdialenú toľko metrov, ak to dá lepšie spojenie. Počíta sa do času chôdze."
         }
       }
     }

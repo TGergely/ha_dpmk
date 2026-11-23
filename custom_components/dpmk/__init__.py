@@ -18,7 +18,7 @@ from homeassistant.helpers.start import async_at_started
 from homeassistant.helpers.typing import ConfigType
 
 from .api import DpmkApi
-from .const import CARD_URL, CONF_ROUTE_FROM, DOMAIN
+from .const import CARD_URL, CONF_ROUTE_FROM, DEFAULT_WALK_M, DOMAIN, MAX_WALK_M
 from .coordinator import DpmkCoordinator, LiveFeed, cache_store
 from .route_entry import RouteCoordinator
 from .routing import Router, RoutingError
@@ -111,6 +111,7 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
         vol.Optional("mode", default="now"): vol.In(["now", "depart", "arrive"]),
         vol.Optional("time"): str,
         vol.Optional("limit", default=4): vol.All(int, vol.Range(min=1, max=8)),
+        vol.Optional("walk", default=DEFAULT_WALK_M): vol.All(int, vol.Range(min=0, max=MAX_WALK_M)),
     }
 )
 @websocket_api.async_response
@@ -118,7 +119,7 @@ async def ws_plan_route(hass: HomeAssistant, connection, msg: dict) -> None:
     """The next connections between two stops, for the route card."""
     try:
         result = await hass.data[DOMAIN]["router"].plan(
-            msg["from"], msg["to"], msg["mode"], msg.get("time"), msg["limit"]
+            msg["from"], msg["to"], msg["mode"], msg.get("time"), msg["limit"], msg.get("walk", DEFAULT_WALK_M)
         )
     except RoutingError as err:
         connection.send_error(msg["id"], err.code, err.code)

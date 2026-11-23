@@ -4,6 +4,16 @@ All notable changes to this project are listed here. The version number lives on
 `custom_components/dpmk/manifest.json`. While the number starts with 0, new features may still
 change how things work.
 
+## 0.4.2 - 2026-11-23
+
+- **Walking to a nearby stop at the start and the end** (route card and saved routes), off by default. When the stops you
+  picked give fewer than three connections, the planner also tries stops within a short walk of the start and of
+  the destination, for example when no bus runs from your stop at night but a line runs one stop away. The
+  walk is shown on the connection, you set off earlier by the walking time, and the arrival includes the walk
+  at the end. The distance is a setting: `walk` on the card (editor: "Walk to a nearby stop") and "Walk to a
+  nearby stop" in the options of a saved route. It is 0 (off) by default; try 300 m (about one stop); 600 m at most.
+  The saved-route sensor gets `walk_start` and `walk_end` attributes.
+
 ## 0.4.1 - 2026-11-23
 
 - **Route planner: the last stop of every line direction is now known.** The line pages of dpmk.sk leave out

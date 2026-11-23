@@ -62,14 +62,18 @@ class Leg:
 class Connection:
     legs: tuple[Leg, ...]
     walk: tuple[int, ...]  # minutes walked between leg i and leg i+1
+    walk_start: int = 0  # minutes walked from where you start to the first stop
+    walk_end: int = 0  # minutes walked from the last stop to where you are going
 
     @property
     def depart(self) -> datetime:
-        return self.legs[0].depart
+        """When you set off: the first vehicle's departure, less the walk to its stop."""
+        return self.legs[0].depart - timedelta(minutes=self.walk_start)
 
     @property
     def arrive(self) -> datetime:
-        return self.legs[-1].arrive
+        """When you are there: the last vehicle's arrival, plus the walk to the destination."""
+        return self.legs[-1].arrive + timedelta(minutes=self.walk_end)
 
     @property
     def transfers(self) -> int:
@@ -118,8 +122,15 @@ class Network:
         transfers: bool,
         neighbours: Neighbours | None = None,
         max_plans: int | None = MAX_TRANSFER_PLANS,
+        walk_start: dict[str, int] | None = None,
+        walk_end: dict[str, int] | None = None,
     ) -> list[Plan]:
-        """Line combinations from any of `starts` to any of `ends`, cheapest first."""
+        """Line combinations from any of `starts` to any of `ends`, cheapest first.
+
+        walk_start / walk_end: minutes of walking to reach a start stop, or from an end stop (only
+        used to rank the candidates; the times are worked out in combine()).
+        """
+        ws, we = walk_start or {}, walk_end or {}
         plans: dict[tuple, Plan] = {}
         for a in starts:
             for p1 in self.at.get(a, ()):
@@ -129,7 +140,7 @@ class Network:
                     pb = self.after(p1, b, a)
                     if pb is not None:
                         key = ((p1, a, b),)
-                        plans[key] = Plan(key, (), pb - first)
+                        plans[key] = Plan(key, (), pb - first + ws.get(a, 0) + we.get(b, 0))
                 if not transfers:
                     continue
                 for j in range(first + 1, len(ids1)):
@@ -144,7 +155,7 @@ class Network:
                                 if pb is None:
                                     continue
                                 key = ((p1, a, x1), (p2, x2, b))
-                                cost = (j - first) + (pb - self.positions[p2][x2][0]) + walk
+                                cost = (j - first) + (pb - self.positions[p2][x2][0]) + walk + ws.get(a, 0) + we.get(b, 0)
                                 plans[key] = Plan(key, (walk,), cost)
         direct = sorted((p for p in plans.values() if len(p.legs) == 1), key=lambda p: p.cost)
         changing = sorted((p for p in plans.values() if len(p.legs) == 2), key=lambda p: p.cost)
@@ -208,20 +219,35 @@ def combine(
     now: datetime,
     school_mode: str = SCHOOL_AUTO,
     limit: int = 5,
+    walk_start: dict[str, int] | None = None,
+    walk_end: dict[str, int] | None = None,
 ) -> list[Connection]:
-    """Turn plans plus timetables into connections: the useful ones, soonest first."""
+    """Turn plans plus timetables into connections: the useful ones, soonest first.
+
+    walk_start / walk_end: minutes to walk from where you start to a stop, and from a stop to where
+    you are going. You must reach the first stop in time, and the arrival includes the last walk.
+    """
     days = _service_days(now, school_mode)
     earliest, latest = now - timedelta(minutes=1), now + HORIZON
+    ws, we = walk_start or {}, walk_end or {}
     found: list[Connection] = []
     for plan in plans:
         if len(plan.legs) == 1:
             index, a, b = plan.legs[0]
-            for leg in _trips(network.patterns[index], a, b, tables[(index, a)], tables[(index, b)], days, earliest, latest):
-                found.append(Connection((leg,), ()))
+            wa, wb = ws.get(a, 0), we.get(b, 0)
+            for leg in _trips(
+                network.patterns[index], a, b, tables[(index, a)], tables[(index, b)], days,
+                earliest + timedelta(minutes=wa), latest,
+            ):
+                found.append(Connection((leg,), (), wa, wb))
             continue
         (i1, a, x1), (i2, x2, b) = plan.legs
         walk = plan.walk[0]
-        first = _trips(network.patterns[i1], a, x1, tables[(i1, a)], tables[(i1, x1)], days, earliest, latest)
+        wa, wb = ws.get(a, 0), we.get(b, 0)
+        first = _trips(
+            network.patterns[i1], a, x1, tables[(i1, a)], tables[(i1, x1)], days,
+            earliest + timedelta(minutes=wa), latest,
+        )
         second = _trips(
             network.patterns[i2], x2, b, tables[(i2, x2)], tables[(i2, b)], days,
             earliest - timedelta(hours=1), latest + timedelta(hours=3),
@@ -235,7 +261,7 @@ def combine(
             ready = leg.arrive + timedelta(minutes=walk + MIN_TRANSFER)
             k = bisect_left(departs, ready)
             if k < len(second):
-                found.append(Connection((leg, second[best[k]]), (walk,)))
+                found.append(Connection((leg, second[best[k]]), (walk,), wa, wb))
     # the same vehicles reached by two plans count once
     unique = {
         tuple((l.pattern.line_id, l.pattern.direction, l.trip, l.day_offset, l.board, l.alight) for l in c.legs): c
@@ -270,8 +296,15 @@ async def plan_route(
     transfers: str = "auto",  # "auto": only when there are few direct trips | "always" | "never"
     max_plans: int | None = MAX_TRANSFER_PLANS,
     concurrency: int = 3,
+    start_walk: dict[str, int] | None = None,
+    end_walk: dict[str, int] | None = None,
 ) -> list[Connection]:
-    """The next connections from one of `starts` to one of `ends` (a stop can have several poles)."""
+    """The next connections from one of `starts` to one of `ends` (a stop can have several poles).
+
+    start_walk / end_walk: other stops you could walk to at the start, or from at the end, with the
+    minutes it takes. They are looked at only when the plain search finds fewer than DIRECT_ENOUGH
+    connections (or with transfers="always").
+    """
     sem = asyncio.Semaphore(concurrency)
     tables: dict[tuple[int, str], Tables] = {}
 
@@ -287,8 +320,15 @@ async def plan_route(
     direct = network.candidates(starts, ends, transfers=False)
     await fetch(direct)
     found = combine(network, direct, tables, now, school_mode, limit)
-    if transfers == "never" or (transfers == "auto" and len(found) >= DIRECT_ENOUGH):
+    walking = bool(start_walk or end_walk)
+    if (transfers == "never" and not walking) or (transfers == "auto" and len(found) >= DIRECT_ENOUGH):
         return found
-    every = network.candidates(starts, ends, transfers=True, neighbours=neighbours, max_plans=max_plans)
+    # the walks, with the stops you named themselves at no walk
+    ws = {**(start_walk or {}), **{s: 0 for s in starts}}
+    we = {**(end_walk or {}), **{e: 0 for e in ends}}
+    every = network.candidates(
+        list(ws), list(we), transfers=transfers != "never", neighbours=neighbours, max_plans=max_plans,
+        walk_start=ws, walk_end=we,
+    )
     await fetch(every)
-    return combine(network, every, tables, now, school_mode, limit)
+    return combine(network, every, tables, now, school_mode, limit, ws, we)

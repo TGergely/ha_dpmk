@@ -53,6 +53,9 @@
       to_stop: "Cieľ (zastávka)",
       route_name: "DPMK plánovač trasy",
       route_desc: "Spojenie medzi dvoma zastávkami DPMK Košice, aj s prestupom",
+      walk: "Chôdza k blízkej zastávke (m, 0 = vypnuté)",
+      route_walk_start: "Chôdza {min} min na zastávku {stop}",
+      route_walk_end: "Chôdza {min} min zo zastávky {stop}",
       none: "Žiadne ďalšie odchody",
       unavailable: "Údaje DPMK nie sú dostupné",
       missing: "Entita nebola nájdená:",
@@ -119,6 +122,9 @@
       to_stop: "Destination (stop)",
       route_name: "DPMK route planner",
       route_desc: "Connections between two DPMK Košice stops, also with a change",
+      walk: "Walk to a nearby stop (m, 0 = off)",
+      route_walk_start: "Walk {min} min to {stop}",
+      route_walk_end: "Walk {min} min from {stop}",
       none: "No upcoming departures",
       unavailable: "DPMK data is unavailable",
       missing: "Entity not found:",
@@ -1054,6 +1060,8 @@
       try {
         const msg = { type: "dpmk/plan_route", from, to, mode, limit: this._config.max_rows || 4 };
         if (mode !== "now") msg.time = time;
+        // metres one may walk to a nearby stop at the start and the end; left out = the integration's default
+        if (Number.isFinite(Number(this._config.walk))) msg.walk = Math.max(0, Math.min(600, Math.round(Number(this._config.walk))));
         const result = await this._hass.callWS(msg);
         if (seq !== this._seq) return;
         this._hasResults = true;
@@ -1103,15 +1111,27 @@
               const to = ch.walk ? ` \u2192 ${ch.to_stop} (${t("route_walk")} ${ch.walk} min)` : "";
               return `<b>${esc(t("route_change"))}</b> ${esc(ch.stop)}${esc(to)} \u00b7 ${esc(t("route_wait"))} ${esc(ch.wait)} min`;
             });
-            const where = changes.length
-              ? changes.join("<br>")
-              : `<b>${esc(first.from)}</b> \u2192 ${esc(first.to)} \u00b7 ${esc(t("route_direct"))}`;
+            const walkText = (w, key) =>
+              w ? esc(t(key).replace("{min}", w.minutes).replace("{stop}", w.stop)) : "";
+            const walkIn = walkText(c.walk_start, "route_walk_start");
+            const walkOut = walkText(c.walk_end, "route_walk_end");
+            const where = [
+              walkIn ? `\ud83d\udeb6 ${walkIn}` : "",
+              changes.length
+                ? changes.join("<br>")
+                : `<b>${esc(first.from)}</b> \u2192 ${esc(first.to)} \u00b7 ${esc(t("route_direct"))}`,
+              walkOut ? `\ud83d\udeb6 ${walkOut}` : "",
+            ]
+              .filter(Boolean)
+              .join("<br>");
             const day = new Date(c.depart).toDateString() !== today ? `<span class="tag">${esc(t("route_tomorrow"))}</span>` : "";
             const spoken = [
               `${clock(c.depart, lang)} \u2013 ${clock(c.arrive, lang)}`,
               `${c.minutes} min`,
               c.legs.map((l) => l.line).join(" \u203a "),
+              c.walk_start ? t("route_walk_start").replace("{min}", c.walk_start.minutes).replace("{stop}", c.walk_start.stop) : "",
               c.changes.map((ch) => `${t("route_change")} ${ch.stop}`).join(", "),
+              c.walk_end ? t("route_walk_end").replace("{min}", c.walk_end.minutes).replace("{stop}", c.walk_end.stop) : "",
               first.live ? t("live") : "",
             ]
               .filter(Boolean)
@@ -1161,12 +1181,13 @@
           ? { name, selector: { select: { mode: "dropdown", options: stops.map((s) => ({ value: s.id, label: s.label })) } } }
           : { name, selector: { text: {} } };
       this._form.hass = this._hass;
-      this._form.data = { max_rows: 4, ...this._config };
+      this._form.data = { max_rows: 4, walk: 0, ...this._config };
       this._form.schema = [
         pick("from_stop"),
         pick("to_stop"),
         { name: "title", selector: { text: {} } },
         { name: "max_rows", selector: { number: { min: 1, max: 8, mode: "box" } } },
+        { name: "walk", selector: { number: { min: 0, max: 600, step: 50, mode: "box", unit_of_measurement: "m" } } },
         LANGUAGE_FIELD,
       ];
     }
