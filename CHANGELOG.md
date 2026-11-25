@@ -4,6 +4,13 @@ All notable changes to this project are listed here. The version number lives on
 `custom_components/dpmk/manifest.json`. While the number starts with 0, new features may still
 change how things work.
 
+## 0.4.5 - 2026-11-25
+
+- **Favourites row wraps** onto more lines instead of scrolling sideways, so the "+ Uložiť" and edit buttons are
+  always visible on a phone. A very long name is shortened with "…".
+- **Clear delete button** in the favourites edit mode: a red "Zmazať" / "Delete" instead of a small icon.
+  Card-only update: a page refresh is enough to get it.
+
 ## 0.4.4 - 2026-11-25
 
 - **Favourite routes on the route card**: save a pair of stops with a name (and the way back with one tick) and

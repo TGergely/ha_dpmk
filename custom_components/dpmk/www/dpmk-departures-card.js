@@ -1032,10 +1032,10 @@
             .when input { font:inherit; color:var(--primary-text-color); background:transparent;
                           border:1px solid var(--divider-color); border-radius:999px; padding:3px 10px; }
             button:focus-visible, input:focus-visible { outline:2px solid var(--primary-color); outline-offset:2px; }
-            .favs { display:flex; gap:6px; padding:0 16px 8px; align-items:center; overflow-x:auto;
-                    scrollbar-width:thin; scrollbar-color:var(--divider-color) transparent; }
+            .favs { display:flex; flex-wrap:wrap; gap:6px; padding:0 16px 8px; align-items:center; }
             .favs[hidden], .fdlg[hidden], .fundo[hidden] { display:none; }
-            .favs button { flex:none; white-space:nowrap; background:transparent; border:1px solid var(--divider-color);
+            .favs button { max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; background:transparent;
+                           border:1px solid var(--divider-color);
                            border-radius:999px; padding:4px 12px; }
             .favs button[aria-pressed="true"] { background:var(--primary-color); border-color:var(--primary-color);
                                                 color:var(--text-primary-color, #fff); }
@@ -1044,7 +1044,8 @@
             .favs button:disabled { opacity:.4; cursor:default; }
             .favs.editing { flex-direction:column; align-items:stretch; overflow:visible; }
             .fi { display:flex; gap:6px; align-items:center; }
-            .fi button { padding:2px 9px; border-radius:8px; }
+            .fi button { padding:4px 10px; border-radius:8px; flex:none; }
+            .fi button[data-fa="del"] { color:var(--error-color, #e53935); border-color:var(--error-color, #e53935); }
             .fi input, .fdlg input[type="text"] { flex:1; min-width:0; font:inherit; color:var(--primary-text-color);
                     background:var(--card-background-color); border:1px solid var(--divider-color); border-radius:8px; padding:6px 8px; }
             .fdlg { margin:0 16px 10px; padding:10px 12px; border:1px solid var(--primary-color); border-radius:12px;
@@ -1168,7 +1169,7 @@
                 `<div class="fi"><button type="button" data-fa="up" data-id="${esc(f.id)}" aria-label="${esc(t("fav_up"))}" ${i === 0 ? "disabled" : ""}>▲</button>` +
                 `<button type="button" data-fa="down" data-id="${esc(f.id)}" aria-label="${esc(t("fav_down"))}" ${i === own.length - 1 ? "disabled" : ""}>▼</button>` +
                 `<input type="text" data-favname data-id="${esc(f.id)}" value="${esc(f.name)}" maxlength="40" aria-label="${esc(t("fav_name"))}">` +
-                `<button type="button" data-fa="del" data-id="${esc(f.id)}" aria-label="${esc(t("fav_delete"))}">🗑</button></div>`
+                `<button type="button" data-fa="del" data-id="${esc(f.id)}" aria-label="${esc(t("fav_delete"))}">${esc(t("fav_delete"))}</button></div>`
             )
             .join("") + `<button type="button" data-fa="done">${esc(t("fav_done"))}</button>`;
         box.hidden = false;
