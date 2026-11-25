@@ -172,6 +172,11 @@ title: Plánovač trasy  # optional
 max_rows: 4            # optional, 1-8 connections
 walk: 300              # optional, metres to walk to a nearby stop at the start and the end (default 0 = off)
 show_walk: true        # optional, false hides the walk switch of the card
+show_favourites: true   # optional, false hides the row of favourite routes
+favourites:            # optional, fixed favourites shown to everyone (pinned with a pin)
+  - name: Domov → Práca
+    from_stop: "261"
+    to_stop: "42"
 language: sk           # optional: sk | en | auto. Leave it out to use the integration setting
 ```
 
@@ -186,6 +191,8 @@ Night lines work too, for example N1 from Staničné námestie to Madridská at 
 ![Route card, night line N1](https://raw.githubusercontent.com/TGergely/ha_dpmk/main/docs/images/example-route-night.png)
 
 **Walking to a nearby stop.** Maybe no bus goes from your stop at that hour, but one stop away a better line runs. Walking is **off by default**. Turn it on with `walk` (for example 300 m, about one stop; 0 = off; up to 600 m) and the planner also tries the stops within that distance of the start and of the destination. It shows the walk as a line on the connection ("Chôdza 3 min na zastávku …" / "Walk 3 min to …"), you set off earlier by the walking time, and the arrival includes the walk at the end. A bus that leaves before you could get to its stop is not offered. Walking is only tried when the stops you picked give fewer than three connections, so a good direct connection is never replaced. The distance is a straight line (about 70 m per minute), not a street route. The card has a **🚶 Chôdza / Walk** switch next to the time buttons: turn walking on or off right there (on = the `walk` distance, or 300 m when none is set). The choice is remembered in the browser; `show_walk: false` hides the switch.
+
+**Favourite routes.** Above the start and destination fields the card shows your favourites as buttons: one tap fills both stops. Pick a pair of stops and press **+ Uložiť** (**+ Save**) to save it: you give it a name (the suggestion is "start → destination") and can tick **Also save the way back** to add the reverse route as well. The pencil button opens a small edit mode to rename, reorder (arrows) or delete favourites; a deleted one can be brought back with **Späť** (**Undo**) for a few seconds. Favourites are stored in your Home Assistant user data, so they are the same on your phone and your computer; when that is not available they stay in the browser. All route cards share them. Fixed favourites can also be listed in the card settings (`favourites`, with `name`, `from_stop`, `to_stop`); they show first with a pin and cannot be changed on the card. `show_favourites: false` hides the row.
 
 ![Route card, walking to a nearby stop](https://raw.githubusercontent.com/TGergely/ha_dpmk/main/docs/images/example-route-walk.png)
 

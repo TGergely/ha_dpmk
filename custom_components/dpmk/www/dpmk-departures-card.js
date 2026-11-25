@@ -56,6 +56,21 @@
       walk: "Chôdza k blízkej zastávke (m, 0 = vypnuté)",
       walk_switch: "Chôdza",
       show_walk: "Zobraziť prepínač chôdze",
+      show_favourites: "Zobraziť obľúbené trasy",
+      fav_group: "Obľúbené trasy",
+      fav_add: "+ Uložiť",
+      fav_edit: "Upraviť obľúbené",
+      fav_name: "Názov",
+      fav_back: "Uložiť aj cestu späť",
+      fav_save: "Uložiť",
+      fav_cancel: "Zrušiť",
+      fav_done: "Hotovo",
+      fav_delete: "Zmazať",
+      fav_deleted: "Zmazané",
+      fav_undo: "Späť",
+      fav_up: "Posunúť vyššie",
+      fav_down: "Posunúť nižšie",
+      fav_pinned: "pripnuté v nastaveniach karty",
       route_walk_start: "Chôdza {min} min na zastávku {stop}",
       route_walk_end: "Chôdza {min} min zo zastávky {stop}",
       none: "Žiadne ďalšie odchody",
@@ -127,6 +142,21 @@
       walk: "Walk to a nearby stop (m, 0 = off)",
       walk_switch: "Walk",
       show_walk: "Show the walk switch",
+      show_favourites: "Show favourite routes",
+      fav_group: "Favourite routes",
+      fav_add: "+ Save",
+      fav_edit: "Edit favourites",
+      fav_name: "Name",
+      fav_back: "Also save the way back",
+      fav_save: "Save",
+      fav_cancel: "Cancel",
+      fav_done: "Done",
+      fav_delete: "Delete",
+      fav_deleted: "Deleted",
+      fav_undo: "Undo",
+      fav_up: "Move up",
+      fav_down: "Move down",
+      fav_pinned: "pinned in the card settings",
       route_walk_start: "Walk {min} min to {stop}",
       route_walk_end: "Walk {min} min from {stop}",
       none: "No upcoming departures",
@@ -812,6 +842,60 @@
   };
   const colorOk = (c) => (/^[#\w(),.% -]+$/.test(c || "") ? c : "");
 
+  /* Favourite routes. Kept in the Home Assistant user data (the same on every device of the user) when
+   * it is available, and always copied to this browser; shared by all route cards on the page. */
+  const FAV_STORE = "dpmk_route_favourites";
+  const MAX_FAVS = 20;
+  const cleanFavs = (list) =>
+    (Array.isArray(list) ? list : [])
+      .filter((f) => f && [f.id, f.name, f.from, f.to].every((v) => typeof v === "string") && f.id && f.from && f.to && f.from !== f.to)
+      .slice(0, MAX_FAVS)
+      .map((f) => ({ id: f.id.slice(0, 24), name: f.name.trim().slice(0, 40) || `${f.from} → ${f.to}`, from: f.from, to: f.to }));
+  const FavStore = {
+    list: null,
+    hass: null,
+    userData: false,
+    loading: null,
+    subs: new Set(),
+    load(hass) {
+      this.hass = hass;
+      if (!this.loading) {
+        this.loading = (async () => {
+          let list = null;
+          try {
+            const r = await hass.callWS({ type: "frontend/get_user_data", key: FAV_STORE });
+            this.userData = true;
+            if (Array.isArray(r?.value)) list = r.value;
+          } catch (e) {
+            /* no user storage: this browser keeps them */
+          }
+          if (!list) {
+            try {
+              list = JSON.parse(localStorage.getItem(FAV_STORE));
+            } catch (e) {
+              /* none saved */
+            }
+          }
+          this.list = cleanFavs(list);
+          this.subs.forEach((f) => f());
+        })();
+      }
+      return this.loading;
+    },
+    set(list) {
+      this.list = cleanFavs(list);
+      try {
+        localStorage.setItem(FAV_STORE, JSON.stringify(this.list));
+      } catch (e) {
+        /* kept for this page only */
+      }
+      if (this.userData && this.hass) {
+        this.hass.callWS({ type: "frontend/set_user_data", key: FAV_STORE, value: this.list }).catch(() => {});
+      }
+      this.subs.forEach((f) => f());
+    },
+  };
+
   class DpmkRouteCard extends HTMLElement {
     _t(key) {
       return I18N[pickLanguage(this._config, this._hass)][key];
@@ -830,6 +914,8 @@
         this._root = this.attachShadow({ mode: "open" });
         this._build();
         this._timer = setInterval(() => this._search(true), 60000); // fresh delays and countdowns
+        this._favSub = () => this._renderFavs();
+        FavStore.subs.add(this._favSub);
       }
       this._key = `dpmk-route:${config.from_stop || ""}:${config.to_stop || ""}`;
       this._state = this._load();
@@ -845,19 +931,23 @@
         this._lang = lang;
         this._sync();
       }
+      FavStore.hass = hass;
       if (first) {
         this._loadStops();
         this._search();
+        FavStore.load(hass);
       }
     }
 
     disconnectedCallback() {
       clearInterval(this._timer);
       this._timer = null;
+      FavStore.subs.delete(this._favSub);
     }
 
     connectedCallback() {
       if (this._root && !this._timer) this._timer = setInterval(() => this._search(true), 60000);
+      if (this._favSub) FavStore.subs.add(this._favSub);
     }
 
     getCardSize() {
@@ -942,6 +1032,31 @@
             .when input { font:inherit; color:var(--primary-text-color); background:transparent;
                           border:1px solid var(--divider-color); border-radius:999px; padding:3px 10px; }
             button:focus-visible, input:focus-visible { outline:2px solid var(--primary-color); outline-offset:2px; }
+            .favs { display:flex; gap:6px; padding:0 16px 8px; align-items:center; overflow-x:auto;
+                    scrollbar-width:thin; scrollbar-color:var(--divider-color) transparent; }
+            .favs[hidden], .fdlg[hidden], .fundo[hidden] { display:none; }
+            .favs button { flex:none; white-space:nowrap; background:transparent; border:1px solid var(--divider-color);
+                           border-radius:999px; padding:4px 12px; }
+            .favs button[aria-pressed="true"] { background:var(--primary-color); border-color:var(--primary-color);
+                                                color:var(--text-primary-color, #fff); }
+            .favs button[aria-pressed="true"]::before { content:"\\2713\\00a0"; }
+            .favs button.add { color:var(--secondary-text-color); border-style:dashed; }
+            .favs button:disabled { opacity:.4; cursor:default; }
+            .favs.editing { flex-direction:column; align-items:stretch; overflow:visible; }
+            .fi { display:flex; gap:6px; align-items:center; }
+            .fi button { padding:2px 9px; border-radius:8px; }
+            .fi input, .fdlg input[type="text"] { flex:1; min-width:0; font:inherit; color:var(--primary-text-color);
+                    background:var(--card-background-color); border:1px solid var(--divider-color); border-radius:8px; padding:6px 8px; }
+            .fdlg { margin:0 16px 10px; padding:10px 12px; border:1px solid var(--primary-color); border-radius:12px;
+                    background:var(--secondary-background-color); }
+            .fdlg label { display:flex; flex-direction:column; gap:4px; font-size:12px; color:var(--secondary-text-color); }
+            .fdlg label.ck { flex-direction:row; align-items:center; gap:8px; margin-top:8px; font-size:13px; color:var(--primary-text-color); }
+            .frow { display:flex; gap:8px; margin-top:10px; }
+            .frow button { border:1px solid var(--divider-color); background:transparent; border-radius:8px; padding:6px 14px; }
+            .frow button[data-fa="save"] { background:var(--primary-color); border-color:var(--primary-color);
+                                           color:var(--text-primary-color, #fff); }
+            .fundo { margin:0 16px 8px; font-size:13px; color:var(--secondary-text-color); display:flex; gap:10px; align-items:center; }
+            .fundo button { border:0; background:transparent; color:var(--primary-color); font-weight:600; padding:2px 4px; }
             .conn { margin:0 12px 8px; border:1px solid var(--divider-color); border-radius:12px; padding:10px 12px; }
             .conn.best { border-color:var(--primary-color); }
             .top { display:flex; align-items:baseline; justify-content:space-between; gap:8px; }
@@ -962,6 +1077,9 @@
             .foot { padding:2px 16px 0; font-size:12px; color:var(--secondary-text-color); }
             ha-card { padding-bottom:10px; }
           </style>
+          <div class="favs" role="group" hidden></div>
+          <div class="fdlg" hidden></div>
+          <div class="fundo" hidden aria-live="polite"></div>
           <div class="form">
             <div class="fields">
               <label class="field"><span class="lf"></span><input data-f="from" list="stops" autocomplete="off" spellcheck="false"></label>
@@ -994,6 +1112,194 @@
         else if (b.hasAttribute("data-swap")) this._set({ from: this._state.to, to: this._state.from });
         else if (b.hasAttribute("data-walk")) this._set({ walk: !this._state.walk, walkSet: true });
       });
+      // favourites: buttons carry data-fa (the action) and data-id (which favourite)
+      root.addEventListener("click", (ev) => {
+        const b = ev.target.closest?.("[data-fa]");
+        if (b) this._fav(b.dataset.fa, b.dataset.id);
+      });
+      root.addEventListener("change", (ev) => {
+        const el = ev.target;
+        if (!el.matches?.("[data-favname]")) return;
+        FavStore.set((FavStore.list || []).map((f) => (f.id === el.dataset.id ? { ...f, name: el.value.trim().slice(0, 40) || f.name } : f)));
+      });
+      root.addEventListener("keydown", (ev) => {
+        if (!ev.target.classList?.contains("finp")) return;
+        if (ev.key === "Enter") {
+          ev.preventDefault();
+          this._saveDlg();
+        } else if (ev.key === "Escape") {
+          ev.preventDefault();
+          this._closeDlg();
+        }
+      });
+    }
+
+    /* the favourites set in the card settings (pinned) first, then the ones saved on this card */
+    _allFavs() {
+      const fixed = (Array.isArray(this._config.favourites) ? this._config.favourites : [])
+        .map((f, i) => ({ id: `cfg${i}`, name: String(f?.name || ""), from: String(f?.from_stop || ""), to: String(f?.to_stop || ""), fixed: true }))
+        .filter((f) => f.name && f.from && f.to);
+      return fixed.concat(FavStore.list || []);
+    }
+
+    _stopName(id) {
+      return this._byId?.get(id)?.name || id;
+    }
+
+    _renderFavs() {
+      const box = this._root?.querySelector(".favs");
+      if (!box || !this._state) return;
+      const t = (k) => this._t(k);
+      if (this._config.show_favourites === false) {
+        box.hidden = true;
+        this._root.querySelector(".fdlg").hidden = true;
+        return;
+      }
+      // do not replace the list under a name that is being typed
+      if (this._editing && this._root.activeElement && box.contains(this._root.activeElement)) return;
+      const own = FavStore.list || [];
+      box.setAttribute("aria-label", t("fav_group"));
+      box.classList.toggle("editing", !!this._editing && own.length > 0);
+      if (this._editing && own.length) {
+        box.innerHTML =
+          own
+            .map(
+              (f, i) =>
+                `<div class="fi"><button type="button" data-fa="up" data-id="${esc(f.id)}" aria-label="${esc(t("fav_up"))}" ${i === 0 ? "disabled" : ""}>▲</button>` +
+                `<button type="button" data-fa="down" data-id="${esc(f.id)}" aria-label="${esc(t("fav_down"))}" ${i === own.length - 1 ? "disabled" : ""}>▼</button>` +
+                `<input type="text" data-favname data-id="${esc(f.id)}" value="${esc(f.name)}" maxlength="40" aria-label="${esc(t("fav_name"))}">` +
+                `<button type="button" data-fa="del" data-id="${esc(f.id)}" aria-label="${esc(t("fav_delete"))}">🗑</button></div>`
+            )
+            .join("") + `<button type="button" data-fa="done">${esc(t("fav_done"))}</button>`;
+        box.hidden = false;
+        return;
+      }
+      this._editing = false;
+      const { from, to } = this._state;
+      const all = this._allFavs();
+      let html = all
+        .map(
+          (f) =>
+            `<button type="button" data-fa="use" data-id="${esc(f.id)}" aria-pressed="${f.from === from && f.to === to}" title="${esc(f.name)}${f.fixed ? ` (${esc(t("fav_pinned"))})` : ""}">${f.fixed ? "📌 " : ""}${esc(f.name)}</button>`
+        )
+        .join("");
+      if (this._byId && from && to && from !== to && !all.some((f) => f.from === from && f.to === to) && own.length < MAX_FAVS) {
+        html += `<button type="button" class="add" data-fa="add">${esc(t("fav_add"))}</button>`;
+      }
+      if (own.length) html += `<button type="button" data-fa="edit" aria-label="${esc(t("fav_edit"))}" title="${esc(t("fav_edit"))}">✎</button>`;
+      box.innerHTML = html;
+      box.hidden = !html;
+    }
+
+    _fav(action, id) {
+      const own = (FavStore.list || []).slice();
+      const i = own.findIndex((f) => f.id === id);
+      switch (action) {
+        case "use": {
+          const f = this._allFavs().find((x) => x.id === id);
+          if (f) this._set({ from: f.from, to: f.to });
+          break;
+        }
+        case "add":
+          this._openDlg();
+          break;
+        case "edit":
+          this._editing = true;
+          this._renderFavs();
+          this._root.querySelector(".fi input")?.focus();
+          break;
+        case "done":
+          this._editing = false;
+          this._renderFavs();
+          this._root.querySelector('[data-fa="edit"]')?.focus();
+          break;
+        case "up":
+        case "down": {
+          const j = action === "up" ? i - 1 : i + 1;
+          if (i < 0 || j < 0 || j >= own.length) break;
+          [own[i], own[j]] = [own[j], own[i]];
+          FavStore.set(own);
+          this._root.querySelector(`[data-fa="${action}"][data-id="${id}"]`)?.focus();
+          break;
+        }
+        case "del":
+          if (i >= 0) {
+            own.splice(i, 1);
+            this._showUndo(FavStore.list);
+            FavStore.set(own);
+          }
+          break;
+        case "undo":
+          if (this._undo) FavStore.set(this._undo);
+          this._hideUndo();
+          break;
+        case "save":
+          this._saveDlg();
+          break;
+        case "cancel":
+          this._closeDlg();
+          break;
+      }
+    }
+
+    _showUndo(before) {
+      const t = (k) => this._t(k);
+      const box = this._root.querySelector(".fundo");
+      this._undo = before;
+      box.innerHTML = `<span>${esc(t("fav_deleted"))}</span><button type="button" data-fa="undo">${esc(t("fav_undo"))}</button>`;
+      box.hidden = false;
+      clearTimeout(this._undoTimer);
+      this._undoTimer = setTimeout(() => this._hideUndo(), 6000);
+    }
+
+    _hideUndo() {
+      clearTimeout(this._undoTimer);
+      this._undo = null;
+      const box = this._root.querySelector(".fundo");
+      box.hidden = true;
+      box.innerHTML = "";
+    }
+
+    _openDlg() {
+      const t = (k) => this._t(k);
+      const { from, to } = this._state;
+      const a = this._stopName(from);
+      const b = this._stopName(to);
+      const reverseKnown = this._allFavs().some((f) => f.from === to && f.to === from);
+      const dlg = this._root.querySelector(".fdlg");
+      dlg.innerHTML =
+        `<label>${esc(t("fav_name"))}<input type="text" class="finp" maxlength="40" value="${esc(`${a} → ${b}`)}"></label>` +
+        (reverseKnown
+          ? ""
+          : `<label class="ck"><input type="checkbox" class="fback" checked> ${esc(t("fav_back"))} (${esc(b)} → ${esc(a)})</label>`) +
+        `<div class="frow"><button type="button" data-fa="save">${esc(t("fav_save"))}</button><button type="button" data-fa="cancel">${esc(t("fav_cancel"))}</button></div>`;
+      dlg.hidden = false;
+      const input = dlg.querySelector(".finp");
+      input.focus();
+      input.select();
+    }
+
+    _closeDlg() {
+      const dlg = this._root.querySelector(".fdlg");
+      dlg.hidden = true;
+      dlg.innerHTML = "";
+      this._root.querySelector('[data-fa="add"]')?.focus();
+    }
+
+    _saveDlg() {
+      const dlg = this._root.querySelector(".fdlg");
+      const input = dlg.querySelector(".finp");
+      if (!input) return;
+      const { from, to } = this._state;
+      const a = this._stopName(from);
+      const b = this._stopName(to);
+      const own = (FavStore.list || []).slice();
+      const newId = () => Math.random().toString(36).slice(2, 10) + Date.now().toString(36).slice(-4);
+      own.push({ id: newId(), name: input.value.trim().slice(0, 40) || `${a} → ${b}`, from, to });
+      if (dlg.querySelector(".fback")?.checked) own.push({ id: newId(), name: `${b} → ${a}`, from: to, to: from });
+      dlg.hidden = true;
+      dlg.innerHTML = "";
+      FavStore.set(own);
     }
 
     _pick(input, commit) {
@@ -1050,6 +1356,7 @@
         input.setAttribute("aria-label", t(`route_${key}`));
       }
       q(".foot").textContent = t("route_note");
+      this._renderFavs();
     }
 
     _show(html) {
@@ -1200,7 +1507,7 @@
           ? { name, selector: { select: { mode: "dropdown", options: stops.map((s) => ({ value: s.id, label: s.label })) } } }
           : { name, selector: { text: {} } };
       this._form.hass = this._hass;
-      this._form.data = { max_rows: 4, walk: 0, show_walk: true, ...this._config };
+      this._form.data = { max_rows: 4, walk: 0, show_walk: true, show_favourites: true, ...this._config };
       this._form.schema = [
         pick("from_stop"),
         pick("to_stop"),
@@ -1208,6 +1515,7 @@
         { name: "max_rows", selector: { number: { min: 1, max: 8, mode: "box" } } },
         { name: "walk", selector: { number: { min: 0, max: 600, step: 50, mode: "box", unit_of_measurement: "m" } } },
         { name: "show_walk", selector: { boolean: {} } },
+        { name: "show_favourites", selector: { boolean: {} } },
         LANGUAGE_FIELD,
       ];
     }
